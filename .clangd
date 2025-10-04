@@ -1,0 +1,48 @@
+CompileFlags:
+  Add:
+    - "-std=c++20"
+    - "-Wall"
+    - "-Wextra"
+    - "-Wpedantic"
+
+Diagnostics:
+  UnusedIncludes: Strict
+  MissingIncludes: Strict
+  ClangTidy:
+    Add:
+      - modernize-*
+      - readability-*
+      - performance-*
+      - bugprone-*
+      - cppcoreguidelines-*
+      - clang-analyzer-*
+      - cert-*
+      - concurrency-*
+      - misc-*
+      - portability-*
+    Remove:
+      - bugprone-easily-swappable-parameters
+      - cppcoreguidelines-pro-type-vararg
+      - readability-magic-numbers
+      - cppcoreguidelines-avoid-magic-numbers
+      - readability-identifier-length
+    CheckOptions:
+      readability-identifier-naming.NamespaceCase: CamelCase
+      readability-identifier-naming.ClassCase: CamelCase
+      readability-identifier-naming.StructCase: CamelCase
+      readability-identifier-naming.EnumCase: CamelCase
+      readability-identifier-naming.FunctionCase: camelBack
+      readability-identifier-naming.VariableCase: camelBack
+      readability-identifier-naming.PrivateMemberSuffix: _
+      readability-identifier-naming.EnumConstantCase: UPPER_CASE
+      readability-identifier-naming.GlobalConstantCase: UPPER_CASE
+      readability-function-cognitive-complexity.Threshold: 25
+
+InlayHints:
+  Enabled: No
+
+Hover:
+  ShowAKA: Yes
+
+Index:
+  Background: Build
