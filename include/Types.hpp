@@ -25,4 +25,14 @@ enum class GameState : uint8_t
   QUIT      = 4
 };
 
+enum class FoodType : uint8_t
+{
+  APPLE  = 0,
+  CHERRY = 1,
+  BANANA = 2,
+  GRAPE  = 3,
+  ORANGE = 4,
+  COUNT  = 5
+};
+
 }  // namespace SnakeGame

@@ -1,13 +1,16 @@
 #include "Board.hpp"
 #include "Types.hpp"
 
+#include <algorithm>
 #include <cstdint>
+#include <deque>
 #include <random>
 
 namespace SnakeGame
 {
 
-Board::Board(uint8_t width, uint8_t height) : width_(width), height_(height), foodPosition_{0, 0}
+Board::Board(uint8_t width, uint8_t height)
+  : width_(width), height_(height), foodPosition_{0, 0}, foodType_(FoodType::APPLE)
 {
   placeFood();
 }
@@ -15,6 +18,19 @@ Board::Board(uint8_t width, uint8_t height) : width_(width), height_(height), fo
 void Board::placeFood()
 {
   foodPosition_ = generateRandomPosition();
+  foodType_     = generateRandomFoodType();
+}
+
+void Board::placeFood(const std::deque<Coordinate>& snakeBody)
+{
+  foodPosition_ = generateRandomPosition();
+  while (std::ranges::any_of(snakeBody,
+                             [this](const auto& segment) { return segment == foodPosition_; }))
+  {
+    foodPosition_ = generateRandomPosition();
+  }
+
+  foodType_ = generateRandomFoodType();
 }
 
 auto Board::isFoodAt(Coordinate pos) const noexcept -> bool
@@ -30,6 +46,11 @@ auto Board::isWall(Coordinate pos) const noexcept -> bool
 auto Board::getFoodPosition() const noexcept -> Coordinate
 {
   return foodPosition_;
+}
+
+auto Board::getFoodType() const noexcept -> FoodType
+{
+  return foodType_;
 }
 
 auto Board::getWidth() const noexcept -> uint8_t
@@ -51,6 +72,16 @@ auto Board::generateRandomPosition() const -> Coordinate
   auto distY = std::uniform_int_distribution<>(0, height_ - 1);
 
   return {distX(gen), distY(gen)};
+}
+
+auto Board::generateRandomFoodType() -> FoodType
+{
+  static auto seedDevice = std::random_device{};
+  static auto gen        = std::mt19937(seedDevice());
+
+  auto dist = std::uniform_int_distribution<>(0, static_cast<int>(FoodType::COUNT) - 1);
+
+  return static_cast<FoodType>(dist(gen));
 }
 
 }  // namespace SnakeGame

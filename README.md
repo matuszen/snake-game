@@ -1,44 +1,37 @@
-# Snake Game
+# 🐍 Snake Game
 
-A classic Snake game implementation in C++.
+A Snake game implementation in C++.
 
-## Description
+## Gameplay
 
-Navigate a growing snake around the board to eat food while avoiding walls and your own tail.
-The snake grows longer with each piece of food eaten, and the game speeds up as your score increases.
+- Snake grows with each food eaten (+10 points)
+- Speed increases every 50 points (max 10 levels)
+- Collision detection with walls and self
+- Colorful snake - Bright green head (◉), darker green body (○)
+- Variety of food - 5 different types with unique colors and symbols:
+  - `●` Red Apple
+  - `◆` Pink Cherry
+  - `◉` Yellow Banana
+  - `■` Purple Grape
+  - `★` Orange Orange
 
 ## Controls
 
-- **Arrow keys** or **WASD** - Move the snake
+- **Arrow keys** or **WASD** - Move snake
 - **P** or **Space** - Pause/Resume
-- **Q** or **ESC** - Quit game
+- **Q** - Quit game
 
-## Rules
+## Requirements
 
-- Eat food (`*`) to grow your snake and increase your score
-- Each food eaten adds 10 points to your score
-- Avoid hitting walls (`#`) or your own body
-- The game speed increases every 50 points
-- Game ends when you collide with a wall or yourself
+- C++20 compiler (GCC 10+, Clang 10+)
+- CMake 3.20+
+- [notcurses](https://github.com/dankamongmen/notcurses/) 3.0.7+
 
-## Building
-
-### Requirements
-
-- C++20 compatible compiler (GCC 10+, Clang 10+)
-- CMake 3.20 or newer
-- [notcurses](https://github.com/dankamongmen/notcurses/) 3.0.7 or newer
-
-### Compile
+## Build & Run
 
 ```bash
 mkdir build && cd build
 cmake ..
 make
-```
-
-### Run
-
-```bash
 ./snake
 ```

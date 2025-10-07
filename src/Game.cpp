@@ -25,6 +25,51 @@ constexpr uint8_t  SPEED_INCREASE_INTERVAL  = 50;
 constexpr uint8_t  MAX_SPEED                = 10;
 constexpr uint8_t  SPEED_DECREASE_PER_LEVEL = 15;
 
+constexpr uint32_t APPLE_COLOR   = 0xFF0000;
+constexpr uint32_t CHERRY_COLOR  = 0xFF1493;
+constexpr uint32_t BANANA_COLOR  = 0xFFFF00;
+constexpr uint32_t GRAPE_COLOR   = 0x9400D3;
+constexpr uint32_t ORANGE_COLOR  = 0xFF8C00;
+constexpr uint32_t DEFAULT_COLOR = 0xFFFFFF;
+
+constexpr auto getFoodSymbol(FoodType type) -> const char*
+{
+  switch (type)
+  {
+    case FoodType::APPLE:
+      return "●";
+    case FoodType::CHERRY:
+      return "◆";
+    case FoodType::BANANA:
+      return "◉";
+    case FoodType::GRAPE:
+      return "■";
+    case FoodType::ORANGE:
+      return "★";
+    default:
+      return "*";
+  }
+}
+
+constexpr auto getFoodColor(FoodType type) -> uint32_t
+{
+  switch (type)
+  {
+    case FoodType::APPLE:
+      return APPLE_COLOR;
+    case FoodType::CHERRY:
+      return CHERRY_COLOR;
+    case FoodType::BANANA:
+      return BANANA_COLOR;
+    case FoodType::GRAPE:
+      return GRAPE_COLOR;
+    case FoodType::ORANGE:
+      return ORANGE_COLOR;
+    default:
+      return DEFAULT_COLOR;
+  }
+}
+
 }  // namespace
 
 Game::Game(uint8_t boardWidth, uint8_t boardHeight)
@@ -130,7 +175,7 @@ void Game::update()
   if (board_->isFoodAt(snake_->getHead()))
   {
     snake_->grow();
-    board_->placeFood();
+    board_->placeFood(snake_->getBody());
     score_ += SCORE_PER_FOOD;
 
     if (score_ % SPEED_INCREASE_INTERVAL == 0 and speed_ < MAX_SPEED)
@@ -151,29 +196,47 @@ void Game::render() noexcept
 
   ncplane_erase(stdplane);
 
+  ncplane_set_fg_rgb8(stdplane, 128, 128, 128);
+
   for (uint8_t col = 0; col < board_->getWidth() + 2; ++col)
   {
-    ncplane_putstr_yx(stdplane, 0, col, "#");
-    ncplane_putstr_yx(stdplane, board_->getHeight() + 1, col, "#");
+    ncplane_putstr_yx(stdplane, 0, col, "█");
+    ncplane_putstr_yx(stdplane, board_->getHeight() + 1, col, "█");
   }
 
   for (uint8_t row = 0; row < board_->getHeight() + 2; ++row)
   {
-    ncplane_putstr_yx(stdplane, row, 0, "#");
-    ncplane_putstr_yx(stdplane, row, board_->getWidth() + 1, "#");
+    ncplane_putstr_yx(stdplane, row, 0, "█");
+    ncplane_putstr_yx(stdplane, row, board_->getWidth() + 1, "█");
   }
 
   const auto& body   = snake_->getBody();
   bool        isHead = true;
   for (const auto& segment : body)
   {
-    const auto* symbol = isHead ? "@" : "o";
-    ncplane_putstr_yx(stdplane, segment.second + 1, segment.first + 1, symbol);
-    isHead = false;
+    if (isHead)
+    {
+      ncplane_set_fg_rgb8(stdplane, 50, 255, 50);
+      ncplane_putstr_yx(stdplane, segment.second + 1, segment.first + 1, "◉");
+      isHead = false;
+    }
+    else
+    {
+      ncplane_set_fg_rgb8(stdplane, 0, 200, 0);
+      ncplane_putstr_yx(stdplane, segment.second + 1, segment.first + 1, "○");
+    }
   }
 
-  const auto food = board_->getFoodPosition();
-  ncplane_putstr_yx(stdplane, food.second + 1, food.first + 1, "*");
+  const auto  food       = board_->getFoodPosition();
+  const auto  foodType   = board_->getFoodType();
+  const auto* foodSymbol = getFoodSymbol(foodType);
+  const auto  foodColor  = getFoodColor(foodType);
+
+  ncplane_set_fg_rgb8(stdplane, (foodColor >> 16) & 0xFF, (foodColor >> 8) & 0xFF,
+                      foodColor & 0xFF);
+  ncplane_putstr_yx(stdplane, food.second + 1, food.first + 1, foodSymbol);
+
+  ncplane_set_fg_rgb8(stdplane, 255, 255, 255);
 
   const auto scoreText = std::format("Score: {}", score_);
   const auto speedText = std::format("Speed: {}", speed_);
@@ -186,8 +249,10 @@ void Game::render() noexcept
   if (state_ == GameState::PAUSED)
   {
     const auto centerY = board_->getHeight() / 2;
-    const auto centerX = (board_->getWidth() / 2) - 6;
-    ncplane_putstr_yx(stdplane, centerY, centerX, "*** PAUSED ***");
+    const auto centerX = (board_->getWidth() / 2) - 5;
+
+    ncplane_set_fg_rgb8(stdplane, 255, 255, 0);
+    ncplane_putstr_yx(stdplane, centerY, centerX, "|| PAUSED ||");
   }
 
   notcurses_render(nc);
@@ -229,11 +294,14 @@ void Game::showMenu()
   const uint8_t centerY = rows / 2;
   const uint8_t centerX = cols / 2;
 
-  ncplane_putstr_yx(stdplane, centerY - 3, centerX - 10, "===================");
-  ncplane_putstr_yx(stdplane, centerY - 2, centerX - 10, "   SNAKE GAME     ");
-  ncplane_putstr_yx(stdplane, centerY - 1, centerX - 10, "===================");
+  ncplane_set_fg_rgb8(stdplane, 0, 255, 0);
+  ncplane_putstr_yx(stdplane, centerY - 1, centerX - 10, "=== SNAKE GAME ===");
+
+  ncplane_set_fg_rgb8(stdplane, 0, 255, 255);
   ncplane_putstr_yx(stdplane, centerY + 1, centerX - 12, "Press any key to start");
   ncplane_putstr_yx(stdplane, centerY + 2, centerX - 6, "the game");
+
+  ncplane_set_fg_rgb8(stdplane, 255, 255, 0);
   ncplane_putstr_yx(stdplane, centerY + 4, centerX - 6, "Quit: Q");
 
   notcurses_render(nc);
@@ -269,15 +337,21 @@ void Game::showGameOver()
   const uint8_t centerY = rows / 2;
   const uint8_t centerX = cols / 2;
 
-  ncplane_putstr_yx(stdplane, centerY - 2, centerX - 10, "===================");
-  ncplane_putstr_yx(stdplane, centerY - 1, centerX - 10, "    GAME OVER     ");
-  ncplane_putstr_yx(stdplane, centerY, centerX - 10, "===================");
+  ncplane_set_fg_rgb8(stdplane, 255, 0, 0);
+  ncplane_putstr_yx(stdplane, centerY - 2, centerX - 10, "=================");
+  ncplane_putstr_yx(stdplane, centerY - 1, centerX - 10, "XX  GAME OVER  XX");
+  ncplane_putstr_yx(stdplane, centerY, centerX - 10, "=================");
 
+  ncplane_set_fg_rgb8(stdplane, 255, 255, 0);
   const auto scoreText = std::format("Your score: {}", score_);
-  ncplane_putstr_yx(stdplane, centerY + 2, centerX - 10, scoreText.c_str());
-  ncplane_putstr_yx(stdplane, centerY + 4, centerX - 12, "Press any key to return");
-  ncplane_putstr_yx(stdplane, centerY + 5, centerX - 7, "to the menu");
-  ncplane_putstr_yx(stdplane, centerY + 6, centerX - 6, "Quit: Q");
+  ncplane_putstr_yx(stdplane, centerY + 2, centerX - 8, scoreText.c_str());
+
+  ncplane_set_fg_rgb8(stdplane, 255, 255, 255);
+  ncplane_putstr_yx(stdplane, centerY + 4, centerX - 13, "Press any key to return");
+  ncplane_putstr_yx(stdplane, centerY + 5, centerX - 8, "to the menu");
+
+  ncplane_set_fg_rgb8(stdplane, 0, 255, 255);
+  ncplane_putstr_yx(stdplane, centerY + 7, centerX - 6, "Quit: Q");
 
   notcurses_render(nc);
 
