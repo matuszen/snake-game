@@ -1,5 +1,6 @@
 #include "Board.hpp"
 #include "Types.hpp"
+
 #include <cstdint>
 #include <random>
 
@@ -16,27 +17,27 @@ void Board::placeFood()
   foodPosition_ = generateRandomPosition();
 }
 
-auto Board::isFoodAt(Coordinate pos) const -> bool
+auto Board::isFoodAt(Coordinate pos) const noexcept -> bool
 {
   return pos == foodPosition_;
 }
 
-auto Board::isWall(Coordinate pos) const -> bool
+auto Board::isWall(Coordinate pos) const noexcept -> bool
 {
   return pos.first >= width_ or pos.second >= height_;
 }
 
-auto Board::getFoodPosition() const -> Coordinate
+auto Board::getFoodPosition() const noexcept -> Coordinate
 {
   return foodPosition_;
 }
 
-auto Board::getWidth() const -> uint8_t
+auto Board::getWidth() const noexcept -> uint8_t
 {
   return width_;
 }
 
-auto Board::getHeight() const -> uint8_t
+auto Board::getHeight() const noexcept -> uint8_t
 {
   return height_;
 }

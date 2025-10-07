@@ -1,18 +1,14 @@
 #include "Input.hpp"
 #include "Types.hpp"
-#include <cstdint>
-#include <ncurses.h>
+
+#include <notcurses/nckeys.h>
+#include <notcurses/notcurses.h>
 #include <optional>
 
 namespace SnakeGame
 {
 
-namespace
-{
-constexpr int32_t ESC_KEY = 27;
-}  // namespace
-
-Input::Input() : initialized_(false), lastKey_(ERR)
+Input::Input() : initialized_(false), lastKey_(0), nc_(nullptr), stdplane_(nullptr)
 {
 }
 
@@ -25,47 +21,74 @@ void Input::initialize()
 {
   if (not initialized_)
   {
-    initscr();
-    cbreak();
-    noecho();
-    curs_set(0);
-    keypad(stdscr, TRUE);
-    nodelay(stdscr, TRUE);
+    auto opts = notcurses_options{};
+    auto ni   = ncinput{};
+
+    opts.flags = NCOPTION_SUPPRESS_BANNERS;
+
+    nc_ = notcurses_init(&opts, nullptr);
+    if (nc_ == nullptr)
+    {
+      return;
+    }
+    stdplane_ = notcurses_stdplane(nc_);
+    notcurses_get_nblock(nc_, &ni);
+
     initialized_ = true;
   }
 }
 
-void Input::cleanup()
+void Input::cleanup() noexcept
 {
   if (initialized_)
   {
-    endwin();
+    notcurses_stop(nc_);
+    nc_          = nullptr;
+    stdplane_    = nullptr;
     initialized_ = false;
   }
 }
 
-void Input::readInput()
+void Input::readInput() noexcept
 {
-  lastKey_ = getch();
+  if (nc_ == nullptr)
+  {
+    return;
+  }
+
+  constexpr unsigned maxInputLimit = 0xFFFFFFFF;
+
+  auto       ni  = ncinput{};
+  const auto key = notcurses_get_nblock(nc_, &ni);
+
+  if (key != maxInputLimit)
+  {
+    lastKey_ = key;
+  }
 }
 
-auto Input::getDirection() const -> std::optional<Direction>
+void Input::resetInput() noexcept
+{
+  lastKey_ = 0;
+}
+
+auto Input::getDirection() const noexcept -> std::optional<Direction>
 {
   switch (lastKey_)
   {
-    case KEY_UP:
+    case NCKEY_UP:
     case 'w':
     case 'W':
       return Direction::UP;
-    case KEY_DOWN:
+    case NCKEY_DOWN:
     case 's':
     case 'S':
       return Direction::DOWN;
-    case KEY_LEFT:
+    case NCKEY_LEFT:
     case 'a':
     case 'A':
       return Direction::LEFT;
-    case KEY_RIGHT:
+    case NCKEY_RIGHT:
     case 'd':
     case 'D':
       return Direction::RIGHT;
@@ -74,14 +97,24 @@ auto Input::getDirection() const -> std::optional<Direction>
   }
 }
 
-auto Input::isPauseRequested() const -> bool
+auto Input::isPauseRequested() const noexcept -> bool
 {
   return lastKey_ == 'p' or lastKey_ == 'P' or lastKey_ == ' ';
 }
 
-auto Input::isQuitRequested() const -> bool
+auto Input::isQuitRequested() const noexcept -> bool
 {
-  return lastKey_ == 'q' or lastKey_ == 'Q' or lastKey_ == ESC_KEY;
+  return lastKey_ == 'q' or lastKey_ == 'Q';
+}
+
+auto Input::getNotcurses() noexcept -> notcurses*
+{
+  return nc_;
+}
+
+auto Input::getStdPlane() noexcept -> ncplane*
+{
+  return stdplane_;
 }
 
 }  // namespace SnakeGame

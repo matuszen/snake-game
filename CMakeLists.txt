@@ -29,6 +29,8 @@ add_executable(snake ${SOURCES} ${HEADERS})
 
 target_include_directories(snake PRIVATE include)
 
-find_package(Curses REQUIRED)
-target_link_libraries(snake PRIVATE ${CURSES_LIBRARIES})
-target_include_directories(snake PRIVATE ${CURSES_INCLUDE_DIR})
+find_package(PkgConfig REQUIRED)
+pkg_check_modules(NOTCURSES REQUIRED notcurses)
+target_link_libraries(snake PRIVATE ${NOTCURSES_LIBRARIES})
+target_include_directories(snake PRIVATE ${NOTCURSES_INCLUDE_DIRS})
+target_compile_options(snake PRIVATE ${NOTCURSES_CFLAGS_OTHER})

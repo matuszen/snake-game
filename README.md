@@ -1,10 +1,10 @@
 # Snake Game
 
-A classic Snake game implementation in C++20 for terminal/console.
+A classic Snake game implementation in C++.
 
 ## Description
 
-Navigate a growing snake around the board to eat food while avoiding walls and your own tail. 
+Navigate a growing snake around the board to eat food while avoiding walls and your own tail.
 The snake grows longer with each piece of food eaten, and the game speeds up as your score increases.
 
 ## Controls
@@ -24,16 +24,13 @@ The snake grows longer with each piece of food eaten, and the game speeds up as 
 ## Building
 
 ### Requirements
+
 - C++20 compatible compiler (GCC 10+, Clang 10+)
 - CMake 3.20 or newer
-- ncurses library
-
-### Install dependencies (Ubuntu/Debian)
-```bash
-sudo apt-get install build-essential cmake libncurses-dev
-```
+- [notcurses](https://github.com/dankamongmen/notcurses/) 3.0.7 or newer
 
 ### Compile
+
 ```bash
 mkdir build && cd build
 cmake ..
@@ -41,6 +38,7 @@ make
 ```
 
 ### Run
+
 ```bash
 ./snake
 ```

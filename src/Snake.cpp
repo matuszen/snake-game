@@ -1,8 +1,10 @@
 #include "Snake.hpp"
 #include "Types.hpp"
+
+#include <algorithm>
 #include <cstdint>
 #include <deque>
-#include <iterator>
+#include <ranges>
 
 namespace SnakeGame
 {
@@ -48,35 +50,29 @@ void Snake::grow()
 
 auto Snake::checkSelfCollision() const -> bool
 {
-  const auto& head = body_.front();
+  const auto& head            = body_.front();
+  const auto  bodyWithoutHead = body_ | std::views::drop(1);
 
-  for (auto it = std::next(body_.begin()); it != body_.end(); ++it)
-  {
-    if (*it == head)
-    {
-      return true;
-    }
-  }
-
-  return false;
+  return std::ranges::any_of(bodyWithoutHead,
+                             [&head](const auto& segment) { return segment == head; });
 }
 
-auto Snake::getBody() const -> const std::deque<Coordinate>&
+auto Snake::getBody() const noexcept -> const std::deque<Coordinate>&
 {
   return body_;
 }
 
-auto Snake::getHead() const -> Coordinate
+auto Snake::getHead() const noexcept -> Coordinate
 {
   return body_.front();
 }
 
-auto Snake::getDirection() const -> Direction
+auto Snake::getDirection() const noexcept -> Direction
 {
   return currentDirection_;
 }
 
-auto Snake::getNextPosition(Coordinate pos, Direction dir) -> Coordinate
+constexpr auto Snake::getNextPosition(Coordinate pos, Direction dir) noexcept -> Coordinate
 {
   switch (dir)
   {

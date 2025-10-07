@@ -7,7 +7,7 @@ auto main() -> int
 {
   try
   {
-    auto game = SnakeGame::Game{};
+    auto game = Game{};
     game.run();
   }
   catch (const std::exception& e)

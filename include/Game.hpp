@@ -4,19 +4,26 @@
 #include "Input.hpp"
 #include "Snake.hpp"
 #include "Types.hpp"
+
 #include <cstdint>
 #include <memory>
 
 namespace SnakeGame
 {
 
-constexpr uint8_t DEFAULT_DOARD_WIDTH  = 40;
-constexpr uint8_t DEFAULT_DOARD_HEIGHT = 20;
+constexpr uint8_t DEFAULT_BOARD_WIDTH  = 40;
+constexpr uint8_t DEFAULT_BOARD_HEIGHT = 20;
 
 class Game
 {
 public:
-  Game(uint8_t boardWidth = DEFAULT_DOARD_WIDTH, uint8_t boardHeight = DEFAULT_DOARD_HEIGHT);
+  Game(uint8_t boardWidth = DEFAULT_BOARD_WIDTH, uint8_t boardHeight = DEFAULT_BOARD_HEIGHT);
+  ~Game() = default;
+
+  Game(const Game& other)           = delete;
+  Game(Game&& other)                = delete;
+  auto operator=(const Game& other) = delete;
+  auto operator=(Game&& other)      = delete;
 
   void run();
 
@@ -30,14 +37,16 @@ private:
   uint8_t   speed_;
 
   void initialize();
-  void processInput();
+  void processInput() noexcept;
   void update();
-  void render();
-  void handleCollision();
+  void render() noexcept;
+  void handleCollision() noexcept;
   void showMenu();
   void showGameOver();
 
-  [[nodiscard]] auto getDelayMs() const -> uint16_t;
+  [[nodiscard]] constexpr auto getDelayMs() const noexcept -> uint16_t;
 };
 
 }  // namespace SnakeGame
+
+using Game = SnakeGame::Game;

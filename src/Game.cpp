@@ -3,10 +3,13 @@
 #include "Input.hpp"
 #include "Snake.hpp"
 #include "Types.hpp"
+
 #include <chrono>
 #include <cstdint>
+#include <format>
 #include <memory>
-#include <ncurses.h>
+#include <notcurses/notcurses.h>
+#include <string>
 #include <thread>
 
 namespace SnakeGame
@@ -14,13 +17,14 @@ namespace SnakeGame
 
 namespace
 {
+
 constexpr uint16_t PAUSE_DELAY_MS           = 100;
 constexpr uint16_t INITIAL_SPEED_DELAY_MS   = 200;
 constexpr uint8_t  SCORE_PER_FOOD           = 10;
 constexpr uint8_t  SPEED_INCREASE_INTERVAL  = 50;
 constexpr uint8_t  MAX_SPEED                = 10;
 constexpr uint8_t  SPEED_DECREASE_PER_LEVEL = 15;
-constexpr int32_t  ESC_KEY                  = 27;
+
 }  // namespace
 
 Game::Game(uint8_t boardWidth, uint8_t boardHeight)
@@ -82,9 +86,10 @@ void Game::initialize()
   score_ = 0;
   speed_ = 1;
   state_ = GameState::PLAYING;
+  input_->resetInput();
 }
 
-void Game::processInput()
+void Game::processInput() noexcept
 {
   if (state_ == GameState::PLAYING)
   {
@@ -109,7 +114,7 @@ void Game::update()
     return;
   }
 
-  auto newDir = input_->getDirection();
+  const auto newDir = input_->getDirection();
 
   if (newDir.has_value())
   {
@@ -135,49 +140,60 @@ void Game::update()
   }
 }
 
-void Game::render()
+void Game::render() noexcept
 {
-  clear();
+  auto* nc       = input_->getNotcurses();
+  auto* stdplane = input_->getStdPlane();
+  if (nc == nullptr or stdplane == nullptr)
+  {
+    return;
+  }
+
+  ncplane_erase(stdplane);
 
   for (uint8_t col = 0; col < board_->getWidth() + 2; ++col)
   {
-    mvprintw(0, col, "#");
-    mvprintw(board_->getHeight() + 1, col, "#");
+    ncplane_putstr_yx(stdplane, 0, col, "#");
+    ncplane_putstr_yx(stdplane, board_->getHeight() + 1, col, "#");
   }
 
   for (uint8_t row = 0; row < board_->getHeight() + 2; ++row)
   {
-    mvprintw(row, 0, "#");
-    mvprintw(row, board_->getWidth() + 1, "#");
+    ncplane_putstr_yx(stdplane, row, 0, "#");
+    ncplane_putstr_yx(stdplane, row, board_->getWidth() + 1, "#");
   }
 
   const auto& body   = snake_->getBody();
   bool        isHead = true;
   for (const auto& segment : body)
   {
-    char symbol = isHead ? '@' : 'o';
-    mvprintw(segment.second + 1, segment.first + 1, "%c", symbol);
+    const auto* symbol = isHead ? "@" : "o";
+    ncplane_putstr_yx(stdplane, segment.second + 1, segment.first + 1, symbol);
     isHead = false;
   }
 
   const auto food = board_->getFoodPosition();
+  ncplane_putstr_yx(stdplane, food.second + 1, food.first + 1, "*");
 
-  mvprintw(food.second + 1, food.first + 1, "*");
-  mvprintw(board_->getHeight() + 3, 0, "Score: %d", score_);
-  mvprintw(board_->getHeight() + 4, 0, "Speed: %d", speed_);
-  mvprintw(board_->getHeight() + 5, 0, "Controls: Arrows or WASD | Pause: P | Quit: Q");
+  const auto scoreText = std::format("Score: {}", score_);
+  const auto speedText = std::format("Speed: {}", speed_);
+
+  ncplane_putstr_yx(stdplane, board_->getHeight() + 3, 0, scoreText.c_str());
+  ncplane_putstr_yx(stdplane, board_->getHeight() + 4, 0, speedText.c_str());
+  ncplane_putstr_yx(stdplane, board_->getHeight() + 5, 0,
+                    "Controls: Arrows or WASD | Pause: P | Quit: Q");
 
   if (state_ == GameState::PAUSED)
   {
     const auto centerY = board_->getHeight() / 2;
     const auto centerX = (board_->getWidth() / 2) - 6;
-    mvprintw(centerY, centerX, "*** PAUSED ***");
+    ncplane_putstr_yx(stdplane, centerY, centerX, "*** PAUSED ***");
   }
 
-  refresh();
+  notcurses_render(nc);
 }
 
-void Game::handleCollision()
+void Game::handleCollision() noexcept
 {
   const auto head = snake_->getHead();
 
@@ -196,25 +212,36 @@ void Game::handleCollision()
 
 void Game::showMenu()
 {
-  clear();
+  auto* nc       = input_->getNotcurses();
+  auto* stdplane = input_->getStdPlane();
+  if (nc == nullptr or stdplane == nullptr)
+  {
+    return;
+  }
 
-  const uint8_t centerY = LINES / 2;
-  const uint8_t centerX = COLS / 2;
+  ncplane_erase(stdplane);
+  notcurses_render(nc);
 
-  mvprintw(centerY - 3, centerX - 10, "===================");
-  mvprintw(centerY - 2, centerX - 10, "   SNAKE GAME     ");
-  mvprintw(centerY - 1, centerX - 10, "===================");
-  mvprintw(centerY + 1, centerX - 12, "Press any key to start");
-  mvprintw(centerY + 2, centerX - 6, "the game");
-  mvprintw(centerY + 4, centerX - 6, "Quit: Q");
+  unsigned rows = 0;
+  unsigned cols = 0;
+  ncplane_dim_yx(stdplane, &rows, &cols);
 
-  refresh();
+  const uint8_t centerY = rows / 2;
+  const uint8_t centerX = cols / 2;
 
-  nodelay(stdscr, FALSE);
-  const auto keyPressed = getch();
-  nodelay(stdscr, TRUE);
+  ncplane_putstr_yx(stdplane, centerY - 3, centerX - 10, "===================");
+  ncplane_putstr_yx(stdplane, centerY - 2, centerX - 10, "   SNAKE GAME     ");
+  ncplane_putstr_yx(stdplane, centerY - 1, centerX - 10, "===================");
+  ncplane_putstr_yx(stdplane, centerY + 1, centerX - 12, "Press any key to start");
+  ncplane_putstr_yx(stdplane, centerY + 2, centerX - 6, "the game");
+  ncplane_putstr_yx(stdplane, centerY + 4, centerX - 6, "Quit: Q");
 
-  if (keyPressed == 'q' or keyPressed == 'Q' or keyPressed == ESC_KEY)
+  notcurses_render(nc);
+
+  auto       ni         = ncinput{};
+  const auto keyPressed = notcurses_get_blocking(nc, &ni);
+
+  if (keyPressed == 'q' or keyPressed == 'Q')
   {
     state_ = GameState::QUIT;
     return;
@@ -225,26 +252,39 @@ void Game::showMenu()
 
 void Game::showGameOver()
 {
-  clear();
+  auto* nc       = input_->getNotcurses();
+  auto* stdplane = input_->getStdPlane();
+  if (nc == nullptr or stdplane == nullptr)
+  {
+    return;
+  }
 
-  const uint8_t centerY = LINES / 2;
-  const uint8_t centerX = COLS / 2;
+  ncplane_erase(stdplane);
+  notcurses_render(nc);
 
-  mvprintw(centerY - 2, centerX - 10, "===================");
-  mvprintw(centerY - 1, centerX - 10, "    GAME OVER     ");
-  mvprintw(centerY, centerX - 10, "===================");
-  mvprintw(centerY + 2, centerX - 10, "Your score: %d", score_);
-  mvprintw(centerY + 4, centerX - 12, "Press any key to return");
-  mvprintw(centerY + 5, centerX - 7, "to the menu");
-  mvprintw(centerY + 6, centerX - 6, "Quit: Q");
+  unsigned rows = 0;
+  unsigned cols = 0;
+  ncplane_dim_yx(stdplane, &rows, &cols);
 
-  refresh();
+  const uint8_t centerY = rows / 2;
+  const uint8_t centerX = cols / 2;
 
-  nodelay(stdscr, FALSE);
-  const auto keyPressed = getch();
-  nodelay(stdscr, TRUE);
+  ncplane_putstr_yx(stdplane, centerY - 2, centerX - 10, "===================");
+  ncplane_putstr_yx(stdplane, centerY - 1, centerX - 10, "    GAME OVER     ");
+  ncplane_putstr_yx(stdplane, centerY, centerX - 10, "===================");
 
-  if (keyPressed == 'q' or keyPressed == 'Q' or keyPressed == ESC_KEY)
+  const auto scoreText = std::format("Your score: {}", score_);
+  ncplane_putstr_yx(stdplane, centerY + 2, centerX - 10, scoreText.c_str());
+  ncplane_putstr_yx(stdplane, centerY + 4, centerX - 12, "Press any key to return");
+  ncplane_putstr_yx(stdplane, centerY + 5, centerX - 7, "to the menu");
+  ncplane_putstr_yx(stdplane, centerY + 6, centerX - 6, "Quit: Q");
+
+  notcurses_render(nc);
+
+  auto       ni         = ncinput{};
+  const auto keyPressed = notcurses_get_blocking(nc, &ni);
+
+  if (keyPressed == 'q' or keyPressed == 'Q')
   {
     state_ = GameState::QUIT;
     return;
@@ -253,7 +293,7 @@ void Game::showGameOver()
   state_ = GameState::MENU;
 }
 
-auto Game::getDelayMs() const -> uint16_t
+constexpr auto Game::getDelayMs() const noexcept -> uint16_t
 {
   return INITIAL_SPEED_DELAY_MS - ((speed_ - 1) * SPEED_DECREASE_PER_LEVEL);
 }

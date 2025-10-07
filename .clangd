@@ -22,7 +22,6 @@ Diagnostics:
       - portability-*
     Remove:
       - bugprone-easily-swappable-parameters
-      - cppcoreguidelines-pro-type-vararg
       - readability-magic-numbers
       - cppcoreguidelines-avoid-magic-numbers
       - readability-identifier-length

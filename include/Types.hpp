@@ -10,19 +10,19 @@ using Coordinate = std::pair<uint8_t, uint8_t>;
 
 enum class Direction : uint8_t
 {
-  UP,
-  DOWN,
-  LEFT,
-  RIGHT
+  UP    = 0,
+  DOWN  = 1,
+  LEFT  = 2,
+  RIGHT = 3
 };
 
 enum class GameState : uint8_t
 {
-  MENU,
-  PLAYING,
-  PAUSED,
-  GAME_OVER,
-  QUIT
+  MENU      = 0,
+  PLAYING   = 1,
+  PAUSED    = 2,
+  GAME_OVER = 3,
+  QUIT      = 4
 };
 
 }  // namespace SnakeGame
