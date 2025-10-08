@@ -1,10 +1,15 @@
 #include "Game.hpp"
 #include "Board.hpp"
+#include "CommandSocket.hpp"
 #include "Input.hpp"
+#include "SharedMemoryManager.hpp"
 #include "Snake.hpp"
 #include "Types.hpp"
 
+#include <algorithm>
+#include <atomic>
 #include <chrono>
+#include <cstddef>
 #include <cstdint>
 #include <format>
 #include <memory>
@@ -74,8 +79,21 @@ constexpr auto getFoodColor(FoodType type) -> uint32_t
 
 Game::Game(uint8_t boardWidth, uint8_t boardHeight)
   : snake_(nullptr), board_(std::make_unique<Board>(boardWidth, boardHeight)),
-    input_(std::make_unique<Input>()), state_(GameState::MENU), score_(0), speed_(1)
+    input_(std::make_unique<Input>()), shmManager_(std::make_unique<SharedMemoryManager>()),
+    commandSocket_(std::make_unique<CommandSocket>()), state_(GameState::MENU), score_(0),
+    speed_(1), pendingCommand_(IpcCommands::NONE)
 {
+  if (shmManager_->isInitialized())
+  {
+    shmManager_->startAsyncWriter();
+  }
+
+  const auto started = commandSocket_->start([this](IpcCommands cmd) { this->handleCommand(cmd); });
+
+  if (not started)
+  {
+    commandSocket_.reset();
+  }
 }
 
 void Game::run()
@@ -84,6 +102,8 @@ void Game::run()
 
   while (state_ != GameState::QUIT)
   {
+    processSocketCommand();
+
     switch (state_)
     {
       case GameState::MENU:
@@ -183,6 +203,8 @@ void Game::update()
       ++speed_;
     }
   }
+
+  updateSharedMemory();
 }
 
 void Game::render() noexcept
@@ -307,7 +329,7 @@ void Game::showMenu()
   notcurses_render(nc);
 
   auto       ni         = ncinput{};
-  const auto keyPressed = notcurses_get_blocking(nc, &ni);
+  const auto keyPressed = notcurses_get_nblock(nc, &ni);
 
   if (keyPressed == 'q' or keyPressed == 'Q')
   {
@@ -315,7 +337,13 @@ void Game::showMenu()
     return;
   }
 
-  initialize();
+  if (keyPressed > 0)
+  {
+    initialize();
+    return;
+  }
+
+  std::this_thread::sleep_for(std::chrono::milliseconds(PAUSE_DELAY_MS));
 }
 
 void Game::showGameOver()
@@ -356,7 +384,7 @@ void Game::showGameOver()
   notcurses_render(nc);
 
   auto       ni         = ncinput{};
-  const auto keyPressed = notcurses_get_blocking(nc, &ni);
+  const auto keyPressed = notcurses_get_nblock(nc, &ni);
 
   if (keyPressed == 'q' or keyPressed == 'Q')
   {
@@ -364,12 +392,121 @@ void Game::showGameOver()
     return;
   }
 
-  state_ = GameState::MENU;
+  if (keyPressed > 0)
+  {
+    state_ = GameState::MENU;
+    return;
+  }
+
+  std::this_thread::sleep_for(std::chrono::milliseconds(PAUSE_DELAY_MS));
 }
 
 constexpr auto Game::getDelayMs() const noexcept -> uint16_t
 {
   return INITIAL_SPEED_DELAY_MS - ((speed_ - 1) * SPEED_DECREASE_PER_LEVEL);
+}
+
+void Game::updateSharedMemory() noexcept
+{
+  if (not shmManager_ or not shmManager_->isInitialized())
+  {
+    return;
+  }
+
+  auto sharedGameInfo = GameSharedData{.boardWidth   = board_->getWidth(),
+                                       .boardHeight  = board_->getHeight(),
+                                       .score        = score_,
+                                       .speed        = speed_,
+                                       .gameState    = state_,
+                                       .foodPosition = board_->getFoodPosition(),
+                                       .foodType     = board_->getFoodType(),
+                                       .snakeHead    = {0, 0},
+                                       .snakeLength  = 0,
+                                       .snakeBody    = {}};
+
+  if (snake_ != nullptr)
+  {
+    const auto& body       = snake_->getBody();
+    const auto  copyLength = std::min(static_cast<size_t>(MAX_SNAKE_LENGTH), body.size());
+
+    std::copy_n(body.begin(), copyLength, sharedGameInfo.snakeBody.begin());
+    sharedGameInfo.snakeHead   = snake_->getHead();
+    sharedGameInfo.snakeLength = static_cast<uint16_t>(body.size());
+  }
+  else
+  {
+    sharedGameInfo.snakeHead   = {0, 0};
+    sharedGameInfo.snakeLength = 0;
+  }
+
+  shmManager_->updateGameState(sharedGameInfo);
+}
+
+void Game::handleCommand(IpcCommands command) noexcept
+{
+  pendingCommand_.store(command, std::memory_order_release);
+}
+
+void Game::processSocketCommand() noexcept
+{
+  const auto command = pendingCommand_.exchange(IpcCommands::NONE, std::memory_order_acquire);
+
+  if (command == IpcCommands::NONE)
+  {
+    return;
+  }
+
+  switch (command)
+  {
+    case IpcCommands::START_GAME:
+      if (state_ == GameState::MENU or state_ == GameState::GAME_OVER)
+      {
+        initialize();
+      }
+      break;
+
+    case IpcCommands::MOVE_UP:
+      if (state_ == GameState::PLAYING and snake_ != nullptr)
+      {
+        snake_->move(Direction::UP);
+      }
+      break;
+
+    case IpcCommands::MOVE_DOWN:
+      if (state_ == GameState::PLAYING and snake_ != nullptr)
+      {
+        snake_->move(Direction::DOWN);
+      }
+      break;
+
+    case IpcCommands::MOVE_LEFT:
+      if (state_ == GameState::PLAYING and snake_ != nullptr)
+      {
+        snake_->move(Direction::LEFT);
+      }
+      break;
+
+    case IpcCommands::MOVE_RIGHT:
+      if (state_ == GameState::PLAYING and snake_ != nullptr)
+      {
+        snake_->move(Direction::RIGHT);
+      }
+      break;
+
+    case IpcCommands::RESTART_GAME:
+      if (state_ == GameState::GAME_OVER or state_ == GameState::PLAYING)
+      {
+        initialize();
+      }
+      break;
+
+    case IpcCommands::QUIT_GAME:
+      state_ = GameState::QUIT;
+      break;
+
+    case IpcCommands::NONE:
+      break;
+  }
 }
 
 }  // namespace SnakeGame
