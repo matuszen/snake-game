@@ -1,0 +1,101 @@
+{
+    "version": "2.0.0",
+    "tasks": [
+        {
+            "label": "Setup: Install Dependencies",
+            "type": "shell",
+            "command": "${workspaceFolder}/setup.sh",
+            "problemMatcher": [],
+            "presentation": {
+                "echo": true,
+                "reveal": "always",
+                "focus": false,
+                "panel": "shared",
+                "showReuseMessage": false,
+                "clear": false
+            },
+            "group": "none"
+        },
+        {
+            "label": "Build: CMake Configure",
+            "type": "shell",
+            "command": "mkdir -p build && cd build && cmake ..",
+            "problemMatcher": [],
+            "presentation": {
+                "echo": true,
+                "reveal": "always",
+                "focus": false,
+                "panel": "shared",
+                "showReuseMessage": false,
+                "clear": false
+            },
+            "group": "build"
+        },
+        {
+            "label": "Build: Compile Project",
+            "type": "shell",
+            "command": "cd build && make",
+            "problemMatcher": [
+                "$gcc"
+            ],
+            "presentation": {
+                "echo": true,
+                "reveal": "always",
+                "focus": false,
+                "panel": "shared",
+                "showReuseMessage": false,
+                "clear": false
+            },
+            "group": {
+                "kind": "build",
+                "isDefault": true
+            },
+            "dependsOn": [
+                "Build: CMake Configure"
+            ]
+        },
+        {
+            "label": "Build: Full Build",
+            "dependsOn": [
+                "Build: CMake Configure",
+                "Build: Compile Project"
+            ],
+            "dependsOrder": "sequence",
+            "problemMatcher": [],
+            "group": "build"
+        },
+        {
+            "label": "Run: Snake Game",
+            "type": "shell",
+            "command": "${workspaceFolder}/build/snake",
+            "problemMatcher": [],
+            "presentation": {
+                "echo": true,
+                "reveal": "always",
+                "focus": true,
+                "panel": "dedicated",
+                "showReuseMessage": false,
+                "clear": true
+            },
+            "group": "none",
+            "dependsOn": [
+                "Build: Compile Project"
+            ]
+        },
+        {
+            "label": "Clean: Remove Build Files",
+            "type": "shell",
+            "command": "rm -rf build",
+            "problemMatcher": [],
+            "presentation": {
+                "echo": true,
+                "reveal": "always",
+                "focus": false,
+                "panel": "shared",
+                "showReuseMessage": false,
+                "clear": false
+            },
+            "group": "none"
+        }
+    ]
+}

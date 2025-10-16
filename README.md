@@ -26,12 +26,28 @@ A Snake game implementation in C++.
 - C++20 compiler (GCC 10+, Clang 10+)
 - CMake 3.20+
 - [notcurses](https://github.com/dankamongmen/notcurses/) 3.0.7+
+- Python 3.x (for AI agent)
+
+## Quick Setup
+
+Run the automated setup script to install all dependencies:
+
+```bash
+./setup.sh
+```
 
 ## Build & Run
 
+### Using VS Code Tasks (recommended)
+
+- **Ctrl+Shift+B** - Build project
+- **Ctrl+Shift+P** → "Tasks: Run Task" → "Run: Snake Game"
+
+### Manual Build
+
 ```bash
-mkdir build && cd build
+mkdir -p build && cd build
 cmake ..
 make
-./snake
+./build/snake
 ```
