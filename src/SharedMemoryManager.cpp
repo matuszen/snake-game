@@ -163,22 +163,20 @@ void SharedMemoryManager::writeToSharedMemory(const GameSharedData& data) noexce
     return;
   }
 
-  shmData->gameData.boardWidth   = data.boardWidth;
-  shmData->gameData.boardHeight  = data.boardHeight;
-  shmData->gameData.score        = data.score;
-  shmData->gameData.speed        = data.speed;
-  shmData->gameData.gameState    = data.gameState;
-  shmData->gameData.foodPosition = data.foodPosition;
-  shmData->gameData.foodType     = data.foodType;
-  shmData->gameData.snakeHead    = data.snakeHead;
-  shmData->gameData.snakeLength  = data.snakeLength;
-  shmData->gameData.neuralVector = data.neuralVector;
+  shmData->gameData.boardWidth     = data.boardWidth;
+  shmData->gameData.boardHeight    = data.boardHeight;
+  shmData->gameData.score          = data.score;
+  shmData->gameData.speed          = data.speed;
+  shmData->gameData.gameState      = data.gameState;
+  shmData->gameData.foodPosition   = data.foodPosition;
+  shmData->gameData.foodType       = data.foodType;
+  shmData->gameData.snakeHead      = data.snakeHead;
+  shmData->gameData.snakeLength    = data.snakeLength;
+  shmData->gameData.neuralVector   = data.neuralVector;
   shmData->gameData.snakeDirection = data.snakeDirection;
 
   const auto copyLength = std::min(data.snakeLength, MAX_SNAKE_LENGTH);
   std::copy_n(data.snakeBody.begin(), copyLength, shmData->gameData.snakeBody.begin());
-
-
 
   shmData->version.fetch_add(1, std::memory_order_release);
   shmData->isWriting.store(false, std::memory_order_release);

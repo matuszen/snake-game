@@ -64,7 +64,6 @@ struct GameSharedData
   std::array<int, 11>                      neuralVector;
   Direction                                snakeDirection;
   std::array<Coordinate, MAX_SNAKE_LENGTH> snakeBody;
-
 };
 
 }  // namespace SnakeGame

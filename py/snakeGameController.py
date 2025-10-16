@@ -8,13 +8,13 @@ import sys
 import termios
 import time
 import tty
-import snakeAgent
-import numpy as np
 from dataclasses import dataclass
 from enum import IntEnum
 from typing import List, Optional, Tuple
 
+import numpy as np
 import posix_ipc
+import snakeAgent
 
 
 class Direction(IntEnum):
@@ -75,7 +75,9 @@ class SnakeGameData:
     snake_length: int
     snake_body: List[Tuple[int, int]]
     neural_vector: List[int]  # 11 integers: danger(3), direction(4), food_direction(4)
-    snake_direction: Direction  # Current direction snake is moving (0=UP, 1=DOWN, 2=LEFT, 3=RIGHT)
+    snake_direction: (
+        Direction  # Current direction snake is moving (0=UP, 1=DOWN, 2=LEFT, 3=RIGHT)
+    )
 
 
 class SnakeGameController:
@@ -158,7 +160,7 @@ class SnakeGameController:
 
             snake_length = struct.unpack("H", self.memory.read(2))[0]
 
-            self.memory.read(2) 
+            self.memory.read(2)
 
             neural_vector = []
             for i in range(11):
@@ -167,16 +169,11 @@ class SnakeGameController:
 
             snake_direction = Direction(struct.unpack("B", self.memory.read(1))[0])
 
-
             snake_body = []
             for i in range(min(snake_length, 2048)):
                 x = struct.unpack("B", self.memory.read(1))[0]
                 y = struct.unpack("B", self.memory.read(1))[0]
                 snake_body.append((x, y))
-
-
-
-
 
             self.last_version = version
 
@@ -264,8 +261,8 @@ def main():
                     elif key == "t":
                         aiMode = 1
                         command = IpcCommands.START_GAME
-                        print("\n[CMD] AI mode ON")                        
-                        model = snakeAgent.snakeAgent("models/modelv3.keras")
+                        print("\n[CMD] AI mode ON")
+                        model = snakeAgent.SnakeAgent("models/modelv3.keras")
                     elif key == "w" and aiMode == 0:
                         command = IpcCommands.MOVE_UP
                     elif key == "a" and aiMode == 0:
@@ -286,8 +283,15 @@ def main():
                 if aiMode == 1 and data and model:
                     print(data.neural_vector)
                     print(data.snake_direction)
-                    dir = model.move(np.array(data.neural_vector).reshape(1, -1), data.snake_direction)
-                    print( f"AI input: {data.neural_vector} output: {dir}", end="", flush=True)
+                    dir = model.move(
+                        np.array(data.neural_vector).reshape(1, -1),
+                        data.snake_direction,
+                    )
+                    print(
+                        f"AI input: {data.neural_vector} output: {dir}",
+                        end="",
+                        flush=True,
+                    )
                     if dir == Direction.UP:
                         controller.send_command(IpcCommands.MOVE_UP)
                     elif dir == Direction.DOWN:
@@ -296,7 +300,6 @@ def main():
                         controller.send_command(IpcCommands.MOVE_LEFT)
                     elif dir == Direction.RIGHT:
                         controller.send_command(IpcCommands.MOVE_RIGHT)
-
 
                 if data:
                     print(

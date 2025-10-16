@@ -7,6 +7,7 @@
 #include "Snake.hpp"
 #include "Types.hpp"
 
+#include <array>
 #include <atomic>
 #include <cstdint>
 #include <memory>
@@ -57,10 +58,9 @@ private:
 
   void handleCommand(IpcCommands command) noexcept;
 
-
-  std::array<int, 4> getDirectionVector() const;
-  std::array<int, 3> getDangerIndicator() const;
-  std::array<int, 11> getBoardState() const;
+  [[nodiscard]] auto getDirectionVector() const -> std::array<int, 4>;
+  [[nodiscard]] auto getDangerIndicator() const -> std::array<int, 3>;
+  [[nodiscard]] auto getBoardState() const -> std::array<int, 11>;
 
   [[nodiscard]] constexpr auto getDelayMs() const noexcept -> uint16_t;
 };
