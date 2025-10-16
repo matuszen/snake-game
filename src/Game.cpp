@@ -7,6 +7,7 @@
 #include "Types.hpp"
 
 #include <algorithm>
+#include <array>
 #include <atomic>
 #include <chrono>
 #include <cstddef>
@@ -401,6 +402,103 @@ void Game::showGameOver()
   std::this_thread::sleep_for(std::chrono::milliseconds(PAUSE_DELAY_MS));
 }
 
+auto Game::getDirectionVector() const -> std::array<int, 4>
+{
+  const auto dir = snake_->getDirection();
+  switch (dir)
+  {
+    case Direction::UP:
+      return {1, 0, 0, 0};
+    case Direction::DOWN:
+      return {0, 0, 0, 1};
+    case Direction::LEFT:
+      return {0, 1, 0, 0};
+    case Direction::RIGHT:
+      return {0, 0, 1, 0};
+    default:
+      return {0, 0, 0, 0};
+  }
+}
+
+auto Game::getDangerIndicator() const -> std::array<int, 3>
+{
+  const auto  head       = snake_->getHead();
+  const auto  currentDir = snake_->getDirection();
+  const auto& snakeBody  = snake_->getBody();
+
+  const auto isObstacle = [&](Coordinate pos) -> bool
+  {
+    if (board_->isWall(pos))
+    {
+      return true;
+    }
+    if (std::ranges::any_of(snakeBody, [&](const auto& segment)
+                            { return segment.first == pos.first && segment.second == pos.second; }))
+    {
+      return true;
+    }
+    return false;
+  };
+
+  Coordinate forward;
+  Coordinate left;
+  Coordinate right;
+
+  switch (currentDir)
+  {
+    case Direction::UP:
+      forward = {head.first, static_cast<uint8_t>(head.second - 1)};
+      left    = {static_cast<uint8_t>(head.first - 1), head.second};
+      right   = {static_cast<uint8_t>(head.first + 1), head.second};
+      break;
+    case Direction::DOWN:
+      forward = {head.first, static_cast<uint8_t>(head.second + 1)};
+      left    = {static_cast<uint8_t>(head.first + 1), head.second};
+      right   = {static_cast<uint8_t>(head.first - 1), head.second};
+      break;
+    case Direction::LEFT:
+      forward = {static_cast<uint8_t>(head.first - 1), head.second};
+      left    = {head.first, static_cast<uint8_t>(head.second + 1)};
+      right   = {head.first, static_cast<uint8_t>(head.second - 1)};
+      break;
+    case Direction::RIGHT:
+      forward = {static_cast<uint8_t>(head.first + 1), head.second};
+      left    = {head.first, static_cast<uint8_t>(head.second - 1)};
+      right   = {head.first, static_cast<uint8_t>(head.second + 1)};
+      break;
+  }
+
+  auto danger = std::array<int, 3>{0, 0, 0};
+  danger[0]   = isObstacle(forward) ? 1 : 0;
+  danger[1]   = isObstacle(left) ? 1 : 0;
+  danger[2]   = isObstacle(right) ? 1 : 0;
+
+  return danger;
+}
+
+std::array<int, 11> Game::getBoardState() const
+{
+  const auto danger    = getDangerIndicator();
+  const auto direction = getDirectionVector();
+  const auto head      = snake_->getHead();
+  const auto food      = board_->getFoodPosition();
+
+  auto state = std::array<int, 11>{};
+  state[0]   = danger[0];
+  state[1]   = danger[1];
+  state[2]   = danger[2];
+  state[3]   = direction[0];
+  state[4]   = direction[1];
+  state[5]   = direction[2];
+  state[6]   = direction[3];
+  state[7]   = (food.second < head.second) ? 1 : 0;
+  state[8]   = (food.second > head.second) ? 1 : 0;
+  state[9]   = (food.first > head.first) ? 1 : 0;
+  state[10]  = (food.first < head.first) ? 1 : 0;
+
+  return state;
+}
+
 constexpr auto Game::getDelayMs() const noexcept -> uint16_t
 {
   return INITIAL_SPEED_DELAY_MS - ((speed_ - 1) * SPEED_DECREASE_PER_LEVEL);
@@ -413,16 +511,18 @@ void Game::updateSharedMemory() noexcept
     return;
   }
 
-  auto sharedGameInfo = GameSharedData{.boardWidth   = board_->getWidth(),
-                                       .boardHeight  = board_->getHeight(),
-                                       .score        = score_,
-                                       .speed        = speed_,
-                                       .gameState    = state_,
-                                       .foodPosition = board_->getFoodPosition(),
-                                       .foodType     = board_->getFoodType(),
-                                       .snakeHead    = {0, 0},
-                                       .snakeLength  = 0,
-                                       .snakeBody    = {}};
+  auto sharedGameInfo = GameSharedData{.boardWidth     = board_->getWidth(),
+                                       .boardHeight    = board_->getHeight(),
+                                       .score          = score_,
+                                       .speed          = speed_,
+                                       .gameState      = state_,
+                                       .foodPosition   = board_->getFoodPosition(),
+                                       .foodType       = board_->getFoodType(),
+                                       .snakeHead      = {0, 0},
+                                       .snakeLength    = 0,
+                                       .neuralVector   = getBoardState(),
+                                       .snakeDirection = snake_->getDirection(),
+                                       .snakeBody      = {}};
 
   if (snake_ != nullptr)
   {

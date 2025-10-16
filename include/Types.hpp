@@ -61,6 +61,8 @@ struct GameSharedData
   FoodType                                 foodType;
   Coordinate                               snakeHead;
   uint16_t                                 snakeLength;
+  std::array<int, 11>                      neuralVector;
+  Direction                                snakeDirection;
   std::array<Coordinate, MAX_SNAKE_LENGTH> snakeBody;
 };
 
