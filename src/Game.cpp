@@ -401,6 +401,92 @@ void Game::showGameOver()
   std::this_thread::sleep_for(std::chrono::milliseconds(PAUSE_DELAY_MS));
 }
 
+
+
+
+std::array<int, 4> Game::getDirectionVector() const {
+    const auto dir = snake_->getDirection();
+    switch(dir) {
+        case Direction::UP: return {1, 0, 0, 0};
+        case Direction::DOWN: return {0, 0, 0, 1};
+        case Direction::LEFT: return {0, 1, 0, 0};
+        case Direction::RIGHT: return {0, 0, 1, 0};
+        default: return {0, 0, 0, 0};
+    }
+}
+
+
+std::array<int, 3> Game::getDangerIndicator() const {
+const auto head = snake_->getHead();
+const auto currentDir = snake_->getDirection();
+const auto& snakeBody = snake_->getBody();
+
+auto isObstacle = [&](Coordinate pos) -> bool {
+    if (board_->isWall(pos)) return true;
+    for (const auto& segment : snakeBody) {
+        if (segment.first == pos.first && segment.second == pos.second) {
+            return true;
+        }
+    }
+    return false;
+};
+
+std::array<int, 3> danger = {0, 0, 0};
+
+Coordinate forward, left, right;
+
+switch(currentDir) {
+    case Direction::UP:
+        forward = {head.first, static_cast<uint8_t>(head.second - 1)};
+        left = {static_cast<uint8_t>(head.first - 1), head.second};
+        right = {static_cast<uint8_t>(head.first + 1), head.second};
+        break;
+    case Direction::DOWN:
+        forward = {head.first, static_cast<uint8_t>(head.second + 1)};
+        left = {static_cast<uint8_t>(head.first + 1), head.second};
+        right = {static_cast<uint8_t>(head.first - 1), head.second};
+        break;
+    case Direction::LEFT:
+        forward = {static_cast<uint8_t>(head.first - 1), head.second};
+        left = {head.first, static_cast<uint8_t>(head.second + 1)};
+        right = {head.first, static_cast<uint8_t>(head.second - 1)};
+        break;
+    case Direction::RIGHT:
+        forward = {static_cast<uint8_t>(head.first + 1), head.second};
+        left = {head.first, static_cast<uint8_t>(head.second - 1)};
+        right = {head.first, static_cast<uint8_t>(head.second + 1)};
+        break;
+}
+
+danger[0] = isObstacle(forward) ? 1 : 0;  
+danger[1] = isObstacle(left) ? 1 : 0;     
+danger[2] = isObstacle(right) ? 1 : 0;    
+
+return danger;
+}
+
+std::array<int, 11> Game::getBoardState() const {
+   std::array<int, 11> state{};
+   std::array<int, 3> danger = getDangerIndicator();
+   state[0] = danger[0];
+   state[1] = danger[1];
+   state[2] = danger[2];
+   std::array<int, 4> direction = getDirectionVector();
+   state[3] = direction[0];
+   state[4] = direction[1];
+   state[5] = direction[2];
+   state[6] = direction[3];
+   const auto head = snake_->getHead();
+   const auto food = board_->getFoodPosition();
+   state[7] = (food.second <  head.second) ? 1 : 0; // food up
+   state[8] = (food.second >  head.second) ? 1 : 0; // food down
+   state[9]= (food.first  >  head.first)  ? 1 : 0; // food right
+   state[10] = (food.first  <  head.first)  ? 1 : 0; // food left
+    return state;
+}
+
+
+
 constexpr auto Game::getDelayMs() const noexcept -> uint16_t
 {
   return INITIAL_SPEED_DELAY_MS - ((speed_ - 1) * SPEED_DECREASE_PER_LEVEL);
@@ -422,6 +508,8 @@ void Game::updateSharedMemory() noexcept
                                        .foodType     = board_->getFoodType(),
                                        .snakeHead    = {0, 0},
                                        .snakeLength  = 0,
+                                       .neuralVector = getBoardState(),
+                                       .snakeDirection = snake_->getDirection(),
                                        .snakeBody    = {}};
 
   if (snake_ != nullptr)

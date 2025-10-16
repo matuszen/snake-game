@@ -8,6 +8,8 @@ import sys
 import termios
 import time
 import tty
+import snakeAgent
+import numpy as np
 from dataclasses import dataclass
 from enum import IntEnum
 from typing import List, Optional, Tuple
@@ -72,6 +74,8 @@ class SnakeGameData:
     snake_head: Tuple[int, int]
     snake_length: int
     snake_body: List[Tuple[int, int]]
+    neural_vector: List[int]  # 11 integers: danger(3), direction(4), food_direction(4)
+    snake_direction: Direction  # Current direction snake is moving (0=UP, 1=DOWN, 2=LEFT, 3=RIGHT)
 
 
 class SnakeGameController:
@@ -154,11 +158,25 @@ class SnakeGameController:
 
             snake_length = struct.unpack("H", self.memory.read(2))[0]
 
+            self.memory.read(2) 
+
+            neural_vector = []
+            for i in range(11):
+                value = struct.unpack("<i", self.memory.read(4))[0]
+                neural_vector.append(value)
+
+            snake_direction = Direction(struct.unpack("B", self.memory.read(1))[0])
+
+
             snake_body = []
             for i in range(min(snake_length, 2048)):
                 x = struct.unpack("B", self.memory.read(1))[0]
                 y = struct.unpack("B", self.memory.read(1))[0]
                 snake_body.append((x, y))
+
+
+
+
 
             self.last_version = version
 
@@ -174,6 +192,8 @@ class SnakeGameController:
                 snake_head=snake_head,
                 snake_length=snake_length,
                 snake_body=snake_body,
+                neural_vector=neural_vector,
+                snake_direction=snake_direction,
             )
 
         except Exception as e:
@@ -208,7 +228,8 @@ class SnakeGameController:
 def main():
     """Main function - usage example"""
     controller = SnakeGameController()
-
+    aiMode = 0
+    model = None
     if not controller.connect():
         return 1
 
@@ -217,6 +238,7 @@ def main():
     print("Press Ctrl+C to exit\n")
     print("Available commands:")
     print("  r - Start/Restart game")
+    print("  t - Toggle AI control ")
     print("  w/↑ - Move up")
     print("  a/← - Move left")
     print("  s/↓ - Move down")
@@ -239,13 +261,18 @@ def main():
                     if key == "r":
                         command = IpcCommands.START_GAME
                         print("\n[CMD] Start game")
-                    elif key == "w":
+                    elif key == "t":
+                        aiMode = 1
+                        command = IpcCommands.START_GAME
+                        print("\n[CMD] AI mode ON")                        
+                        model = snakeAgent.snakeAgent("models/modelv3.keras")
+                    elif key == "w" and aiMode == 0:
                         command = IpcCommands.MOVE_UP
-                    elif key == "a":
+                    elif key == "a" and aiMode == 0:
                         command = IpcCommands.MOVE_LEFT
-                    elif key == "d":
+                    elif key == "d" and aiMode == 0:
                         command = IpcCommands.MOVE_RIGHT
-                    elif key == "s":
+                    elif key == "s" and aiMode == 0:
                         command = IpcCommands.MOVE_DOWN
                     elif key == "q":
                         command = IpcCommands.QUIT_GAME
@@ -253,8 +280,23 @@ def main():
 
                     if command:
                         controller.send_command(command)
+                        command = None
 
                 data = controller.read_data()
+                if aiMode == 1 and data and model:
+                    print(data.neural_vector)
+                    print(data.snake_direction)
+                    dir = model.move(np.array(data.neural_vector).reshape(1, -1), data.snake_direction)
+                    print( f"AI input: {data.neural_vector} output: {dir}", end="", flush=True)
+                    if dir == Direction.UP:
+                        controller.send_command(IpcCommands.MOVE_UP)
+                    elif dir == Direction.DOWN:
+                        controller.send_command(IpcCommands.MOVE_DOWN)
+                    elif dir == Direction.LEFT:
+                        controller.send_command(IpcCommands.MOVE_LEFT)
+                    elif dir == Direction.RIGHT:
+                        controller.send_command(IpcCommands.MOVE_RIGHT)
+
 
                 if data:
                     print(

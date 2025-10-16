@@ -57,6 +57,11 @@ private:
 
   void handleCommand(IpcCommands command) noexcept;
 
+
+  std::array<int, 4> getDirectionVector() const;
+  std::array<int, 3> getDangerIndicator() const;
+  std::array<int, 11> getBoardState() const;
+
   [[nodiscard]] constexpr auto getDelayMs() const noexcept -> uint16_t;
 };
 
