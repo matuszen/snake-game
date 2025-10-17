@@ -1,5 +1,3 @@
-#!/usr/bin/env python3
-
 import mmap
 import select
 import socket
@@ -18,8 +16,6 @@ import snakeAgent
 
 
 class Direction(IntEnum):
-    """Snake movement directions"""
-
     UP = 0
     DOWN = 1
     LEFT = 2
@@ -27,8 +23,6 @@ class Direction(IntEnum):
 
 
 class GameState(IntEnum):
-    """Game states"""
-
     MENU = 0
     PLAYING = 1
     PAUSED = 2
@@ -37,8 +31,6 @@ class GameState(IntEnum):
 
 
 class FoodType(IntEnum):
-    """Food types"""
-
     APPLE = 0
     CHERRY = 1
     BANANA = 2
@@ -47,8 +39,6 @@ class FoodType(IntEnum):
 
 
 class IpcCommands(IntEnum):
-    """Game control commands"""
-
     NONE = 0
     START_GAME = 1
     MOVE_UP = 2
@@ -61,8 +51,6 @@ class IpcCommands(IntEnum):
 
 @dataclass
 class SnakeGameData:
-    """Snake game data structure"""
-
     version: int
     board_width: int
     board_height: int
@@ -74,15 +62,11 @@ class SnakeGameData:
     snake_head: Tuple[int, int]
     snake_length: int
     snake_body: List[Tuple[int, int]]
-    neural_vector: List[int]  # 11 integers: danger(3), direction(4), food_direction(4)
-    snake_direction: (
-        Direction  # Current direction snake is moving (0=UP, 1=DOWN, 2=LEFT, 3=RIGHT)
-    )
+    neural_vector: List[int]
+    snake_direction: Direction
 
 
 class SnakeGameController:
-    """Class for communicating with Snake game - reading state and sending commands"""
-
     SHM_NAME = "/snake_game_shm"
     SOCKET_PATH = "/tmp/snake_game.sock"
 
@@ -93,7 +77,6 @@ class SnakeGameController:
         self.socket = None
 
     def connect(self) -> bool:
-        """Connects to shared memory"""
         try:
             self.shm = posix_ipc.SharedMemory(self.SHM_NAME, flags=0)
             self.memory = mmap.mmap(self.shm.fd, self.shm.size)
@@ -111,17 +94,12 @@ class SnakeGameController:
             return False
 
     def disconnect(self):
-        """Disconnects from shared memory"""
         if self.memory:
             self.memory.close()
         if hasattr(self, "shm"):
             self.shm.close_fd()
 
     def read_data(self) -> Optional[SnakeGameData]:
-        """
-        Reads data from shared memory.
-        Returns None if data is currently being written (lock-free).
-        """
         if not self.memory:
             return None
 
@@ -163,14 +141,14 @@ class SnakeGameController:
             self.memory.read(2)
 
             neural_vector = []
-            for i in range(11):
+            for _ in range(11):
                 value = struct.unpack("<i", self.memory.read(4))[0]
                 neural_vector.append(value)
 
             snake_direction = Direction(struct.unpack("B", self.memory.read(1))[0])
 
             snake_body = []
-            for i in range(min(snake_length, 2048)):
+            for _ in range(min(snake_length, 2048)):
                 x = struct.unpack("B", self.memory.read(1))[0]
                 y = struct.unpack("B", self.memory.read(1))[0]
                 snake_body.append((x, y))
@@ -198,10 +176,6 @@ class SnakeGameController:
             return None
 
     def send_command(self, command: IpcCommands) -> bool:
-        """
-        Sends command to the game via Unix Domain Socket.
-        Returns True on success, False on error.
-        """
         try:
             sock = socket.socket(socket.AF_UNIX, socket.SOCK_STREAM)
             sock.settimeout(1.0)
@@ -223,7 +197,6 @@ class SnakeGameController:
 
 
 def main():
-    """Main function - usage example"""
     controller = SnakeGameController()
     aiMode = 0
     model = None
@@ -314,27 +287,18 @@ def main():
                         flush=True,
                     )
 
-                    if (
-                        data.version % 100 == 0
-                        and data.version != last_detailed_version
-                    ):
+                    if data.version % 100 == 0 and data.version != last_detailed_version:
                         last_detailed_version = data.version
                         print()
                         print("\n--- Snake position details ---")
-                        print(
-                            f"Head (segment 0): ({data.snake_head[0]:2d}, {data.snake_head[1]:2d})"
-                        )
+                        print(f"Head (segment 0): ({data.snake_head[0]:2d}, {data.snake_head[1]:2d})")
 
                         segments_to_show = min(10, len(data.snake_body))
                         for i in range(segments_to_show):
-                            print(
-                                f"Segment {i:2d}: ({data.snake_body[i][0]:2d}, {data.snake_body[i][1]:2d})"
-                            )
+                            print(f"Segment {i:2d}: ({data.snake_body[i][0]:2d}, {data.snake_body[i][1]:2d})")
 
                         if len(data.snake_body) > segments_to_show:
-                            print(
-                                f"... (and {len(data.snake_body) - segments_to_show} more segments)"
-                            )
+                            print(f"... (and {len(data.snake_body) - segments_to_show} more segments)")
                         print()
 
                 time.sleep(0.01)

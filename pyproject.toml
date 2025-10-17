@@ -1,0 +1,20 @@
+[tool.ruff]
+line-length = 120
+target-version = "py312"
+
+exclude = [
+    ".git",
+    "__pycache__",
+    "build",
+    "dist",
+    ".venv",
+    "venv",
+    ".mypy_cache",
+    ".pytest_cache",
+    "migrations",
+]
+
+[tool.ruff.lint]
+select = ["E", "F", "W", "C90"]
+extend-select = ["B", "D", "I", "S"]
+extend-ignore = ["E203", "D100", "D101", "D102", "D103", "D107", "C901", "S108"]

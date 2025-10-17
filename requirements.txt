@@ -1,2 +1,4 @@
 numpy>=1.24.0
 tensorflow>=2.13.0
+posix-ipc>=1.1.0
+ruff==0.14.1
