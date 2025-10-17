@@ -12,6 +12,7 @@
 #include <cstdint>
 #include <memory>
 #include <mutex>
+#include <optional>
 
 namespace SnakeGame
 {
@@ -45,6 +46,7 @@ private:
 
   std::atomic<IpcCommands> pendingCommand_;
   std::mutex               commandMutex_;
+  std::optional<Direction> pendingDirection_;
 
   void initialize();
   void processInput() noexcept;
