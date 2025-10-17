@@ -225,6 +225,7 @@ void Game::render() noexcept
 
   ncplane_erase(stdplane);
 
+  // Draw static border in a consistent dim color
   ncplane_set_fg_rgb8(stdplane, 128, 128, 128);
 
   for (uint8_t col = 0; col < board_->getWidth() + 2; ++col)
@@ -314,7 +315,6 @@ void Game::showMenu()
   }
 
   ncplane_erase(stdplane);
-  notcurses_render(nc);
 
   unsigned rows = 0;
   unsigned cols = 0;
@@ -363,7 +363,6 @@ void Game::showGameOver()
   }
 
   ncplane_erase(stdplane);
-  notcurses_render(nc);
 
   unsigned rows = 0;
   unsigned cols = 0;
