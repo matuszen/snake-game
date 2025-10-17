@@ -1,3 +1,5 @@
+#!/usr/bin/env python3
+
 import mmap
 import select
 import socket
@@ -9,12 +11,14 @@ import tty
 from collections import deque
 from dataclasses import dataclass
 from enum import IntEnum
-from typing import List, Optional, Tuple
+from typing import List, Optional, Tuple, Set, Dict
 
 import posix_ipc
 
 
 class Direction(IntEnum):
+    """Snake movement directions"""
+
     UP = 0
     DOWN = 1
     LEFT = 2
@@ -22,6 +26,8 @@ class Direction(IntEnum):
 
 
 class GameState(IntEnum):
+    """Game states"""
+
     MENU = 0
     PLAYING = 1
     PAUSED = 2
@@ -30,6 +36,8 @@ class GameState(IntEnum):
 
 
 class FoodType(IntEnum):
+    """Food types"""
+
     APPLE = 0
     CHERRY = 1
     BANANA = 2
@@ -38,6 +46,8 @@ class FoodType(IntEnum):
 
 
 class IpcCommands(IntEnum):
+    """Game control commands"""
+
     NONE = 0
     START_GAME = 1
     MOVE_UP = 2
@@ -50,6 +60,8 @@ class IpcCommands(IntEnum):
 
 @dataclass
 class SnakeGameData:
+    """Snake game data structure"""
+
     version: int
     board_width: int
     board_height: int
@@ -61,11 +73,15 @@ class SnakeGameData:
     snake_head: Tuple[int, int]
     snake_length: int
     snake_body: List[Tuple[int, int]]
-    neural_vector: List[int]
-    snake_direction: Direction
+    neural_vector: List[int]  # 11 integers: danger(3), direction(4), food_direction(4)
+    snake_direction: (
+        Direction  # Current direction snake is moving (0=UP, 1=DOWN, 2=LEFT, 3=RIGHT)
+    )
 
 
 class SnakeGameController:
+    """Class for communicating with Snake game - reading state and sending commands"""
+
     SHM_NAME = "/snake_game_shm"
     SOCKET_PATH = "/tmp/snake_game.sock"
 
@@ -76,6 +92,7 @@ class SnakeGameController:
         self.socket = None
 
     def connect(self) -> bool:
+        """Connects to shared memory"""
         try:
             self.shm = posix_ipc.SharedMemory(self.SHM_NAME, flags=0)
             self.memory = mmap.mmap(self.shm.fd, self.shm.size)
@@ -93,12 +110,17 @@ class SnakeGameController:
             return False
 
     def disconnect(self):
+        """Disconnects from shared memory"""
         if self.memory:
             self.memory.close()
         if hasattr(self, "shm"):
             self.shm.close_fd()
 
     def read_data(self) -> Optional[SnakeGameData]:
+        """
+        Reads data from shared memory.
+        Returns None if data is currently being written (lock-free).
+        """
         if not self.memory:
             return None
 
@@ -140,14 +162,14 @@ class SnakeGameController:
             self.memory.read(2)
 
             neural_vector = []
-            for _ in range(11):
+            for i in range(11):
                 value = struct.unpack("<i", self.memory.read(4))[0]
                 neural_vector.append(value)
 
             snake_direction = Direction(struct.unpack("B", self.memory.read(1))[0])
 
             snake_body = []
-            for _ in range(min(snake_length, 2048)):
+            for i in range(min(snake_length, 2048)):
                 x = struct.unpack("B", self.memory.read(1))[0]
                 y = struct.unpack("B", self.memory.read(1))[0]
                 snake_body.append((x, y))
@@ -175,6 +197,10 @@ class SnakeGameController:
             return None
 
     def send_command(self, command: IpcCommands) -> bool:
+        """
+        Sends command to the game via Unix Domain Socket.
+        Returns True on success, False on error.
+        """
         try:
             sock = socket.socket(socket.AF_UNIX, socket.SOCK_STREAM)
             sock.settimeout(1.0)
@@ -196,13 +222,20 @@ class SnakeGameController:
 
 
 class SnakeHeuristicAI:
+    """
+    Algorytm heurystyczny do gry w Snake.
+    Bazuje na pathfinding (BFS) i sprawdzaniu bezpieczeństwa ruchów.
+    """
+
     def __init__(self):
         self.board_width = 0
         self.board_height = 0
 
     def get_adjacencies(self, pos: Tuple[int, int]) -> List[Tuple[int, int]]:
+        """Zwraca listę sąsiednich pozycji (góra, prawo, dół, lewo)"""
         x, y = pos
         adjacencies = []
+        # Góra, Prawo, Dół, Lewo
         for dx, dy in [(0, -1), (1, 0), (0, 1), (-1, 0)]:
             nx, ny = x + dx, y + dy
             if 0 <= nx < self.board_width and 0 <= ny < self.board_height:
@@ -210,11 +243,12 @@ class SnakeHeuristicAI:
         return adjacencies
 
     def bfs_search(
-        self,
-        start: Tuple[int, int],
-        end: Tuple[int, int],
-        snake_body: List[Tuple[int, int]],
+        self, start: Tuple[int, int], end: Tuple[int, int], snake_body: List[Tuple[int, int]]
     ) -> Optional[List[Tuple[int, int]]]:
+        """
+        BFS pathfinding od start do end, unikając ciała węża.
+        Zwraca ścieżkę jako listę pozycji lub None jeśli brak ścieżki.
+        """
         if start == end:
             return [start]
 
@@ -239,6 +273,9 @@ class SnakeHeuristicAI:
         return None
 
     def count_free_space(self, start: Tuple[int, int], snake_body: List[Tuple[int, int]]) -> int:
+        """
+        Liczy dostępną wolną przestrzeń od danej pozycji używając flood fill.
+        """
         visited = set()
         queue = deque([start])
         snake_set = set(snake_body)
@@ -256,39 +293,46 @@ class SnakeHeuristicAI:
 
         return len(visited)
 
-    def is_safe_move(self, path_to_food: List[Tuple[int, int]], snake_body: List[Tuple[int, int]]) -> bool:
+    def is_safe_move(
+        self, path_to_food: List[Tuple[int, int]], snake_body: List[Tuple[int, int]]
+    ) -> bool:
+        """
+        Sprawdza czy ścieżka do jedzenia jest bezpieczna:
+        Symuluje zjedzenie jedzenia i sprawdza czy wąż może dotrzeć do ogona.
+        """
         if not path_to_food or len(path_to_food) < 2:
             return False
 
         # Symuluj węża po przejściu ścieżki i zjedzeniu
         # Nowa głowa będzie na końcu ścieżki (tam gdzie jedzenie)
         food_pos = path_to_food[-1]
-
+        
         # Symuluj ruch węża wzdłuż ścieżki
         # Wąż przesuwa się o długość ścieżki-1 (bo głowa już jest na starcie)
-        # path_length = len(path_to_food) - 1
-
+        path_length = len(path_to_food) - 1
+        
         # Buduj nowego węża po zjedzeniu
         # Głowa na pozycji jedzenia + wąż przesuwa się o path_length i rośnie o 1
         new_snake = [food_pos]  # Nowa głowa na jedzeniu
-
+        
         # Dodaj resztę ciała - wąż rośnie, więc nie usuwamy ogona
         for i, pos in enumerate(snake_body):
             if i < len(snake_body):  # Wąż rośnie, zachowujemy wszystkie segmenty
                 new_snake.append(pos)
-
+        
         # Teraz sprawdź czy z nowej pozycji można dotrzeć do ogona
         new_head = new_snake[0]
         new_tail = new_snake[-1]
-
+        
         # Usuń ogon ze sprawdzania, bo gdy tam dotrzemy, będzie już wolny
         path_to_tail = self.bfs_search(new_head, new_tail, new_snake[:-1])
-
+        
         return path_to_tail is not None
 
     def get_direction_to_pos(
         self, from_pos: Tuple[int, int], to_pos: Tuple[int, int], current_dir: Direction
     ) -> Direction:
+        """Konwertuje następną pozycję na kierunek ruchu"""
         dx = to_pos[0] - from_pos[0]
         dy = to_pos[1] - from_pos[1]
 
@@ -304,6 +348,15 @@ class SnakeHeuristicAI:
             return current_dir
 
     def get_next_move(self, data: SnakeGameData) -> Direction:
+        """
+        Główna logika algorytmu heurystycznego.
+        
+        Algorytm:
+        1. Znajdź ścieżkę do jedzenia
+        2. Jeśli ścieżka istnieje, sprawdź czy po zjedzeniu będzie bezpiecznie (można dotrzeć do ogona)
+        3. Jeśli bezpiecznie, idź do jedzenia
+        4. Jeśli nie, idź w kierunku ogona lub najbezpieczniejszego miejsca
+        """
         self.board_width = data.board_width
         self.board_height = data.board_height
 
@@ -354,7 +407,7 @@ class SnakeHeuristicAI:
                 continue
 
             next_dir = self.get_direction_to_pos(head, next_pos, current_dir)
-
+            
             # Nie zawracaj
             if next_dir == opposite_dirs.get(current_dir):
                 continue
@@ -374,7 +427,8 @@ class SnakeHeuristicAI:
         return current_dir
 
 
-def main() -> None:
+def main():
+    """Main function"""
     controller = SnakeGameController()
     heuristic_ai = SnakeHeuristicAI()
 
