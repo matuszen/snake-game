@@ -180,7 +180,11 @@ void Game::update()
     return;
   }
 
-  const auto newDir = input_->getDirection();
+  auto newDir = input_->getDirection();
+  if (not newDir.has_value() and pendingDirection_.has_value())
+  {
+    newDir = pendingDirection_;
+  }
 
   if (newDir.has_value())
   {
@@ -190,6 +194,8 @@ void Game::update()
   {
     snake_->move(snake_->getDirection());
   }
+
+  pendingDirection_.reset();
 
   handleCollision();
 
@@ -566,30 +572,30 @@ void Game::processSocketCommand() noexcept
       break;
 
     case IpcCommands::MOVE_UP:
-      if (state_ == GameState::PLAYING and snake_ != nullptr)
+      if (state_ == GameState::PLAYING)
       {
-        snake_->move(Direction::UP);
+        pendingDirection_ = Direction::UP;
       }
       break;
 
     case IpcCommands::MOVE_DOWN:
-      if (state_ == GameState::PLAYING and snake_ != nullptr)
+      if (state_ == GameState::PLAYING)
       {
-        snake_->move(Direction::DOWN);
+        pendingDirection_ = Direction::DOWN;
       }
       break;
 
     case IpcCommands::MOVE_LEFT:
-      if (state_ == GameState::PLAYING and snake_ != nullptr)
+      if (state_ == GameState::PLAYING)
       {
-        snake_->move(Direction::LEFT);
+        pendingDirection_ = Direction::LEFT;
       }
       break;
 
     case IpcCommands::MOVE_RIGHT:
-      if (state_ == GameState::PLAYING and snake_ != nullptr)
+      if (state_ == GameState::PLAYING)
       {
-        snake_->move(Direction::RIGHT);
+        pendingDirection_ = Direction::RIGHT;
       }
       break;
 
