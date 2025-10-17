@@ -1,0 +1,71 @@
+name: CI
+on:
+  push:
+    branches: [ master, develop/* ]
+  pull_request:
+    branches: [ master, develop/* ]
+
+jobs:
+  build-cpp:
+    name: Build C++
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Install build dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y cmake make
+
+      - name: Configure CMake
+        run: |
+          mkdir -p build
+          cd build
+          cmake ..
+
+      - name: Build project
+        run: |
+          cd build
+          make
+
+  lint-cpp:
+    name: Lint C++
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Install lint dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y clang clang-format clang-tidy
+
+      - name: Run clang-format check
+        run: |
+          find src include py -name '*.cpp' -o -name '*.hpp' | xargs clang-format --dry-run --Werror
+
+      - name: Run clang-tidy
+        run: |
+          find src -name '*.cpp' | xargs -I{} clang-tidy {} -- -Iinclude
+
+  lint-python:
+    name: Ruff Python Lint & Format
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Install ruff
+        run: pip install ruff
+
+      - name: Ruff check
+        run: ruff check py
+
+      - name: Ruff format check
+        run: ruff format --check py
