@@ -16,7 +16,7 @@ jobs:
       - name: Install build dependencies
         run: |
           sudo apt-get update
-          sudo apt-get install -y cmake make
+          sudo apt-get install -y cmake make pkg-config libnotcurses-dev
 
       - name: Configure CMake
         run: |
@@ -43,7 +43,8 @@ jobs:
 
       - name: Run clang-format check
         run: |
-          find src include py -name '*.cpp' -o -name '*.hpp' | xargs clang-format --dry-run --Werror
+          find src include py -type f \( -name '*.cpp' -o -name '*.hpp' \) -print0 \
+            | xargs -0 -n 1 clang-format --dry-run --Werror -style=file
 
       - name: Run clang-tidy
         run: |
