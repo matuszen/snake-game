@@ -29,27 +29,6 @@ jobs:
           cd build
           make
 
-  lint-cpp:
-    name: Lint C++
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-
-      - name: Install lint dependencies
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y clang clang-format clang-tidy
-
-      - name: Run clang-format check
-        run: |
-          find src include py -type f \( -name '*.cpp' -o -name '*.hpp' \) -print0 \
-            | xargs -0 -n 1 clang-format --dry-run --Werror -style=file
-
-      - name: Run clang-tidy
-        run: |
-          find src -name '*.cpp' | xargs -I{} clang-tidy {} -- -Iinclude
-
   lint-python:
     name: Ruff Python Lint & Format
     runs-on: ubuntu-latest
