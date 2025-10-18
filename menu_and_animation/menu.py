@@ -58,22 +58,18 @@ dane = [
 
 pygame.init()
 
-# --- KONFIGURACJA OKNA ---
 WIDTH, HEIGHT = 600, 400
 SCREEN = pygame.display.set_mode((WIDTH, HEIGHT))
 pygame.display.set_caption("Snake Menu")
 
-# --- KOLORY ---
 WHITE = (255, 255, 255)
 BLACK = (0, 0, 0)
 GREEN = (0, 200, 0)
 GRAY = (70, 70, 70)
 HIGHLIGHT = (0, 255, 0)
 
-# --- FONT ---
 FONT = pygame.font.SysFont("Arial", 32)
 
-# --- POMOCNICZE FUNKCJE ---
 
 def draw_text(text, y, selected=False):
     """Rysuje tekst w menu"""
@@ -81,7 +77,6 @@ def draw_text(text, y, selected=False):
     label = FONT.render(text, True, color)
     rect = label.get_rect(center=(WIDTH//2, y))
     SCREEN.blit(label, rect)
-
 
 
 def wait_for_key():
@@ -93,8 +88,6 @@ def wait_for_key():
                 sys.exit()
             if event.type == pygame.KEYDOWN:
                 return event.key
-
-# --- FUNKCJE GRY / SYMULACJI (na razie proste placeholdery) ---
 
 
 def symulacja_ai():
@@ -109,6 +102,7 @@ def symulacja_ai():
     if key == pygame.K_ESCAPE:
         return
 
+
 def symulacja_algorytmu():
     SCREEN.fill(BLACK)
     draw_text("Symulacja algorytmu w toku...", HEIGHT//2 - 20)
@@ -117,6 +111,7 @@ def symulacja_algorytmu():
     key = wait_for_key()
     if key == pygame.K_ESCAPE:
         return
+
 
 def symulacja_oba():
     SCREEN.fill(BLACK)
@@ -127,7 +122,6 @@ def symulacja_oba():
     if key == pygame.K_ESCAPE:
         return
 
-# --- PODMENU SYMULACJI ---
 
 def menu_symulacji():
     options = ["Symulacja AI", "Symulacja algorytmu", "Obie symulacje", "Powrót"]
@@ -161,7 +155,6 @@ def menu_symulacji():
                 elif event.key == pygame.K_ESCAPE:
                     return
 
-# --- MENU GŁÓWNE ---
 
 def menu_glowne():
     options = ["Przeprowadź symulację", "Wyjdź"]
@@ -190,5 +183,4 @@ def menu_glowne():
                         pygame.quit()
                         sys.exit()
 
-# --- START ---
 menu_glowne()

@@ -5,7 +5,7 @@ from stats import wykresy
 
     
 def play(dane):
-    # --- KONFIGURACJA ---
+
     CELL_SIZE = 20
     GRID_WIDTH = 100
     GRID_HEIGHT = 50
@@ -18,26 +18,27 @@ def play(dane):
     BG_COLOR = (30, 30, 30)
     TEXT_COLOR = (255, 255, 255)
 
-    FPS = 5  # szybkość animacji
+    FPS = 5 
 
 
 
-    # --- INICJALIZACJA PYGAME ---
     pygame.init()
     screen = pygame.display.set_mode((WINDOW_WIDTH, WINDOW_HEIGHT))
     pygame.display.set_caption("Symulacja Snake")
     clock = pygame.time.Clock()
     font = pygame.font.SysFont("Arial", 28, bold=True)
 
-    # --- FUNKCJE ---
+
     def draw_cell(x, y, color):
         rect = pygame.Rect(x * CELL_SIZE, y * CELL_SIZE, CELL_SIZE, CELL_SIZE)
         pygame.draw.rect(screen, color, rect)
+
+
     def draw_food(x, y, frame_count):
-        # prosty efekt pulsowania jedzenia
-        radius = CELL_SIZE // 2 + (frame_count % 6)  # zmienia rozmiar co klatkę
+        radius = CELL_SIZE // 2 + (frame_count % 6)  
         center = (x * CELL_SIZE + CELL_SIZE // 2, y * CELL_SIZE + CELL_SIZE // 2)
         pygame.draw.circle(screen, FOOD_COLOR, center, radius)
+
 
     def show_end_screen(final_length):
         frame_count = 0
@@ -65,7 +66,7 @@ def play(dane):
         screen.fill(BG_COLOR)
         for x in range(0, WINDOW_WIDTH, CELL_SIZE):
             for y in range(0, WINDOW_HEIGHT, CELL_SIZE):
-                shade = 20 + (frame_count + x + y) % 30  # zmienia jasność co klatkę
+                shade = 20 + (frame_count + x + y) % 30  
                 pygame.draw.rect(screen, (shade, shade, shade), (x, y, CELL_SIZE, CELL_SIZE))
 
 
@@ -79,35 +80,27 @@ def play(dane):
                     sys.exit()
 
             x_head, y_head, length, food_x, food_y = frame
-
-            # --- RYSOWANIE ---
+      
             screen.fill(BG_COLOR)
-
 
             draw_background(frame_index)
             
             x_head, y_head, length, food_x, food_y = frame
 
-            # --- aktualizacja węża ---
-            snake_positions.insert(0, (x_head, y_head))      # dodajemy nową głowę
-            snake_positions = snake_positions[:length]       # przycinamy do długości
+            snake_positions.insert(0, (x_head, y_head))    
+            snake_positions = snake_positions[:length]      
 
-            # --- RYSOWANIE ---
             screen.fill(BG_COLOR)
             for pos in snake_positions[1:]:
-                draw_cell(pos[0], pos[1], SNAKE_COLOR)       # ciało
-            draw_cell(snake_positions[0][0], snake_positions[0][1], HEAD_COLOR)  # głowa
+                draw_cell(pos[0], pos[1], SNAKE_COLOR)       
+            draw_cell(snake_positions[0][0], snake_positions[0][1], HEAD_COLOR)  
 
             draw_food(food_x, food_y, frame_index)
             
-
-
             pygame.display.flip()
             clock.tick(FPS)
             frame_index += 1
 
-
-        # --- KONIEC GRY ---
         final_length = dane[-1][2]
         show_end_screen(final_length)
         
