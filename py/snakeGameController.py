@@ -14,6 +14,7 @@ import numpy as np
 import posix_ipc
 import snakeAgent
 
+MODEL = "models/modelv5.keras"
 
 class Direction(IntEnum):
     UP = 0
@@ -235,7 +236,7 @@ def main():
                         aiMode = 1
                         command = IpcCommands.START_GAME
                         print("\n[CMD] AI mode ON")
-                        model = snakeAgent.SnakeAgent("models/modelv3.keras")
+                        model = snakeAgent.SnakeAgent(MODEL)
                     elif key == "w" and aiMode == 0:
                         command = IpcCommands.MOVE_UP
                     elif key == "a" and aiMode == 0:
@@ -301,7 +302,7 @@ def main():
                             print(f"... (and {len(data.snake_body) - segments_to_show} more segments)")
                         print()
 
-                time.sleep(0.01)
+                time.sleep(0.001)
 
         finally:
             termios.tcsetattr(sys.stdin, termios.TCSADRAIN, old_settings)
