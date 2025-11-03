@@ -47,8 +47,10 @@ jobs:
       - name: Ruff check
         run: ruff check py
 
+      - name: Ruff fix
+        run: ruff fix py
+
       - name: Ruff format check
         run: ruff format --check py
 
-      - name: Ruff format fix
-        run: ruff format --fix py
+
