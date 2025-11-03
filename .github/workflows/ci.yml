@@ -49,3 +49,6 @@ jobs:
 
       - name: Ruff format check
         run: ruff format --check py
+
+      - name: Ruff format fix
+        run: ruff format --fix py
