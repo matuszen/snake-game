@@ -23,7 +23,6 @@ namespace SnakeGame
 
 namespace
 {
-
 constexpr uint16_t PAUSE_DELAY_MS           = 100;
 constexpr uint16_t INITIAL_SPEED_DELAY_MS   = 200;
 constexpr uint8_t  SCORE_PER_FOOD           = 10;
@@ -79,22 +78,25 @@ constexpr auto getFoodColor(FoodType type) -> uint32_t
 }  // namespace
 
 Game::Game(uint8_t boardWidth, uint8_t boardHeight)
-  : snake_(nullptr), board_(std::make_unique<Board>(boardWidth, boardHeight)),
-    input_(std::make_unique<Input>()), shmManager_(std::make_unique<SharedMemoryManager>()),
-    commandSocket_(std::make_unique<CommandSocket>()), state_(GameState::MENU), score_(0),
-    speed_(1), pendingCommand_(IpcCommands::NONE)
+  : snake_(nullptr), board_(std::make_unique<Board>(boardWidth, boardHeight)), state_(GameState::MENU), score_(0),
+    speed_(1), fruitPickedThisFrame_(false), pendingCommand_(IpcCommands::NONE)
 {
-  if (shmManager_->isInitialized())
-  {
-    shmManager_->startAsyncWriter();
-  }
 
-  const auto started = commandSocket_->start([this](IpcCommands cmd) { this->handleCommand(cmd); });
+    input_ = std::make_unique<Input>();
+    shmManager_ = std::make_unique<SharedMemoryManager>();
+    commandSocket_ = std::make_unique<CommandSocket>();
+    if (shmManager_->isInitialized())
+    {
+      shmManager_->startAsyncWriter();
+    }
 
-  if (not started)
-  {
-    commandSocket_.reset();
-  }
+    const auto started = commandSocket_->start([this](IpcCommands cmd) { this->handleCommand(cmd); });
+
+    if (not started)
+    {
+      commandSocket_.reset();
+    }
+
 }
 
 void Game::run()
@@ -150,7 +152,7 @@ void Game::initialize()
   snake_              = std::make_unique<Snake>(startPos);
   board_->placeFood();
   score_ = 0;
-  speed_ = 1;
+  speed_ = 10;
   state_ = GameState::PLAYING;
   input_->resetInput();
 }
@@ -212,6 +214,32 @@ void Game::update()
   }
 
   updateSharedMemory();
+}
+
+void Game::updateTraining(Direction direction)
+{
+  if (state_ != GameState::PLAYING)
+  {
+    return;
+  }
+
+  snake_->move(direction);
+  handleCollision();
+
+  if (board_->isFoodAt(snake_->getHead()))
+  {
+    fruitPickedThisFrame_ = true;
+    snake_->grow();
+    board_->placeFood(snake_->getBody());
+    score_ += SCORE_PER_FOOD;
+
+    if (score_ % SPEED_INCREASE_INTERVAL == 0 and speed_ < MAX_SPEED)
+    {
+      ++speed_;
+    }
+  }
+
+  //updateSharedMemory();
 }
 
 void Game::render() noexcept
@@ -407,102 +435,104 @@ void Game::showGameOver()
   std::this_thread::sleep_for(std::chrono::milliseconds(PAUSE_DELAY_MS));
 }
 
-auto Game::getDirectionVector() const -> std::array<int, 4>
+// initialize the game
+auto Game::initializeGame() -> StepResult
 {
-  const auto dir = snake_->getDirection();
-  switch (dir)
-  {
-    case Direction::UP:
-      return {1, 0, 0, 0};
-    case Direction::DOWN:
-      return {0, 0, 0, 1};
-    case Direction::LEFT:
-      return {0, 1, 0, 0};
-    case Direction::RIGHT:
-      return {0, 0, 1, 0};
-    default:
-      return {0, 0, 0, 0};
-  }
-}
-
-auto Game::getDangerIndicator() const -> std::array<int, 3>
-{
-  const auto  head       = snake_->getHead();
-  const auto  currentDir = snake_->getDirection();
-  const auto& snakeBody  = snake_->getBody();
-
-  const auto isObstacle = [&](Coordinate pos) -> bool
-  {
-    if (board_->isWall(pos))
-    {
-      return true;
-    }
-    if (std::ranges::any_of(snakeBody, [&](const auto& segment)
-                            { return segment.first == pos.first && segment.second == pos.second; }))
-    {
-      return true;
-    }
-    return false;
+  initialize();
+  return {
+    .distances      = getNeuralInputs(),
+    .isGameOver     = false,
+    .fruitPickedUp  = false,
   };
-
-  Coordinate forward;
-  Coordinate left;
-  Coordinate right;
-
-  switch (currentDir)
-  {
-    case Direction::UP:
-      forward = {head.first, static_cast<uint8_t>(head.second - 1)};
-      left    = {static_cast<uint8_t>(head.first - 1), head.second};
-      right   = {static_cast<uint8_t>(head.first + 1), head.second};
-      break;
-    case Direction::DOWN:
-      forward = {head.first, static_cast<uint8_t>(head.second + 1)};
-      left    = {static_cast<uint8_t>(head.first + 1), head.second};
-      right   = {static_cast<uint8_t>(head.first - 1), head.second};
-      break;
-    case Direction::LEFT:
-      forward = {static_cast<uint8_t>(head.first - 1), head.second};
-      left    = {head.first, static_cast<uint8_t>(head.second + 1)};
-      right   = {head.first, static_cast<uint8_t>(head.second - 1)};
-      break;
-    case Direction::RIGHT:
-      forward = {static_cast<uint8_t>(head.first + 1), head.second};
-      left    = {head.first, static_cast<uint8_t>(head.second - 1)};
-      right   = {head.first, static_cast<uint8_t>(head.second + 1)};
-      break;
-  }
-
-  auto danger = std::array<int, 3>{0, 0, 0};
-  danger[0]   = isObstacle(forward) ? 1 : 0;
-  danger[1]   = isObstacle(left) ? 1 : 0;
-  danger[2]   = isObstacle(right) ? 1 : 0;
-
-  return danger;
 }
 
-std::array<int, 11> Game::getBoardState() const
+// step the game by one frame
+auto Game::stepGame(Direction direction) -> StepResult
 {
-  const auto danger    = getDangerIndicator();
-  const auto direction = getDirectionVector();
-  const auto head      = snake_->getHead();
-  const auto food      = board_->getFoodPosition();
+  fruitPickedThisFrame_ = false;
+  updateTraining(direction);
 
-  auto state = std::array<int, 11>{};
-  state[0]   = danger[0];
-  state[1]   = danger[1];
-  state[2]   = danger[2];
-  state[3]   = direction[0];
-  state[4]   = direction[1];
-  state[5]   = direction[2];
-  state[6]   = direction[3];
-  state[7]   = (food.second < head.second) ? 1 : 0;
-  state[8]   = (food.second > head.second) ? 1 : 0;
-  state[9]   = (food.first > head.first) ? 1 : 0;
-  state[10]  = (food.first < head.first) ? 1 : 0;
-
-  return state;
+  return {
+    .distances      = getNeuralInputs(),
+    .isGameOver     = (state_ == GameState::GAME_OVER),
+    .fruitPickedUp  = fruitPickedThisFrame_
+  };
 }
+
+auto Game::getNeuralInputs() const -> std::array<float, 12>
+{
+    // 0 - 3: distances to walls (up, down, left, right)
+    // 4 - 7: distances to food (up, down, left, right)
+    // 8 - 11: distances to self-collision (up, down, left, right)
+    std::array<float, 12> result = {};
+
+    const auto head = snake_->getHead();
+    //const auto maxDist = static_cast<float>(std::max(board_->getWidth(), board_->getHeight()));
+    const auto& snakeBody = snake_->getBody();
+    const auto foodPos = board_->getFoodPosition();
+
+    auto findDistance = [&](Direction dir, auto collisionCheck) -> float {
+        Coordinate pos = head;
+        int distance = 0;
+
+        while (distance < std::max(board_->getWidth(), board_->getHeight()))
+        {
+            if (dir == Direction::UP) --pos.second;
+            else if (dir == Direction::DOWN) ++pos.second;
+            else if (dir == Direction::LEFT) --pos.first;
+            else if (dir == Direction::RIGHT) ++pos.first;
+
+            ++distance;
+
+            if (collisionCheck(pos))
+                return distance > 0 ? 1.0f / distance : 0.0f;
+        }
+
+        return 0.0f;
+    };
+
+    result[0] = findDistance(Direction::UP, [this](Coordinate pos) {
+        return board_->isWall(pos);
+    });
+    result[1] = findDistance(Direction::DOWN, [this](Coordinate pos) {
+        return board_->isWall(pos);
+    });
+    result[2] = findDistance(Direction::LEFT, [this](Coordinate pos) {
+        return board_->isWall(pos);
+    });
+    result[3] = findDistance(Direction::RIGHT, [this](Coordinate pos) {
+        return board_->isWall(pos);
+    });
+
+    result[4] = findDistance(Direction::UP, [foodPos](Coordinate pos) {
+        return pos == foodPos;
+    });
+    result[5] = findDistance(Direction::DOWN, [foodPos](Coordinate pos) {
+        return pos == foodPos;
+    });
+    result[6] = findDistance(Direction::LEFT, [foodPos](Coordinate pos) {
+        return pos == foodPos;
+    });
+    result[7] = findDistance(Direction::RIGHT, [foodPos](Coordinate pos) {
+        return pos == foodPos;
+    });
+
+    result[8] = findDistance(Direction::UP, [&snakeBody](Coordinate pos) {
+        return std::find(snakeBody.begin(), snakeBody.end(), pos) != snakeBody.end();
+    });
+    result[9] = findDistance(Direction::DOWN, [&snakeBody](Coordinate pos) {
+        return std::find(snakeBody.begin(), snakeBody.end(), pos) != snakeBody.end();
+    });
+    result[10] = findDistance(Direction::LEFT, [&snakeBody](Coordinate pos) {
+        return std::find(snakeBody.begin(), snakeBody.end(), pos) != snakeBody.end();
+    });
+    result[11] = findDistance(Direction::RIGHT, [&snakeBody](Coordinate pos) {
+        return std::find(snakeBody.begin(), snakeBody.end(), pos) != snakeBody.end();
+    });
+
+    return result;
+}
+
 
 constexpr auto Game::getDelayMs() const noexcept -> uint16_t
 {
@@ -525,7 +555,7 @@ void Game::updateSharedMemory() noexcept
                                        .foodType       = board_->getFoodType(),
                                        .snakeHead      = {0, 0},
                                        .snakeLength    = 0,
-                                       .neuralVector   = getBoardState(),
+                                       .neuralVector   = getNeuralInputs(),
                                        .snakeDirection = snake_->getDirection(),
                                        .snakeBody      = {}};
 

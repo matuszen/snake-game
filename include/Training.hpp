@@ -31,8 +31,6 @@ public:
   auto operator=(const Game& other) = delete;
   auto operator=(Game&& other)      = delete;
 
-  void run();
-
   struct StepResult
   {
     std::array<float, 12> distances;
@@ -41,11 +39,7 @@ public:
   };
 
   [[nodiscard]] auto initializeGame() -> StepResult;
-
   [[nodiscard]] auto stepGame(Direction direction) -> StepResult;
-
-  void update();
-  void updateTraining(Direction direction);
 
 private:
   std::unique_ptr<Snake>                    snake_;
@@ -64,18 +58,10 @@ private:
   std::optional<Direction> pendingDirection_;
 
   void initialize();
-  void processInput() noexcept;
-  void processSocketCommand() noexcept;
-  void render() noexcept;
-  void handleCollision() noexcept;
-  void showMenu();
-  void showGameOver();
-  void updateSharedMemory() noexcept;
 
-  void handleCommand(IpcCommands command) noexcept;
+  void handleCollision() noexcept;
 
   [[nodiscard]] auto getNeuralInputs() const -> std::array<float, 12>;
-
   [[nodiscard]] constexpr auto getDelayMs() const noexcept -> uint16_t;
 };
 
