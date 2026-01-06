@@ -199,7 +199,7 @@ class SnakeGameController:
 def main():
     controller = SnakeGameController()
     aiMode = 0
-    model = None
+    #model = None
     if not controller.connect():
         return 1
 
