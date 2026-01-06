@@ -57,7 +57,7 @@ def main():
                 futures = [worker.inject_network.remote(mig_global_best) for worker in workers]
                 save_network(
                     mig_global_best,
-                    f"py/training/models/autosaves/migration{gen}_{int(np.max([result['best_fitness'] for result in results]))}.json", # noqa
+                    f"py/training/models/autosaves/migration{gen}_{int(np.max([result['best_fitness'] for result in results]))}.json",  # noqa
                 )
                 save_network(best_network, f"py/training/models/best/best_network_gen{gen}_{best_fit}.json")
 
