@@ -2,7 +2,7 @@ import logging
 import os
 import sys
 
-sys.path.insert(0, '.')
+sys.path.insert(0, ".")
 import matplotlib.pyplot as plt
 import numpy as np
 import ray
@@ -11,9 +11,9 @@ from py.training.config import Config
 from py.training.utils import save_network
 from py.training.worker import Worker
 
-os.environ['RAY_DISABLE_MEMORY_MONITOR'] = '1'
-logging.getLogger('ray.core_worker').setLevel(logging.CRITICAL)
-logging.getLogger('ray._raylet').setLevel(logging.CRITICAL)
+os.environ["RAY_DISABLE_MEMORY_MONITOR"] = "1"
+logging.getLogger("ray.core_worker").setLevel(logging.CRITICAL)
+logging.getLogger("ray._raylet").setLevel(logging.CRITICAL)
 
 ray.init(log_to_driver=False, ignore_reinit_error=True)
 
@@ -23,11 +23,11 @@ def main():
     workers = [
         Worker.remote(config, pop_size=config.POPULATION_SIZE, hidden_size=config.HIDDEN_SIZE)
         for _ in range(config.WORKERS)
-        ]
+    ]
     best_network = None
     best_fit = -1
     best_history = []
-    worker_history = [ [] for _ in range(config.WORKERS) ]
+    worker_history = [[] for _ in range(config.WORKERS)]
     print("=" * 60)
     print("SNAKE AI TRAINING - CONFIGURATION".center(60))
     print("=" * 60)
@@ -49,13 +49,16 @@ def main():
         futures = [worker.run.remote() for worker in workers]
         results = ray.get(futures)
         global_best = 0
-        #migrations
+        # migrations
         if gen > 0 and gen % config.MIGRATION_INTERVAL == 0:
             try:
-                mig_best_net = [result['best_network'] for result in results]
-                mig_global_best = mig_best_net[np.argmax([result['best_fitness'] for result in results])]
+                mig_best_net = [result["best_network"] for result in results]
+                mig_global_best = mig_best_net[np.argmax([result["best_fitness"] for result in results])]
                 futures = [worker.inject_network.remote(mig_global_best) for worker in workers]
-                save_network(mig_global_best, f"py/training/models/autosaves/migration{gen}_{int(np.max([result['best_fitness'] for result in results]))}.json") # noqa
+                save_network(
+                    mig_global_best,
+                    f"py/training/models/autosaves/migration{gen}_{int(np.max([result['best_fitness'] for result in results]))}.json",
+                )  # noqa
                 save_network(best_network, f"py/training/models/best/best_network_gen{gen}_{best_fit}.json")
 
                 ray.get(futures, timeout=30)
@@ -64,9 +67,9 @@ def main():
 
         output_lines = []
         for worker, result in enumerate(results):
-            best_snake = result['best_network']
-            max_fit = result['best_fitness']
-            avg_fit = result['avg_fitness']
+            best_snake = result["best_network"]
+            max_fit = result["best_fitness"]
+            avg_fit = result["avg_fitness"]
             output_lines.append(f"Worker {worker}: Gen {gen} | Max: {max_fit:.2f} | Avg: {avg_fit:.2f}")
 
             if max_fit > best_fit:
@@ -79,10 +82,11 @@ def main():
             worker_history[worker].append(max_fit)
         best_history.append(global_best)
         output_lines.append(
-            f"\nGeneration {gen} complete. Generation Best: {global_best:.2f}. Global Best: {best_fit:.2f}")
+            f"\nGeneration {gen} complete. Generation Best: {global_best:.2f}. Global Best: {best_fit:.2f}"
+        )
 
         if gen > 0:
-            sys.stdout.write(f"\033[{len(output_lines)+1}A")
+            sys.stdout.write(f"\033[{len(output_lines) + 1}A")
             sys.stdout.flush()
 
         for line in output_lines:
@@ -94,24 +98,25 @@ def main():
     fig, axes = plt.subplots(num_workers + 1, 1, figsize=(12, 4 * (num_workers + 1)))
 
     for i in range(num_workers):
-        axes[i].plot(worker_history[i], marker='o', label=f'Worker {i}')
-        axes[i].set_ylabel('Best Fitness')
-        axes[i].set_title(f'Worker {i} Progress')
+        axes[i].plot(worker_history[i], marker="o", label=f"Worker {i}")
+        axes[i].set_ylabel("Best Fitness")
+        axes[i].set_title(f"Worker {i} Progress")
         axes[i].grid()
         axes[i].legend()
 
-    axes[-1].plot(best_history, marker='s', color='red', linewidth=2, label='Global Best')
-    axes[-1].set_xlabel('Generation')
-    axes[-1].set_ylabel('Best Fitness')
-    axes[-1].set_title('Global Best Fitness')
+    axes[-1].plot(best_history, marker="s", color="red", linewidth=2, label="Global Best")
+    axes[-1].set_xlabel("Generation")
+    axes[-1].set_ylabel("Best Fitness")
+    axes[-1].set_title("Global Best Fitness")
     axes[-1].grid()
     axes[-1].legend()
 
     plt.tight_layout()
-    plt.savefig('py/training/models/training_progress.png', dpi=150)
+    plt.savefig("py/training/models/training_progress.png", dpi=150)
     plt.show()
 
     ray.shutdown()
+
 
 if __name__ == "__main__":
     main()

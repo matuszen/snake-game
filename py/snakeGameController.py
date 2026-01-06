@@ -16,6 +16,7 @@ import snakeAgent
 
 MODEL_PATH = "py/training/models/modelv3_20x20.json"
 
+
 class Direction(IntEnum):
     UP = 0
     DOWN = 1
@@ -200,7 +201,7 @@ class SnakeGameController:
 def main():
     controller = SnakeGameController()
     aiMode = 0
-    #model = None
+    # model = None
     if not controller.connect():
         return 1
 

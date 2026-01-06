@@ -1,6 +1,6 @@
 import sys
 
-sys.path.insert(0, '.')
+sys.path.insert(0, ".")
 import copy
 
 import numpy as np
@@ -19,10 +19,10 @@ class Worker:
         self.hidden_size = hidden_size
         self.population = [
             Neural(config.INPUT_SIZE, hidden_size, config.OUTPUT_SIZE, config.WEIGHT_RANGE) for _ in range(pop_size)
-              ]
-        self.games = [ snakelib.Game(config.WIDTH, config.HEIGHT) for _ in range(pop_size) ]
+        ]
+        self.games = [snakelib.Game(config.WIDTH, config.HEIGHT) for _ in range(pop_size)]
 
-        self.gamestates = [ game.initialize_game() for game in self.games ]
+        self.gamestates = [game.initialize_game() for game in self.games]
 
     def run(self):
         fitness = self.eval()
@@ -45,7 +45,7 @@ class Worker:
                     snakelib.Direction.UP,
                     snakelib.Direction.DOWN,
                     snakelib.Direction.LEFT,
-                    snakelib.Direction.RIGHT
+                    snakelib.Direction.RIGHT,
                 ]
 
                 self.gamestates[i] = self.games[i].step_game(directions[direction])
@@ -62,16 +62,17 @@ class Worker:
 
         self.gen_number += 1
         fitness = [
-        fitness[i] * self.config.FOOD_REWARD + survived_steps[i] * self.config.STEP_REWARD
-        for i in range(self.pop_size)]
+            fitness[i] * self.config.FOOD_REWARD + survived_steps[i] * self.config.STEP_REWARD
+            for i in range(self.pop_size)
+        ]
         return fitness
 
     def evolve(self, fitness):
         sorted_indices = np.argsort(fitness)[::-1]
         sorted_population = [self.population[i] for i in sorted_indices]
         sorted_fitness = np.array([fitness[i] for i in sorted_indices])
-        #progress = self.gen_number / self.config.GENERATIONS
-        mutation_rate = self.config.MUTATION_RATE# * (1 - progress * 0.5)
+        # progress = self.gen_number / self.config.GENERATIONS
+        mutation_rate = self.config.MUTATION_RATE  # * (1 - progress * 0.5)
         new_pop = []
 
         num_retain = int(self.pop_size * self.config.POP_RETENTION)
@@ -92,11 +93,9 @@ class Worker:
             p1 = sorted_population[parents[0]]
             p2 = sorted_population[parents[1]]
 
-
             child = p1.merge(p2)
             child.mutate(mutation_rate, self.config.MUTATION_VARIANCE)
             new_pop.append(child)
-
 
         for _ in range(num_random):
             new_pop.append(
@@ -104,13 +103,13 @@ class Worker:
             )
 
         self.population = new_pop
-        self.games = [ snakelib.Game(self.config.WIDTH, self.config.HEIGHT) for _ in range(self.pop_size) ]
-        self.gamestates = [ game.initialize_game() for game in self.games ]
+        self.games = [snakelib.Game(self.config.WIDTH, self.config.HEIGHT) for _ in range(self.pop_size)]
+        self.gamestates = [game.initialize_game() for game in self.games]
         return {
-                'best_network': sorted_population[0],
-                'best_fitness': sorted_fitness[0],
-                'avg_fitness': np.mean(sorted_fitness)
-                }
+            "best_network": sorted_population[0],
+            "best_fitness": sorted_fitness[0],
+            "avg_fitness": np.mean(sorted_fitness),
+        }
 
     def inject_network(self, network):
         try:
