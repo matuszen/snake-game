@@ -14,6 +14,7 @@ import numpy as np
 import posix_ipc
 import snakeAgent
 
+MODEL_PATH = "py/training/models/modelv3_20x20.json"
 
 class Direction(IntEnum):
     UP = 0
@@ -199,7 +200,7 @@ class SnakeGameController:
 def main():
     controller = SnakeGameController()
     aiMode = 0
-    model = None
+    #model = None
     if not controller.connect():
         return 1
 
@@ -235,7 +236,7 @@ def main():
                         aiMode = 1
                         command = IpcCommands.START_GAME
                         print("\n[CMD] AI mode ON")
-                        network = snakeAgent.SnakeAgent("py/training/models/best_network_gen1200_1609.369.json")
+                        network = snakeAgent.SnakeAgent(MODEL_PATH)
                     elif key == "w" and aiMode == 0:
                         command = IpcCommands.MOVE_UP
                     elif key == "a" and aiMode == 0:
