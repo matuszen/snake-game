@@ -29,6 +29,7 @@ sudo apt-get install -y -qq \
     python3 \
     python3-pip \
     python3-venv \
+    pybind11-dev \
     python3-dev > /dev/null 2>&1
 
 echo "Setting up Python virtual environment..."
