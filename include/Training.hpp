@@ -1,9 +1,7 @@
 #pragma once
 
 #include "Board.hpp"
-#include "CommandSocket.hpp"
 #include "Input.hpp"
-#include "SharedMemoryManager.hpp"
 #include "Snake.hpp"
 #include "Types.hpp"
 
@@ -41,21 +39,17 @@ public:
   [[nodiscard]] auto initializeGame() -> StepResult;
   [[nodiscard]] auto stepGame(Direction direction) -> StepResult;
 
+  void update(Direction direction);
+
 private:
   std::unique_ptr<Snake>                    snake_;
   std::unique_ptr<Board>                    board_;
   std::unique_ptr<Input>                    input_;
-  std::unique_ptr<SharedMemoryManager>      shmManager_;
-  std::unique_ptr<CommandSocket>            commandSocket_;
 
   GameState state_;
   uint16_t  score_;
   uint8_t   speed_;
   bool      fruitPickedThisFrame_;
-
-  std::atomic<IpcCommands> pendingCommand_;
-  std::mutex               commandMutex_;
-  std::optional<Direction> pendingDirection_;
 
   void initialize();
 

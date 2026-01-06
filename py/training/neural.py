@@ -9,12 +9,12 @@ class Neural:
         self.inputs = [0.0 for _ in range(input_size)]
         self.hidden = [0.0 for _ in range(hidden_size)]
         self.hidden_weights = [
-            [random.uniform(-weight_range, weight_range) for _ in range(input_size + 1)] for _ in range(hidden_size)
-        ]  # noqa: S311
+            [random.uniform(-weight_range, weight_range) for _ in range(input_size + 1)] for _ in range(hidden_size) # noqa: S311
+        ]
         self.outputs = [0.0 for _ in range(output_size)]
         self.output_weights = [
-            [random.uniform(-weight_range, weight_range) for _ in range(hidden_size + 1)] for _ in range(output_size)
-        ]  # noqa: S311
+            [random.uniform(-weight_range, weight_range) for _ in range(hidden_size + 1)] for _ in range(output_size) # noqa: S311
+        ]
 
     def predict(self, input):
         if len(input) != len(self.inputs):

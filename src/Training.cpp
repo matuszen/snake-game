@@ -30,11 +30,11 @@ Game::Game(uint8_t boardWidth, uint8_t boardHeight)
 auto Game::initializeGame() -> StepResult
 {
   initialize();
-  return {
-    .distances      = getNeuralInputs(),
-    .isGameOver     = false,
-    .fruitPickedUp  = false,
-  };
+  StepResult result;
+  result.distances = getNeuralInputs();
+  result.isGameOver = false;
+  result.fruitPickedUp = false;
+  return result;
 }
 
 // step the game by one frame
@@ -43,11 +43,11 @@ auto Game::stepGame(Direction direction) -> StepResult
   fruitPickedThisFrame_ = false;
   update(direction);
 
-  return {
-    .distances      = getNeuralInputs(),
-    .isGameOver     = (state_ == GameState::GAME_OVER),
-    .fruitPickedUp  = fruitPickedThisFrame_
-  };
+  StepResult result;
+  result.distances = getNeuralInputs();
+  result.isGameOver = (state_ == GameState::GAME_OVER);
+  result.fruitPickedUp = fruitPickedThisFrame_;
+  return result;
 }
 
 
@@ -80,7 +80,7 @@ void Game::update(Direction direction)
     board_->placeFood(snake_->getBody());
     score_ += SCORE_PER_FOOD;
 
-    if (score_ % SPEED_INCREASE_INTERVAL == 0 and speed_ < MAX_SPEED)
+    if (score_ % SPEED_INCREASE_INTERVAL == 0 && speed_ < MAX_SPEED)
     {
       ++speed_;
     }
