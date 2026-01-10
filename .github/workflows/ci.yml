@@ -6,6 +6,19 @@ on:
     branches: [ master, develop/* ]
 
 jobs:
+  format-cpp:
+    name: Clang-Format C++ Check
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Install clang-format
+        run: sudo apt-get update && sudo apt-get install -y clang-format
+
+      - name: Check C++ formatting
+        run: clang-format --style=file --dry-run -Werror $(find src -name '*.cpp' -o -name '*.hpp')
+
   build-cpp:
     name: Build C++
     runs-on: ubuntu-latest

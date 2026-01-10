@@ -1,3 +1,4 @@
+import os
 import subprocess
 import sys
 import time
@@ -6,6 +7,10 @@ from pathlib import Path
 import numpy as np
 import pygame
 from SnakeGameController import Controller, Direction, GameState, IpcCommands
+
+if not os.environ.get("DISPLAY") and not os.environ.get("WAYLAND_DISPLAY"):
+    os.environ["SDL_VIDEODRIVER"] = "dummy"
+    os.environ["SDL_AUDIODRIVER"] = "dummy"
 
 project_root = Path(__file__).parent.parent.parent
 cpp_game_path = project_root / "build" / "src" / "app" / "snake_game"
@@ -157,5 +162,4 @@ def main():
 
 if __name__ == "__main__":
     time.sleep(0.5)
-    subprocess.call("reset", shell=True)  # noqa: S602, S607
     sys.exit(main())

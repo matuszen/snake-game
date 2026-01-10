@@ -2,6 +2,7 @@
 
 #include "Definitions.hpp"
 
+#include <asm-generic/socket.h>
 #include <bits/types/struct_timeval.h>
 #include <sys/select.h>
 #include <sys/socket.h>
@@ -183,15 +184,35 @@ void CommandSocket::serverThreadFunction()
       break;
     }
 
+    constexpr auto recvTimeout = timeval{
+      .tv_sec  = 1,
+      .tv_usec = 0,
+    };
+
+    if (setsockopt(clientFd, SOL_SOCKET, SO_RCVTIMEO, &recvTimeout, sizeof(recvTimeout)) < 0)
+    {
+      std::cerr << "Błąd ustawiania timeoutu na sockecie\n";
+    }
+
     handleClient(clientFd);
     close(clientFd);
   }
 }
 
-void CommandSocket::handleClient(int32_t clientFd)
+void CommandSocket::handleClient(const int32_t clientFd)
 {
   uint8_t    cmdByte   = 0;
   const auto bytesRead = recv(clientFd, &cmdByte, sizeof(cmdByte), 0);
+
+  if (bytesRead < 0)
+  {
+    if (errno == EAGAIN or errno == EWOULDBLOCK)
+    {
+      return;
+    }
+    std::cerr << "Error during recv" << "\n";
+    return;
+  }
 
   if (bytesRead != static_cast<ssize_t>(sizeof(cmdByte)))
   {

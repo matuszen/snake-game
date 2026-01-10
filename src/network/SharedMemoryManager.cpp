@@ -22,7 +22,7 @@ namespace SnakeGame
 
 SharedMemoryManager::SharedMemoryManager(std::string shmName)
   : hasNewData_(false), shouldStopWriter_(false), shmName_(std::move(shmName)), shmFd_(-1),
-    shmSize_(sizeof(SharedMemoryData)), initialized_(initializeSharedMemory()), shmPtr_(nullptr)
+    shmSize_(sizeof(SharedMemoryData)), shmPtr_(nullptr), initialized_(initializeSharedMemory())
 {
 }
 

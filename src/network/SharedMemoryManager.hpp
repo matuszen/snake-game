@@ -39,8 +39,8 @@ private:
 
   int32_t shmFd_;
   size_t  shmSize_;
-  bool    initialized_;
   void*   shmPtr_;
+  bool    initialized_;
 
   auto initializeSharedMemory() -> bool;
   void cleanupSharedMemory() noexcept;

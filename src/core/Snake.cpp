@@ -71,8 +71,8 @@ auto Snake::getDirection() const noexcept -> Direction
   return currentDirection_;
 }
 
-constexpr auto Snake::getNextPosition(const Coordinate headPosition, const Direction headingDirection) noexcept
-  -> Coordinate
+constexpr auto Snake::getNextPosition(const Coordinate headPosition,
+                                      const Direction  headingDirection) noexcept -> Coordinate
 {
   switch (headingDirection)
   {
