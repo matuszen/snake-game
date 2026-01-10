@@ -4,6 +4,7 @@
 
 #include <cstdint>
 #include <deque>
+#include <random>
 
 namespace SnakeGame
 {
@@ -21,8 +22,8 @@ public:
 
   void placeFood();
   void placeFood(const std::deque<Coordinate>& snakeBody);
-  auto isFoodAt(Coordinate pos) const noexcept -> bool;
-  auto isWall(Coordinate pos) const noexcept -> bool;
+  auto isFoodAt(Coordinate position) const noexcept -> bool;
+  auto isWall(Coordinate position) const noexcept -> bool;
 
   auto getFoodPosition() const noexcept -> Coordinate;
   auto getFoodType() const noexcept -> FoodType;
@@ -37,6 +38,7 @@ private:
 
   auto        generateRandomPosition() const -> Coordinate;
   static auto generateRandomFoodType() -> FoodType;
+  static auto getGenerator() -> std::mt19937&;
 };
 
 }  // namespace SnakeGame

@@ -1,4 +1,5 @@
 #include "SharedMemoryManager.hpp"
+
 #include "Definitions.hpp"
 
 #include <fcntl.h>
@@ -9,7 +10,6 @@
 #include <atomic>
 #include <cerrno>
 #include <chrono>
-#include <cstdint>
 #include <cstring>
 #include <memory>
 #include <mutex>
@@ -17,19 +17,12 @@
 #include <thread>
 #include <utility>
 
-namespace
-{
-
-constexpr int64_t K_SHARED_MEMORY_WRITE_DELAY = 200;
-
-}  // namespace
-
 namespace SnakeGame
 {
 
 SharedMemoryManager::SharedMemoryManager(std::string shmName)
-  : shmName_(std::move(shmName)), shmFd_(-1), shmPtr_(nullptr), shmSize_(sizeof(SharedMemoryData)),
-    initialized_(initializeSharedMemory()), hasNewData_(false), shouldStopWriter_(false)
+  : hasNewData_(false), shouldStopWriter_(false), shmName_(std::move(shmName)), shmFd_(-1),
+    shmSize_(sizeof(SharedMemoryData)), initialized_(initializeSharedMemory()), shmPtr_(nullptr)
 {
 }
 
@@ -75,7 +68,7 @@ void SharedMemoryManager::updateGameState(const GameSharedData& data) noexcept
   }
 
   {
-    std::lock_guard<std::mutex> lock(bufferMutex_);
+    const std::lock_guard<std::mutex> lock(bufferMutex_);
     writeBuffer_ = data;
   }
 
@@ -141,16 +134,16 @@ void SharedMemoryManager::writerThreadFunction()
   {
     if (hasNewData_.load(std::memory_order_acquire))
     {
-      auto dataToWrite = GameSharedData{};
+      GameSharedData dataToWrite{};
       {
-        std::lock_guard<std::mutex> lock(bufferMutex_);
+        const std::lock_guard<std::mutex> lock(bufferMutex_);
         dataToWrite = writeBuffer_;
       }
       hasNewData_.store(false, std::memory_order_release);
       writeToSharedMemory(dataToWrite);
     }
 
-    std::this_thread::sleep_for(std::chrono::microseconds(K_SHARED_MEMORY_WRITE_DELAY));
+    std::this_thread::sleep_for(std::chrono::microseconds(SHARED_MEMORY_WRITE_DELAY));
   }
 }
 
@@ -181,7 +174,7 @@ void SharedMemoryManager::writeToSharedMemory(const GameSharedData& data) noexce
   shmData->gameData.neuralVector   = data.neuralVector;
   shmData->gameData.snakeDirection = data.snakeDirection;
 
-  const auto copyLength = std::min(data.snakeLength, MAX_SNAKE_LENGTH);
+  const auto copyLength = std::min(data.snakeLength, SNAKE_MAX_LENGTH);
   std::copy_n(data.snakeBody.begin(), copyLength, shmData->gameData.snakeBody.begin());
 
   shmData->version.fetch_add(1, std::memory_order_release);

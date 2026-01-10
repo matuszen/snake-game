@@ -8,12 +8,10 @@
 namespace SnakeGame
 {
 
-constexpr uint8_t INITIAL_LENGTH = 3;
-
 class Snake
 {
 public:
-  Snake(Coordinate initialPosition, uint8_t initialLength = INITIAL_LENGTH);
+  Snake(Coordinate initialPosition, uint8_t initialLength = INITIAL_SNAKE_LENGTH);
   ~Snake() = default;
 
   Snake(const Snake& other)                   = delete;

@@ -15,9 +15,6 @@
 namespace SnakeGame
 {
 
-constexpr uint8_t DEFAULT_BOARD_WIDTH  = 40;
-constexpr uint8_t DEFAULT_BOARD_HEIGHT = 20;
-
 class Game
 {
 public:
@@ -30,32 +27,32 @@ public:
   auto operator=(Game&& other)      = delete;
 
   void run();
+  auto step(Direction direction) -> StepResult;
+  void reset();
+  auto getScore() const -> uint16_t;
+  auto getNeuralInputs() const -> NeuralInputs;
 
 private:
   std::unique_ptr<Snake>               snake_;
   std::unique_ptr<Board>               board_;
   std::unique_ptr<SharedMemoryManager> shmManager_;
   std::unique_ptr<CommandSocket>       commandSocket_;
+  std::atomic<IpcCommands>             pendingCommand_;
+  std::mutex                           commandMutex_;
+  std::optional<Direction>             pendingDirection_;
 
   GameState state_;
   uint16_t  score_;
   uint8_t   speed_;
-
-  std::atomic<IpcCommands> pendingCommand_;
-  std::mutex               commandMutex_;
-  std::optional<Direction> pendingDirection_;
+  bool      fruitPickedThisFrame_;
 
   void initialize();
+  void update(Direction direction);
   void processSocketCommand() noexcept;
   void handleCollision() noexcept;
-  void updateSharedMemory() noexcept;
-
   void handleCommand(IpcCommands command) noexcept;
-  void gameStep() noexcept;
-
-  auto getNeuralInputs() const -> NeuralInputs;
-
-  constexpr auto getDelayMs() const noexcept -> uint16_t;
+  void updateSharedMemory() noexcept;
+  auto getDelayMs() const noexcept -> uint16_t;
 };
 
 }  // namespace SnakeGame

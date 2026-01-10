@@ -1,4 +1,5 @@
 #include "Game.hpp"
+
 #include "Board.hpp"
 #include "CommandSocket.hpp"
 #include "Definitions.hpp"
@@ -14,20 +15,12 @@
 #include <memory>
 #include <thread>
 
-namespace
-{
-
-constexpr uint16_t INITIAL_SPEED_DELAY_MS   = 200;
-constexpr uint8_t  SPEED_DECREASE_PER_LEVEL = 15;
-
-}  // namespace
-
 namespace SnakeGame
 {
 
-Game::Game(uint8_t boardWidth, uint8_t boardHeight)
-  : snake_(nullptr), board_(std::make_unique<Board>(boardWidth, boardHeight)), state_(GameState::MENU), score_(0),
-    speed_(1), pendingCommand_(IpcCommands::NONE)
+Game::Game(const uint8_t boardWidth, const uint8_t boardHeight)
+  : snake_(nullptr), board_(std::make_unique<Board>(boardWidth, boardHeight)), pendingCommand_(IpcCommands::NONE),
+    state_(GameState::MENU), score_(0), speed_(1), fruitPickedThisFrame_(false)
 {
   shmManager_    = std::make_unique<SharedMemoryManager>();
   commandSocket_ = std::make_unique<CommandSocket>();
@@ -36,7 +29,7 @@ Game::Game(uint8_t boardWidth, uint8_t boardHeight)
     shmManager_->startAsyncWriter();
   }
 
-  const auto started = commandSocket_->start([this](IpcCommands cmd) { this->handleCommand(cmd); });
+  const auto started = commandSocket_->start([this](IpcCommands cmd) -> void { this->handleCommand(cmd); });
 
   if (not started)
   {
@@ -53,7 +46,13 @@ void Game::run()
 
     if (state_ == GameState::PLAYING)
     {
-      gameStep();
+      auto currentDirection = snake_ ? snake_->getDirection() : Direction::UP;
+      if (pendingDirection_)
+      {
+        currentDirection = *pendingDirection_;
+        pendingDirection_.reset();
+      }
+      update(currentDirection);
       std::this_thread::sleep_for(std::chrono::milliseconds(getDelayMs()));
     }
     else
@@ -74,25 +73,39 @@ void Game::initialize()
   speed_ = 1;
   state_ = GameState::PLAYING;
   pendingDirection_.reset();
+  fruitPickedThisFrame_ = false;
 }
 
-void Game::gameStep() noexcept
+auto Game::step(const Direction direction) -> StepResult
 {
-  if (not snake_)
+  fruitPickedThisFrame_ = false;
+  update(direction);
+
+  return {
+    .distances     = getNeuralInputs(),
+    .isGameOver    = (state_ == GameState::GAME_OVER),
+    .fruitPickedUp = fruitPickedThisFrame_,
+  };
+}
+
+void Game::reset()
+{
+  initialize();
+}
+
+auto Game::getScore() const -> uint16_t
+{
+  return score_;
+}
+
+void Game::update(const Direction direction)
+{
+  if (state_ != GameState::PLAYING or not snake_)
   {
     return;
   }
 
-  if (pendingDirection_)
-  {
-    snake_->move(*pendingDirection_);
-    pendingDirection_.reset();
-  }
-  else
-  {
-    snake_->move(snake_->getDirection());
-  }
-
+  snake_->move(direction);
   handleCollision();
 
   if (state_ != GameState::PLAYING)
@@ -100,23 +113,17 @@ void Game::gameStep() noexcept
     return;
   }
 
-  // Check Food
   if (snake_->getHead() == board_->getFoodPosition())
   {
+    fruitPickedThisFrame_ = true;
     snake_->grow();
     score_ += 10;
-
-    // Speed logic can go here
-
     board_->placeFood();
   }
 }
 
 void Game::processSocketCommand() noexcept
 {
-  // Need to loop to process all pending commands or just one?
-  // Original handled one per loop. Let's stick to that but maybe better to handle all?
-  // But pendingCommand is atomic single value.
   const auto command = pendingCommand_.exchange(IpcCommands::NONE, std::memory_order_acquire);
 
   if (command == IpcCommands::NONE)
@@ -179,7 +186,7 @@ void Game::processSocketCommand() noexcept
 
 void Game::handleCollision() noexcept
 {
-  if (!snake_)
+  if (not snake_)
   {
     return;
   }
@@ -204,10 +211,10 @@ void Game::handleCommand(IpcCommands command) noexcept
   pendingCommand_.store(command, std::memory_order_release);
 }
 
-constexpr auto Game::getDelayMs() const noexcept -> uint16_t
+auto Game::getDelayMs() const noexcept -> uint16_t
 {
-  int delay = INITIAL_SPEED_DELAY_MS - ((speed_ - 1) * SPEED_DECREASE_PER_LEVEL);
-  delay     = std::max(delay, 50);
+  auto delay = INITIAL_SPEED_DELAY_MS - ((speed_ - 1) * SPEED_DECREASE_PER_LEVEL);
+  delay      = std::max(delay, 10);
   return static_cast<uint16_t>(delay);
 }
 
@@ -240,7 +247,7 @@ void Game::updateSharedMemory() noexcept
     uint16_t i = 0;
     for (const auto& segment : body)
     {
-      if (i >= MAX_SNAKE_LENGTH)
+      if (i >= SNAKE_MAX_LENGTH)
       {
         break;
       }
@@ -262,44 +269,42 @@ void Game::updateSharedMemory() noexcept
 
 auto Game::getNeuralInputs() const -> NeuralInputs
 {
-  if (!snake_)
+  if (not snake_)
   {
     return {};
   }
-
-  NeuralInputs result = {};
 
   const auto  head      = snake_->getHead();
   const auto& snakeBody = snake_->getBody();
   const auto  foodPos   = board_->getFoodPosition();
 
-  auto findDistance = [&](Direction dir, auto collisionCheck) -> float
+  const auto findDistance = [&](const Direction currentDirection, const auto collisionCheck) -> float
   {
-    Coordinate pos      = head;
-    int        distance = 0;
+    auto    currentPosition = head;
+    int32_t distance        = 0;
 
     while (distance < std::max(board_->getWidth(), board_->getHeight()))
     {
-      if (dir == Direction::UP)
+      if (currentDirection == Direction::UP)
       {
-        --pos.second;
+        --currentPosition.second;
       }
-      else if (dir == Direction::DOWN)
+      else if (currentDirection == Direction::DOWN)
       {
-        ++pos.second;
+        ++currentPosition.second;
       }
-      else if (dir == Direction::LEFT)
+      else if (currentDirection == Direction::LEFT)
       {
-        --pos.first;
+        --currentPosition.first;
       }
-      else if (dir == Direction::RIGHT)
+      else if (currentDirection == Direction::RIGHT)
       {
-        ++pos.first;
+        ++currentPosition.first;
       }
 
       ++distance;
 
-      if (collisionCheck(pos))
+      if (collisionCheck(currentPosition))
       {
         return distance > 0 ? 1.0F / (float)distance : 0.0F;
       }
@@ -308,26 +313,24 @@ auto Game::getNeuralInputs() const -> NeuralInputs
     return 0.0F;
   };
 
-  result[0] = findDistance(Direction::UP, [this](Coordinate pos) -> bool { return board_->isWall(pos); });
-  result[1] = findDistance(Direction::DOWN, [this](Coordinate pos) -> bool { return board_->isWall(pos); });
-  result[2] = findDistance(Direction::LEFT, [this](Coordinate pos) -> bool { return board_->isWall(pos); });
-  result[3] = findDistance(Direction::RIGHT, [this](Coordinate pos) -> bool { return board_->isWall(pos); });
-
-  result[4] = findDistance(Direction::UP, [foodPos](Coordinate pos) -> bool { return pos == foodPos; });
-  result[5] = findDistance(Direction::DOWN, [foodPos](Coordinate pos) -> bool { return pos == foodPos; });
-  result[6] = findDistance(Direction::LEFT, [foodPos](Coordinate pos) -> bool { return pos == foodPos; });
-  result[7] = findDistance(Direction::RIGHT, [foodPos](Coordinate pos) -> bool { return pos == foodPos; });
-
-  result[8]  = findDistance(Direction::UP, [&snakeBody](Coordinate pos) -> bool
-                            { return std::ranges::find(snakeBody, pos) != snakeBody.end(); });
-  result[9]  = findDistance(Direction::DOWN, [&snakeBody](Coordinate pos) -> bool
-                            { return std::ranges::find(snakeBody, pos) != snakeBody.end(); });
-  result[10] = findDistance(Direction::LEFT, [&snakeBody](Coordinate pos) -> bool
-                            { return std::ranges::find(snakeBody, pos) != snakeBody.end(); });
-  result[11] = findDistance(Direction::RIGHT, [&snakeBody](Coordinate pos) -> bool
-                            { return std::ranges::find(snakeBody, pos) != snakeBody.end(); });
-
-  return result;
+  return {
+    findDistance(Direction::UP, [this](Coordinate pos) -> bool { return board_->isWall(pos); }),
+    findDistance(Direction::DOWN, [this](Coordinate pos) -> bool { return board_->isWall(pos); }),
+    findDistance(Direction::LEFT, [this](Coordinate pos) -> bool { return board_->isWall(pos); }),
+    findDistance(Direction::RIGHT, [this](Coordinate pos) -> bool { return board_->isWall(pos); }),
+    findDistance(Direction::UP, [foodPos](Coordinate pos) -> bool { return pos == foodPos; }),
+    findDistance(Direction::DOWN, [foodPos](Coordinate pos) -> bool { return pos == foodPos; }),
+    findDistance(Direction::LEFT, [foodPos](Coordinate pos) -> bool { return pos == foodPos; }),
+    findDistance(Direction::RIGHT, [foodPos](Coordinate pos) -> bool { return pos == foodPos; }),
+    findDistance(Direction::UP,
+                 [&snakeBody](Coordinate pos) -> bool { return std::ranges::find(snakeBody, pos) != snakeBody.end(); }),
+    findDistance(Direction::DOWN,
+                 [&snakeBody](Coordinate pos) -> bool { return std::ranges::find(snakeBody, pos) != snakeBody.end(); }),
+    findDistance(Direction::LEFT,
+                 [&snakeBody](Coordinate pos) -> bool { return std::ranges::find(snakeBody, pos) != snakeBody.end(); }),
+    findDistance(Direction::RIGHT,
+                 [&snakeBody](Coordinate pos) -> bool { return std::ranges::find(snakeBody, pos) != snakeBody.end(); }),
+  };
 }
 
 }  // namespace SnakeGame

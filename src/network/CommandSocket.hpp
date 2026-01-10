@@ -3,18 +3,14 @@
 #include "Definitions.hpp"
 
 #include <atomic>
-#include <functional>
+#include <cstdint>
 #include <memory>
+#include <span>
 #include <string>
-#include <string_view>
 #include <thread>
 
 namespace SnakeGame
 {
-
-using CommandCallback = std::function<void(IpcCommands)>;
-
-inline constexpr std::string_view DEFAULT_SOCKET_PATH = "/tmp/snake_game.sock";
 
 class CommandSocket
 {
@@ -29,23 +25,23 @@ public:
 
   auto start(CommandCallback callback) -> bool;
   void stop();
-
   auto isRunning() const noexcept -> bool;
 
 private:
-  std::string     socketPath_;
-  int             serverFd_;
-  bool            initialized_;
-  CommandCallback callback_;
-
+  CommandCallback              callback_;
   std::unique_ptr<std::thread> serverThread_;
   std::atomic<bool>            shouldStop_;
+  std::string                  socketPath_;
+
+  int32_t serverFd_;
+  bool    initialized_;
 
   auto initializeSocket() -> bool;
-
   void cleanupSocket() noexcept;
   void serverThreadFunction();
-  void handleClient(int clientFd);
+  void handleClient(int32_t clientFd);
+
+  static void copySocketPath(std::span<char> destinationBuffer, const std::string& source) noexcept;
 };
 
 }  // namespace SnakeGame

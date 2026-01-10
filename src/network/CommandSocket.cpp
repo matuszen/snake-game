@@ -1,4 +1,5 @@
 #include "CommandSocket.hpp"
+
 #include "Definitions.hpp"
 
 #include <bits/types/struct_timeval.h>
@@ -20,80 +21,11 @@
 #include <thread>
 #include <utility>
 
-namespace
-{
-
-void copySocketPath(std::span<char> dest, std::string source) noexcept
-{
-  const auto copySize = std::min(dest.size() - 1, source.size());
-  std::copy_n(source.data(), copySize, dest.data());
-  dest[copySize] = '\0';
-}
-
-class FileDescriptor
-{
-public:
-  explicit FileDescriptor(int fd = -1) noexcept : fd_(fd)
-  {
-  }
-
-  ~FileDescriptor() noexcept
-  {
-    if (fd_ >= 0)
-    {
-      close(fd_);
-    }
-  }
-
-  FileDescriptor(const FileDescriptor&)                    = delete;
-  auto operator=(const FileDescriptor&) -> FileDescriptor& = delete;
-
-  FileDescriptor(FileDescriptor&& other) noexcept : fd_(other.fd_)
-  {
-    other.fd_ = -1;
-  }
-
-  auto operator=(FileDescriptor&& other) noexcept -> FileDescriptor&
-  {
-    if (this != &other)
-    {
-      if (fd_ >= 0)
-      {
-        close(fd_);
-      }
-      fd_       = other.fd_;
-      other.fd_ = -1;
-    }
-    return *this;
-  }
-
-  auto get() const noexcept -> int
-  {
-    return fd_;
-  }
-  auto isValid() const noexcept -> bool
-  {
-    return fd_ >= 0;
-  }
-
-  auto release() noexcept -> int
-  {
-    const auto fd = fd_;
-    fd_           = -1;
-    return fd;
-  }
-
-private:
-  int fd_;
-};
-
-}  // namespace
-
 namespace SnakeGame
 {
 
 CommandSocket::CommandSocket(std::string socketPath)
-  : socketPath_(std::move(socketPath)), serverFd_(-1), initialized_(false), shouldStop_(false)
+  : shouldStop_(false), socketPath_(std::move(socketPath)), serverFd_(-1), initialized_(false)
 {
 }
 
@@ -133,14 +65,15 @@ void CommandSocket::stop()
 
   shouldStop_ = true;
 
-  FileDescriptor clientFd{socket(AF_UNIX, SOCK_STREAM, 0)};
-  if (clientFd.isValid())
+  const auto clientFd = socket(AF_UNIX, SOCK_STREAM, 0);
+  if (clientFd >= 0)
   {
     auto addr       = sockaddr_un{};
     addr.sun_family = AF_UNIX;
     copySocketPath(std::span{addr.sun_path}, socketPath_);
 
-    [[maybe_unused]] const auto _ = connect(clientFd.get(), reinterpret_cast<const sockaddr*>(&addr), sizeof(addr));
+    [[maybe_unused]] const auto _ = connect(clientFd, reinterpret_cast<const sockaddr*>(&addr), sizeof(addr));
+    close(clientFd);
   }
 
   if (serverThread_->joinable())
@@ -180,7 +113,7 @@ auto CommandSocket::initializeSocket() -> bool
     return false;
   }
 
-  constexpr int backlog = 5;
+  constexpr int32_t backlog = 5;
   if (listen(serverFd_, backlog) < 0)
   {
     std::cerr << "Błąd listen na sockecie\n";
@@ -213,9 +146,10 @@ void CommandSocket::serverThreadFunction()
     FD_ZERO(&readfds);
     FD_SET(serverFd_, &readfds);
 
-    auto timeout    = timeval{};
-    timeout.tv_sec  = 0;
-    timeout.tv_usec = std::chrono::duration_cast<std::chrono::microseconds>(timeoutMs).count();
+    auto timeout = timeval{
+      .tv_sec  = 0,
+      .tv_usec = std::chrono::duration_cast<std::chrono::microseconds>(timeoutMs).count(),
+    };
 
     const auto result = select(serverFd_ + 1, &readfds, nullptr, nullptr, &timeout);
 
@@ -233,8 +167,8 @@ void CommandSocket::serverThreadFunction()
       continue;
     }
 
-    FileDescriptor clientFd{accept(serverFd_, nullptr, nullptr)};
-    if (not clientFd.isValid())
+    const auto clientFd = accept(serverFd_, nullptr, nullptr);
+    if (clientFd < 0)
     {
       if (errno != EINTR and errno != EAGAIN)
       {
@@ -245,16 +179,18 @@ void CommandSocket::serverThreadFunction()
 
     if (shouldStop_.load(std::memory_order_acquire))
     {
+      close(clientFd);
       break;
     }
 
-    handleClient(clientFd.get());
+    handleClient(clientFd);
+    close(clientFd);
   }
 }
 
-void CommandSocket::handleClient(int clientFd)
+void CommandSocket::handleClient(int32_t clientFd)
 {
-  auto       cmdByte   = uint8_t{0};
+  uint8_t    cmdByte   = 0;
   const auto bytesRead = recv(clientFd, &cmdByte, sizeof(cmdByte), 0);
 
   if (bytesRead != static_cast<ssize_t>(sizeof(cmdByte)))
@@ -275,8 +211,15 @@ void CommandSocket::handleClient(int clientFd)
     callback_(command);
   }
 
-  constexpr auto ack = uint8_t{1};
+  constexpr uint8_t ack = 1;
   send(clientFd, &ack, sizeof(ack), 0);
+}
+
+void CommandSocket::copySocketPath(const std::span<char> destinationBuffer, const std::string& source) noexcept
+{
+  const auto copySize = std::min(destinationBuffer.size() - 1, source.size());
+  std::copy_n(source.data(), copySize, destinationBuffer.data());
+  destinationBuffer[copySize] = '\0';
 }
 
 }  // namespace SnakeGame
