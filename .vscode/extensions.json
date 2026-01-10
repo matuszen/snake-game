@@ -1,11 +1,10 @@
 {
     "recommendations": [
         "editorconfig.editorconfig",
+        "xaver.clang-format",
         "llvm-vs-code-extensions.vscode-clangd",
-        "twxs.cmake",
         "ms-vscode.cmake-tools",
         "charliermarsh.ruff",
-        "xaver.clang-format",
         "ms-vscode.cpptools"
     ]
 }

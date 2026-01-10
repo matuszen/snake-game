@@ -1,3 +1,4 @@
+import os
 import subprocess
 import sys
 import time
@@ -7,8 +8,12 @@ import numpy as np
 import pygame
 from SnakeGameController import Controller, Direction, GameState, IpcCommands
 
-project_root = Path(__file__).parent.parent
-cpp_game_path = project_root / "build" / "snake"
+if not os.environ.get("DISPLAY") and not os.environ.get("WAYLAND_DISPLAY"):
+    os.environ["SDL_VIDEODRIVER"] = "dummy"
+    os.environ["SDL_AUDIODRIVER"] = "dummy"
+
+project_root = Path(__file__).parent.parent.parent
+cpp_game_path = project_root / "build" / "src" / "app" / "snake_game"
 
 print(f"Looking for executable at: {cpp_game_path}")
 print(f"Exists: {cpp_game_path.exists()}")
@@ -27,7 +32,8 @@ def main():
     aiMode = False
     network = None
 
-    pygame.init()
+    pygame.display.init()
+    pygame.font.init()
     CELL_SIZE = 20
     MARGIN = 100
     WIN_WIDTH = 800
@@ -98,7 +104,12 @@ def main():
         if data:
             screen.fill((0, 0, 0))
 
-            if data.game_state == GameState.PLAYING:
+            if data.game_state == GameState.MENU:
+                screen.blit(title_surf, (WIN_WIDTH // 2 - title_surf.get_width() // 2, 150))
+                screen.blit(controls_surf1, (WIN_WIDTH // 2 - controls_surf1.get_width() // 2, 200))
+                screen.blit(controls_surf2, (WIN_WIDTH // 2 - controls_surf2.get_width() // 2, 230))
+
+            elif data.game_state == GameState.PLAYING:
                 pygame.draw.rect(
                     screen,
                     (255, 255, 255),
@@ -151,5 +162,4 @@ def main():
 
 if __name__ == "__main__":
     time.sleep(0.5)
-    subprocess.call("reset", shell=True)  # noqa: S602, S607
     sys.exit(main())

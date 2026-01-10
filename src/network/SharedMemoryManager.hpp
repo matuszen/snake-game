@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Types.hpp"
+#include "Definitions.hpp"
 
 #include <atomic>
 #include <cstddef>
@@ -8,20 +8,10 @@
 #include <memory>
 #include <mutex>
 #include <string>
-#include <string_view>
 #include <thread>
 
 namespace SnakeGame
 {
-
-inline constexpr std::string_view DEFAULT_SHM_NAME = "/snake_game_shm";
-
-struct SharedMemoryData
-{
-  std::atomic<bool>     isWriting{false};
-  std::atomic<uint32_t> version{0};
-  GameSharedData        gameData{};
-};
 
 class SharedMemoryManager
 {
@@ -36,28 +26,23 @@ public:
 
   void startAsyncWriter();
   void stopAsyncWriter();
-
   void updateGameState(const GameSharedData& data) noexcept;
-
   auto isInitialized() const noexcept -> bool;
 
 private:
-  std::string shmName_;
-  int         shmFd_;
-  void*       shmPtr_;
-  size_t      shmSize_;
-  bool        initialized_;
-
-  GameSharedData writeBuffer_;
-  std::mutex     bufferMutex_;
-
-  std::atomic<bool> hasNewData_;
-
+  GameSharedData               writeBuffer_;
+  std::mutex                   bufferMutex_;
+  std::atomic<bool>            hasNewData_;
   std::unique_ptr<std::thread> writerThread_;
   std::atomic<bool>            shouldStopWriter_;
+  std::string                  shmName_;
+
+  int32_t shmFd_;
+  size_t  shmSize_;
+  void*   shmPtr_;
+  bool    initialized_;
 
   auto initializeSharedMemory() -> bool;
-
   void cleanupSharedMemory() noexcept;
   void writerThreadFunction();
   void writeToSharedMemory(const GameSharedData& data) noexcept;

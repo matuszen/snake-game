@@ -1,5 +1,5 @@
 #include "Board.hpp"
-#include "Types.hpp"
+#include "Definitions.hpp"
 
 #include <algorithm>
 #include <cstdint>
@@ -9,7 +9,7 @@
 namespace SnakeGame
 {
 
-Board::Board(uint8_t width, uint8_t height)
+Board::Board(const uint8_t width, const uint8_t height)
   : width_(width), height_(height), foodPosition_{0, 0}, foodType_(FoodType::APPLE)
 {
   placeFood();
@@ -32,14 +32,14 @@ void Board::placeFood(const std::deque<Coordinate>& snakeBody)
   foodType_ = generateRandomFoodType();
 }
 
-auto Board::isFoodAt(Coordinate pos) const noexcept -> bool
+auto Board::isFoodAt(const Coordinate position) const noexcept -> bool
 {
-  return pos == foodPosition_;
+  return position == foodPosition_;
 }
 
-auto Board::isWall(Coordinate pos) const noexcept -> bool
+auto Board::isWall(const Coordinate position) const noexcept -> bool
 {
-  return pos.first >= width_ or pos.second >= height_;
+  return position.first >= width_ or position.second >= height_;
 }
 
 auto Board::getFoodPosition() const noexcept -> Coordinate
@@ -64,23 +64,22 @@ auto Board::getHeight() const noexcept -> uint8_t
 
 auto Board::generateRandomPosition() const -> Coordinate
 {
-  static auto seedDevice = std::random_device{};
-  static auto gen        = std::mt19937(seedDevice());
-
   auto distX = std::uniform_int_distribution<>(0, width_ - 1);
   auto distY = std::uniform_int_distribution<>(0, height_ - 1);
-
-  return {distX(gen), distY(gen)};
+  return {distX(getGenerator()), distY(getGenerator())};
 }
 
 auto Board::generateRandomFoodType() -> FoodType
 {
-  static auto seedDevice = std::random_device{};
-  static auto gen        = std::mt19937(seedDevice());
-
   auto dist = std::uniform_int_distribution<>(0, static_cast<int>(FoodType::COUNT) - 1);
+  return static_cast<FoodType>(dist(getGenerator()));
+}
 
-  return static_cast<FoodType>(dist(gen));
+auto Board::getGenerator() -> std::mt19937&
+{
+  static auto seedDevice = std::random_device{};
+  static auto generator  = std::mt19937(seedDevice());
+  return generator;
 }
 
 }  // namespace SnakeGame

@@ -284,9 +284,9 @@ __marimo__/
 # Streamlit
 .streamlit/secrets.toml
 
-# cache files
+# Cache files
 .cache
 
-#model autosaves
+# Model autosaves
 py/training/models/best/
 py/training/models/autosaves/

@@ -11,9 +11,6 @@ sudo apt-get install -y -qq \
     cmake \
     pkg-config \
     git \
-    libnotcurses-dev \
-    libnotcurses3 \
-    notcurses-bin \
     libc6-dev > /dev/null 2>&1
 
 gcc_version=$(gcc -dumpversion | cut -d. -f1)
@@ -44,8 +41,7 @@ pip install -r requirements.txt -q
 echo ""
 echo "✓ Setup complete!"
 echo ""
-echo "Build: mkdir -p build && cd build && cmake .. && make"
-echo "Run:   ./build/snake"
+echo "Build:    mkdir -p build && cd build && cmake .. && make"
+echo "Activate: source .venv/bin/activate"
+echo "Run:      python3 snake_pygame/main.py"
 echo ""
-echo "Python environment activated. To run AI agent:"
-echo "  python py/snakeAgent.py"

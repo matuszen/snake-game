@@ -110,7 +110,7 @@ class Controller:
             self.memory.read(1)
             snake_length = struct.unpack("H", self.memory.read(2))[0]
             self.memory.read(2)
-            neural_vector = [struct.unpack("<i", self.memory.read(4))[0] for _ in range(11)]
+            neural_vector = [struct.unpack("f", self.memory.read(4))[0] for _ in range(12)]
             snake_direction = Direction(struct.unpack("B", self.memory.read(1))[0])
             snake_body = [
                 (struct.unpack("B", self.memory.read(1))[0], struct.unpack("B", self.memory.read(1))[0])

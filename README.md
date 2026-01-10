@@ -7,26 +7,18 @@ A Snake game implementation in C++.
 - Snake grows with each food eaten (+10 points)
 - Speed increases every 50 points (max 10 levels)
 - Collision detection with walls and self
-- Colorful snake - Bright green head (◉), darker green body (○)
-- Variety of food - 5 different types with unique colors and symbols:
-  - `●` Red Apple
-  - `◆` Pink Cherry
-  - `◉` Yellow Banana
-  - `■` Purple Grape
-  - `★` Orange Orange
 
 ## Controls
 
-- **Arrow keys** or **WASD** - Move snake
-- **P** or **Space** - Pause/Resume
+- **R** - Start game
 - **Q** - Quit game
+- **WASD** - Move snake
 
 ## Requirements
 
-- C++20 compiler (GCC 10+, Clang 10+)
+- C++20 compiler
 - CMake 3.20+
-- [notcurses](https://github.com/dankamongmen/notcurses/) 3.0.7+
-- Python 3.x (for AI agent)
+- Python 3.x
 
 ## Quick Setup
 
@@ -38,16 +30,13 @@ Run the automated setup script to install all dependencies:
 
 ## Build & Run
 
-### Using VS Code Tasks (recommended)
+### Using VS Code Tasks
 
 - **Ctrl+Shift+B** - Build project
-- **Ctrl+Shift+P** → "Tasks: Run Task" → "Run: Snake Game"
+- **Ctrl+Shift+P** → "Tasks: Run Task" → "Run game"
 
 ### Manual Build
 
 ```bash
-mkdir -p build && cd build
-cmake ..
-make
-./build/snake
+./run.sh
 ```

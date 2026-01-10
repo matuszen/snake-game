@@ -3,18 +3,16 @@
 #include <exception>
 #include <iostream>
 
-auto main() -> int
+auto main(const int /*argc*/, const char* const /*argv*/[]) -> int
 {
   try
   {
-    auto game = Game{};
-    game.run();
+    Game{}.run();
   }
   catch (const std::exception& e)
   {
     std::cerr << "Error: " << e.what() << '\n';
     return 1;
   }
-
   return 0;
 }
