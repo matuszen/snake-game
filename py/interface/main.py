@@ -7,7 +7,7 @@ import numpy as np
 import pygame
 from SnakeGameController import Controller, Direction, GameState, IpcCommands
 
-project_root = Path(__file__).parent.parent
+project_root = Path(__file__).parent.parent.parent
 cpp_game_path = project_root / "build" / "src" / "app" / "snake_game"
 
 print(f"Looking for executable at: {cpp_game_path}")

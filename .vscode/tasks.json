@@ -2,7 +2,7 @@
     "version": "2.0.0",
     "tasks": [
         {
-            "label": "Setup: Install Dependencies",
+            "label": "Setup project",
             "type": "shell",
             "command": "${workspaceFolder}/setup.sh",
             "problemMatcher": [],
@@ -17,7 +17,7 @@
             "group": "none"
         },
         {
-            "label": "Build: CMake Configure",
+            "label": "Configure CMake",
             "type": "shell",
             "command": "mkdir -p build && cd build && cmake ..",
             "problemMatcher": [],
@@ -32,7 +32,7 @@
             "group": "build"
         },
         {
-            "label": "Build: Compile Project",
+            "label": "Build project",
             "type": "shell",
             "command": "cd build && make",
             "problemMatcher": [
@@ -55,9 +55,9 @@
             ]
         },
         {
-            "label": "Run: Snake Game",
+            "label": "Run game",
             "type": "shell",
-            "command": "source ${workspaceFolder}/.venv/bin/activate && python3 ${workspaceFolder}/snake_pygame/main.py",
+            "command": "${workspaceFolder}/run.sh",
             "problemMatcher": [],
             "presentation": {
                 "echo": true,
@@ -73,7 +73,25 @@
             ]
         },
         {
-            "label": "Clean: Remove Build Files",
+            "label": "Start training",
+            "type": "shell",
+            "command": "${workspaceFolder}/train.sh",
+            "problemMatcher": [],
+            "presentation": {
+                "echo": true,
+                "reveal": "always",
+                "focus": true,
+                "panel": "dedicated",
+                "showReuseMessage": false,
+                "clear": true
+            },
+            "group": "none",
+            "dependsOn": [
+                "Build: Compile Project"
+            ]
+        },
+        {
+            "label": "Clean",
             "type": "shell",
             "command": "rm -rf build",
             "problemMatcher": [],
