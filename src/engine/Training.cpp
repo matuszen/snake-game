@@ -1,7 +1,7 @@
 #include "Training.hpp"
 #include "Board.hpp"
+#include "Definitions.hpp"
 #include "Snake.hpp"
-#include "Types.hpp"
 
 #include <algorithm>
 #include <cstdint>
@@ -52,10 +52,11 @@ auto NeuralGame::stepGame(Direction direction) -> StepResult
 void NeuralGame::initialize()
 {
   const auto startPos = Coordinate{board_->getWidth() / 2, board_->getHeight() / 2};
-  snake_              = std::make_unique<Snake>(startPos);
+
+  snake_ = std::make_unique<Snake>(startPos);
   board_->placeFood();
   score_ = 0;
-  speed_ = 1;
+  speed_ = 10;
   state_ = GameState::PLAYING;
 }
 
@@ -81,8 +82,6 @@ void NeuralGame::update(Direction direction)
       ++speed_;
     }
   }
-
-  // updateSharedMemory();
 }
 
 void NeuralGame::handleCollision() noexcept
@@ -114,7 +113,7 @@ auto NeuralGame::getNeuralInputs() const -> NeuralInputs
   const auto& snakeBody = snake_->getBody();
   const auto  foodPos   = board_->getFoodPosition();
 
-  auto findDistance = [&](Direction dir, auto collisionCheck) -> float
+  const auto findDistance = [&](Direction dir, auto collisionCheck) -> float
   {
     Coordinate pos      = head;
     int        distance = 0;

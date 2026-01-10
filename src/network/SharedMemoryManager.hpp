@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Types.hpp"
+#include "Definitions.hpp"
 
 #include <atomic>
 #include <cstddef>

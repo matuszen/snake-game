@@ -1,10 +1,9 @@
 #pragma once
 
 #include "Board.hpp"
+#include "Definitions.hpp"
 #include "Game.hpp"
-#include "Input.hpp"
 #include "Snake.hpp"
-#include "Types.hpp"
 
 #include <cstdint>
 #include <memory>
@@ -38,7 +37,6 @@ public:
 private:
   std::unique_ptr<Snake> snake_;
   std::unique_ptr<Board> board_;
-  std::unique_ptr<Input> input_;
 
   GameState state_;
   uint16_t  score_;

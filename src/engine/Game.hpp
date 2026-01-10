@@ -2,10 +2,9 @@
 
 #include "Board.hpp"
 #include "CommandSocket.hpp"
-#include "Input.hpp"
+#include "Definitions.hpp"
 #include "SharedMemoryManager.hpp"
 #include "Snake.hpp"
-#include "Types.hpp"
 
 #include <atomic>
 #include <cstdint>
@@ -35,7 +34,6 @@ public:
 private:
   std::unique_ptr<Snake>               snake_;
   std::unique_ptr<Board>               board_;
-  std::unique_ptr<Input>               input_;
   std::unique_ptr<SharedMemoryManager> shmManager_;
   std::unique_ptr<CommandSocket>       commandSocket_;
 
@@ -48,22 +46,16 @@ private:
   std::optional<Direction> pendingDirection_;
 
   void initialize();
-  void processInput() noexcept;
   void processSocketCommand() noexcept;
-  void render() noexcept;
   void handleCollision() noexcept;
-  void showMenu();
-  void showGameOver();
   void updateSharedMemory() noexcept;
 
   void handleCommand(IpcCommands command) noexcept;
+  void gameStep() noexcept;
 
   auto getNeuralInputs() const -> NeuralInputs;
 
   constexpr auto getDelayMs() const noexcept -> uint16_t;
-
-  static constexpr auto getFoodSymbol(FoodType type) -> const char*;
-  static constexpr auto getFoodColor(FoodType type) -> uint32_t;
 };
 
 }  // namespace SnakeGame

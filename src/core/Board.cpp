@@ -1,5 +1,5 @@
 #include "Board.hpp"
-#include "Types.hpp"
+#include "Definitions.hpp"
 
 #include <algorithm>
 #include <cstdint>

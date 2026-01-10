@@ -1,5 +1,5 @@
 #include "SharedMemoryManager.hpp"
-#include "Types.hpp"
+#include "Definitions.hpp"
 
 #include <fcntl.h>
 #include <sys/mman.h>

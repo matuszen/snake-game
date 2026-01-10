@@ -1,5 +1,5 @@
+#include "Definitions.hpp"
 #include "Training.hpp"
-#include "Types.hpp"
 
 #include <pybind11/cast.h>
 #include <pybind11/detail/common.h>

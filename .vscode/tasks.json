@@ -55,19 +55,9 @@
             ]
         },
         {
-            "label": "Build: Full Build",
-            "dependsOn": [
-                "Build: CMake Configure",
-                "Build: Compile Project"
-            ],
-            "dependsOrder": "sequence",
-            "problemMatcher": [],
-            "group": "build"
-        },
-        {
             "label": "Run: Snake Game",
             "type": "shell",
-            "command": "${workspaceFolder}/build/snake",
+            "command": "source ${workspaceFolder}/.venv/bin/activate && python3 ${workspaceFolder}/snake_pygame/main.py",
             "problemMatcher": [],
             "presentation": {
                 "echo": true,

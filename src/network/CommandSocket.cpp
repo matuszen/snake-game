@@ -1,5 +1,5 @@
 #include "CommandSocket.hpp"
-#include "Types.hpp"
+#include "Definitions.hpp"
 
 #include <bits/types/struct_timeval.h>
 #include <sys/select.h>

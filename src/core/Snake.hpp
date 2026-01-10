@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Types.hpp"
+#include "Definitions.hpp"
 
 #include <cstdint>
 #include <deque>
@@ -13,7 +13,7 @@ constexpr uint8_t INITIAL_LENGTH = 3;
 class Snake
 {
 public:
-  Snake(Coordinate startPos, uint8_t initialLength = INITIAL_LENGTH);
+  Snake(Coordinate initialPosition, uint8_t initialLength = INITIAL_LENGTH);
   ~Snake() = default;
 
   Snake(const Snake& other)                   = delete;
@@ -21,7 +21,7 @@ public:
   auto operator=(const Snake& other) -> Snake = delete;
   auto operator=(Snake&& other) -> Snake      = delete;
 
-  void move(Direction dir);
+  void move(Direction movementDirection);
   void grow();
   auto checkSelfCollision() const -> bool;
 
@@ -34,7 +34,7 @@ private:
   Direction              currentDirection_;
   bool                   shouldGrow_;
 
-  static constexpr auto getNextPosition(Coordinate pos, Direction dir) noexcept -> Coordinate;
+  static constexpr auto getNextPosition(Coordinate headPosition, Direction headingDirection) noexcept -> Coordinate;
 };
 
 }  // namespace SnakeGame
