@@ -434,6 +434,71 @@ void Game::processSocketCommand() noexcept
   }
 }
 
+auto Game::getNeuralInputs() const -> NeuralInputs
+{
+  NeuralInputs result = {};
+
+  const auto  head      = snake_->getHead();
+  const auto& snakeBody = snake_->getBody();
+  const auto  foodPos   = board_->getFoodPosition();
+
+  auto findDistance = [&](Direction dir, auto collisionCheck) -> float
+  {
+    Coordinate pos      = head;
+    int        distance = 0;
+
+    while (distance < std::max(board_->getWidth(), board_->getHeight()))
+    {
+      if (dir == Direction::UP)
+      {
+        --pos.second;
+      }
+      else if (dir == Direction::DOWN)
+      {
+        ++pos.second;
+      }
+      else if (dir == Direction::LEFT)
+      {
+        --pos.first;
+      }
+      else if (dir == Direction::RIGHT)
+      {
+        ++pos.first;
+      }
+
+      ++distance;
+
+      if (collisionCheck(pos))
+      {
+        return distance > 0 ? 1.0F / (float)distance : 0.0F;
+      }
+    }
+
+    return 0.0F;
+  };
+
+  result[0] = findDistance(Direction::UP, [this](Coordinate pos) -> bool { return board_->isWall(pos); });
+  result[1] = findDistance(Direction::DOWN, [this](Coordinate pos) -> bool { return board_->isWall(pos); });
+  result[2] = findDistance(Direction::LEFT, [this](Coordinate pos) -> bool { return board_->isWall(pos); });
+  result[3] = findDistance(Direction::RIGHT, [this](Coordinate pos) -> bool { return board_->isWall(pos); });
+
+  result[4] = findDistance(Direction::UP, [foodPos](Coordinate pos) -> bool { return pos == foodPos; });
+  result[5] = findDistance(Direction::DOWN, [foodPos](Coordinate pos) -> bool { return pos == foodPos; });
+  result[6] = findDistance(Direction::LEFT, [foodPos](Coordinate pos) -> bool { return pos == foodPos; });
+  result[7] = findDistance(Direction::RIGHT, [foodPos](Coordinate pos) -> bool { return pos == foodPos; });
+
+  result[8]  = findDistance(Direction::UP, [&snakeBody](Coordinate pos) -> bool
+                            { return std::ranges::find(snakeBody, pos) != snakeBody.end(); });
+  result[9]  = findDistance(Direction::DOWN, [&snakeBody](Coordinate pos) -> bool
+                            { return std::ranges::find(snakeBody, pos) != snakeBody.end(); });
+  result[10] = findDistance(Direction::LEFT, [&snakeBody](Coordinate pos) -> bool
+                            { return std::ranges::find(snakeBody, pos) != snakeBody.end(); });
+  result[11] = findDistance(Direction::RIGHT, [&snakeBody](Coordinate pos) -> bool
+                            { return std::ranges::find(snakeBody, pos) != snakeBody.end(); });
+
+  return result;
+}
+
 constexpr auto Game::getFoodSymbol(FoodType type) -> const char*
 {
   switch (type)
