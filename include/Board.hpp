@@ -19,15 +19,15 @@ public:
   auto operator=(const Board& other) -> Board = delete;
   auto operator=(Board&& other) -> Board      = delete;
 
-  void               placeFood();
-  void               placeFood(const std::deque<Coordinate>& snakeBody);
-  [[nodiscard]] auto isFoodAt(Coordinate pos) const noexcept -> bool;
-  [[nodiscard]] auto isWall(Coordinate pos) const noexcept -> bool;
+  void placeFood();
+  void placeFood(const std::deque<Coordinate>& snakeBody);
+  auto isFoodAt(Coordinate pos) const noexcept -> bool;
+  auto isWall(Coordinate pos) const noexcept -> bool;
 
-  [[nodiscard]] auto getFoodPosition() const noexcept -> Coordinate;
-  [[nodiscard]] auto getFoodType() const noexcept -> FoodType;
-  [[nodiscard]] auto getWidth() const noexcept -> uint8_t;
-  [[nodiscard]] auto getHeight() const noexcept -> uint8_t;
+  auto getFoodPosition() const noexcept -> Coordinate;
+  auto getFoodType() const noexcept -> FoodType;
+  auto getWidth() const noexcept -> uint8_t;
+  auto getHeight() const noexcept -> uint8_t;
 
 private:
   uint8_t    width_;
@@ -35,8 +35,8 @@ private:
   Coordinate foodPosition_;
   FoodType   foodType_;
 
-  [[nodiscard]] auto        generateRandomPosition() const -> Coordinate;
-  [[nodiscard]] static auto generateRandomFoodType() -> FoodType;
+  auto        generateRandomPosition() const -> Coordinate;
+  static auto generateRandomFoodType() -> FoodType;
 };
 
 }  // namespace SnakeGame

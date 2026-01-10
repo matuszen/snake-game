@@ -30,7 +30,7 @@ public:
   auto start(CommandCallback callback) -> bool;
   void stop();
 
-  [[nodiscard]] auto isRunning() const noexcept -> bool;
+  auto isRunning() const noexcept -> bool;
 
 private:
   std::string     socketPath_;

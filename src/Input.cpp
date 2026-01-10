@@ -3,6 +3,7 @@
 
 #include <notcurses/nckeys.h>
 #include <notcurses/notcurses.h>
+
 #include <optional>
 
 namespace SnakeGame

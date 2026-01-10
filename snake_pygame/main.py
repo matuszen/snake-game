@@ -1,4 +1,3 @@
-
 import subprocess
 import sys
 import time
@@ -11,7 +10,6 @@ from SnakeGameController import Controller, Direction, GameState, IpcCommands
 project_root = Path(__file__).parent.parent
 cpp_game_path = project_root / "build" / "snake"
 
-# Debug: print the path to verify
 print(f"Looking for executable at: {cpp_game_path}")
 print(f"Exists: {cpp_game_path.exists()}")
 
@@ -19,7 +17,6 @@ game_process = subprocess.Popen([cpp_game_path], stdout=subprocess.DEVNULL, stde
 
 
 time.sleep(0.5)
-
 
 
 def main():
@@ -102,20 +99,34 @@ def main():
             screen.fill((0, 0, 0))
 
             if data.game_state == GameState.PLAYING:
-                pygame.draw.rect(screen, (255, 255, 255),
-                                (MARGIN, MARGIN, data.board_width * CELL_SIZE, data.board_height * CELL_SIZE), 3)
+                pygame.draw.rect(
+                    screen,
+                    (255, 255, 255),
+                    (MARGIN, MARGIN, data.board_width * CELL_SIZE, data.board_height * CELL_SIZE),
+                    3,
+                )
                 for x, y in data.snake_body:
-                    pygame.draw.rect(screen, (0, 255, 0), (MARGIN + x*CELL_SIZE, MARGIN + y*CELL_SIZE, CELL_SIZE, CELL_SIZE))
+                    pygame.draw.rect(
+                        screen, (0, 255, 0), (MARGIN + x * CELL_SIZE, MARGIN + y * CELL_SIZE, CELL_SIZE, CELL_SIZE)
+                    )
                 hx, hy = data.snake_head
-                pygame.draw.rect(screen, (0, 200, 0), (MARGIN + hx*CELL_SIZE, MARGIN + hy*CELL_SIZE, CELL_SIZE, CELL_SIZE))
+                pygame.draw.rect(
+                    screen, (0, 200, 0), (MARGIN + hx * CELL_SIZE, MARGIN + hy * CELL_SIZE, CELL_SIZE, CELL_SIZE)
+                )
                 fx, fy = data.food_position
-                pygame.draw.rect(screen, (255, 0, 0), (MARGIN + fx*CELL_SIZE, MARGIN + fy*CELL_SIZE, CELL_SIZE, CELL_SIZE))
+                pygame.draw.rect(
+                    screen, (255, 0, 0), (MARGIN + fx * CELL_SIZE, MARGIN + fy * CELL_SIZE, CELL_SIZE, CELL_SIZE)
+                )
                 score_surf = font.render(f"Score: {data.score}", True, (255, 255, 255))
                 screen.blit(score_surf, (10, 10))
 
             elif data.game_state == GameState.PAUSED:
-                pygame.draw.rect(screen, (255, 255, 255),
-                                (MARGIN, MARGIN, data.board_width * CELL_SIZE, data.board_height * CELL_SIZE), 3)
+                pygame.draw.rect(
+                    screen,
+                    (255, 255, 255),
+                    (MARGIN, MARGIN, data.board_width * CELL_SIZE, data.board_height * CELL_SIZE),
+                    3,
+                )
                 paused_surf = font.render("PAUSED", True, (255, 255, 0))
                 screen.blit(paused_surf, (WIN_WIDTH // 2 - paused_surf.get_width() // 2, 150))
 
@@ -130,8 +141,6 @@ def main():
                 screen.blit(restart_surf, (WIN_WIDTH // 2 - restart_surf.get_width() // 2, 250))
                 screen.blit(quit_surf, (WIN_WIDTH // 2 - quit_surf.get_width() // 2, 280))
 
-
-
         pygame.display.flip()
         clock.tick(300)
 
@@ -142,5 +151,5 @@ def main():
 
 if __name__ == "__main__":
     time.sleep(0.5)
-    subprocess.call("reset", shell=True)  # noqa: S602
+    subprocess.call("reset", shell=True)  # noqa: S602, S607
     sys.exit(main())

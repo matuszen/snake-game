@@ -1,18 +1,11 @@
 import mmap
-import struct
-import sys
-import time
 import socket
-import subprocess
-import sys
-
+import struct
 from dataclasses import dataclass
 from enum import IntEnum
-from typing import List, Tuple, Optional
+from typing import List, Optional, Tuple
 
-import numpy as np
 import posix_ipc
-import pygame
 
 
 class Direction(IntEnum):
@@ -119,13 +112,26 @@ class Controller:
             self.memory.read(2)
             neural_vector = [struct.unpack("<i", self.memory.read(4))[0] for _ in range(11)]
             snake_direction = Direction(struct.unpack("B", self.memory.read(1))[0])
-            snake_body = [(struct.unpack("B", self.memory.read(1))[0],
-                           struct.unpack("B", self.memory.read(1))[0])
-                          for _ in range(min(snake_length, 2048))]
+            snake_body = [
+                (struct.unpack("B", self.memory.read(1))[0], struct.unpack("B", self.memory.read(1))[0])
+                for _ in range(min(snake_length, 2048))
+            ]
             self.last_version = version
-            return SnakeGameData(version, board_width, board_height, score, speed, game_state,
-                                 food_position, food_type, snake_head, snake_length,
-                                 snake_body, neural_vector, snake_direction)
+            return SnakeGameData(
+                version,
+                board_width,
+                board_height,
+                score,
+                speed,
+                game_state,
+                food_position,
+                food_type,
+                snake_head,
+                snake_length,
+                snake_body,
+                neural_vector,
+                snake_direction,
+            )
         except Exception as e:
             print(f"Error reading data: {e}")
             return None
@@ -142,4 +148,3 @@ class Controller:
         except Exception as e:
             print(f"Command error: {e}")
             return False
-

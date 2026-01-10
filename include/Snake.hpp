@@ -21,21 +21,20 @@ public:
   auto operator=(const Snake& other) -> Snake = delete;
   auto operator=(Snake&& other) -> Snake      = delete;
 
-  void               move(Direction dir);
-  void               grow();
-  [[nodiscard]] auto checkSelfCollision() const -> bool;
+  void move(Direction dir);
+  void grow();
+  auto checkSelfCollision() const -> bool;
 
-  [[nodiscard]] auto getBody() const noexcept -> const std::deque<Coordinate>&;
-  [[nodiscard]] auto getHead() const noexcept -> Coordinate;
-  [[nodiscard]] auto getDirection() const noexcept -> Direction;
+  auto getBody() const noexcept -> const std::deque<Coordinate>&;
+  auto getHead() const noexcept -> Coordinate;
+  auto getDirection() const noexcept -> Direction;
 
 private:
   std::deque<Coordinate> body_;
   Direction              currentDirection_;
   bool                   shouldGrow_;
 
-  [[nodiscard]] static constexpr auto getNextPosition(Coordinate pos, Direction dir) noexcept
-    -> Coordinate;
+  static constexpr auto getNextPosition(Coordinate pos, Direction dir) noexcept -> Coordinate;
 };
 
 }  // namespace SnakeGame

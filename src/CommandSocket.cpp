@@ -1,9 +1,14 @@
 #include "CommandSocket.hpp"
 #include "Types.hpp"
 
+#include <bits/types/struct_timeval.h>
+#include <sys/select.h>
+#include <sys/socket.h>
+#include <sys/un.h>
+#include <unistd.h>
+
 #include <algorithm>
 #include <atomic>
-#include <bits/types/struct_timeval.h>
 #include <cerrno>
 #include <chrono>
 #include <cstdint>
@@ -12,15 +17,8 @@
 #include <memory>
 #include <span>
 #include <string>
-#include <sys/select.h>
-#include <sys/socket.h>
-#include <sys/un.h>
 #include <thread>
-#include <unistd.h>
 #include <utility>
-
-namespace SnakeGame
-{
 
 namespace
 {
@@ -69,11 +67,11 @@ public:
     return *this;
   }
 
-  [[nodiscard]] auto get() const noexcept -> int
+  auto get() const noexcept -> int
   {
     return fd_;
   }
-  [[nodiscard]] auto isValid() const noexcept -> bool
+  auto isValid() const noexcept -> bool
   {
     return fd_ >= 0;
   }
@@ -90,6 +88,9 @@ private:
 };
 
 }  // namespace
+
+namespace SnakeGame
+{
 
 CommandSocket::CommandSocket(std::string socketPath)
   : socketPath_(std::move(socketPath)), serverFd_(-1), initialized_(false), shouldStop_(false)
@@ -139,7 +140,7 @@ void CommandSocket::stop()
     addr.sun_family = AF_UNIX;
     copySocketPath(std::span{addr.sun_path}, socketPath_);
 
-    connect(clientFd.get(), reinterpret_cast<const sockaddr*>(&addr), sizeof(addr));
+    [[maybe_unused]] const auto _ = connect(clientFd.get(), reinterpret_cast<const sockaddr*>(&addr), sizeof(addr));
   }
 
   if (serverThread_->joinable())

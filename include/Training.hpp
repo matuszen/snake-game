@@ -1,50 +1,44 @@
 #pragma once
 
 #include "Board.hpp"
+#include "Game.hpp"
 #include "Input.hpp"
 #include "Snake.hpp"
 #include "Types.hpp"
 
-#include <array>
-#include <atomic>
 #include <cstdint>
 #include <memory>
-#include <mutex>
-#include <optional>
 
 namespace SnakeGame
 {
 
-constexpr uint8_t DEFAULT_BOARD_WIDTH  = 40;
-constexpr uint8_t DEFAULT_BOARD_HEIGHT = 20;
-
-class Game
+class NeuralGame
 {
 public:
-  Game(uint8_t boardWidth = DEFAULT_BOARD_WIDTH, uint8_t boardHeight = DEFAULT_BOARD_HEIGHT);
-  ~Game() = default;
+  NeuralGame(uint8_t boardWidth = DEFAULT_BOARD_WIDTH, uint8_t boardHeight = DEFAULT_BOARD_HEIGHT);
+  ~NeuralGame() = default;
 
-  Game(const Game& other)           = delete;
-  Game(Game&& other)                = delete;
-  auto operator=(const Game& other) = delete;
-  auto operator=(Game&& other)      = delete;
+  NeuralGame(const NeuralGame& other)     = delete;
+  NeuralGame(NeuralGame&& other)          = delete;
+  auto operator=(const NeuralGame& other) = delete;
+  auto operator=(NeuralGame&& other)      = delete;
 
   struct StepResult
   {
-    std::array<float, 12> distances;
-    bool                  isGameOver;
-    bool                  fruitPickedUp;
+    NeuralInputs distances;
+    bool         isGameOver;
+    bool         fruitPickedUp;
   };
 
-  [[nodiscard]] auto initializeGame() -> StepResult;
-  [[nodiscard]] auto stepGame(Direction direction) -> StepResult;
+  auto initializeGame() -> StepResult;
+  auto stepGame(Direction direction) -> StepResult;
 
   void update(Direction direction);
 
 private:
-  std::unique_ptr<Snake>                    snake_;
-  std::unique_ptr<Board>                    board_;
-  std::unique_ptr<Input>                    input_;
+  std::unique_ptr<Snake> snake_;
+  std::unique_ptr<Board> board_;
+  std::unique_ptr<Input> input_;
 
   GameState state_;
   uint16_t  score_;
@@ -55,8 +49,8 @@ private:
 
   void handleCollision() noexcept;
 
-  [[nodiscard]] auto getNeuralInputs() const -> std::array<float, 12>;
-  [[nodiscard]] constexpr auto getDelayMs() const noexcept -> uint16_t;
+  auto           getNeuralInputs() const -> NeuralInputs;
+  constexpr auto getDelayMs() const noexcept -> uint16_t;
 };
 
 }  // namespace SnakeGame

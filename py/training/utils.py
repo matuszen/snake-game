@@ -21,7 +21,6 @@ def save_network(network: Neural, filepath: str) -> None:
 
     with open(filepath, "w") as f:
         json.dump(data, f, indent=2)
-    # print(f"✓ Saved network to {filepath}", flush=True)
 
 
 def load_network(filepath: str) -> Neural:

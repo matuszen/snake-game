@@ -7,7 +7,6 @@
 #include "Snake.hpp"
 #include "Types.hpp"
 
-#include <array>
 #include <atomic>
 #include <cstdint>
 #include <memory>
@@ -33,31 +32,16 @@ public:
 
   void run();
 
-  struct StepResult
-  {
-    std::array<float, 12> distances;
-    bool                  isGameOver;
-    bool                  fruitPickedUp;
-  };
-
-  [[nodiscard]] auto initializeGame() -> StepResult;
-
-  [[nodiscard]] auto stepGame(Direction direction) -> StepResult;
-
-  void update();
-  void updateTraining(Direction direction);
-
 private:
-  std::unique_ptr<Snake>                    snake_;
-  std::unique_ptr<Board>                    board_;
-  std::unique_ptr<Input>                    input_;
-  std::unique_ptr<SharedMemoryManager>      shmManager_;
-  std::unique_ptr<CommandSocket>            commandSocket_;
+  std::unique_ptr<Snake>               snake_;
+  std::unique_ptr<Board>               board_;
+  std::unique_ptr<Input>               input_;
+  std::unique_ptr<SharedMemoryManager> shmManager_;
+  std::unique_ptr<CommandSocket>       commandSocket_;
 
   GameState state_;
   uint16_t  score_;
   uint8_t   speed_;
-  bool      fruitPickedThisFrame_;
 
   std::atomic<IpcCommands> pendingCommand_;
   std::mutex               commandMutex_;
@@ -74,9 +58,12 @@ private:
 
   void handleCommand(IpcCommands command) noexcept;
 
-  [[nodiscard]] auto getNeuralInputs() const -> std::array<float, 12>;
+  auto getNeuralInputs() const -> NeuralInputs;
 
-  [[nodiscard]] constexpr auto getDelayMs() const noexcept -> uint16_t;
+  constexpr auto getDelayMs() const noexcept -> uint16_t;
+
+  static constexpr auto getFoodSymbol(FoodType type) -> const char*;
+  static constexpr auto getFoodColor(FoodType type) -> uint32_t;
 };
 
 }  // namespace SnakeGame

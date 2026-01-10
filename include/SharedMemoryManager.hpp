@@ -39,7 +39,7 @@ public:
 
   void updateGameState(const GameSharedData& data) noexcept;
 
-  [[nodiscard]] auto isInitialized() const noexcept -> bool;
+  auto isInitialized() const noexcept -> bool;
 
 private:
   std::string shmName_;

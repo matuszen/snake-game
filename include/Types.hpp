@@ -7,7 +7,8 @@
 namespace SnakeGame
 {
 
-using Coordinate = std::pair<uint8_t, uint8_t>;
+using Coordinate   = std::pair<uint8_t, uint8_t>;
+using NeuralInputs = std::array<float, 12>;
 
 constexpr uint16_t MAX_SNAKE_LENGTH = 2048;
 
@@ -61,7 +62,7 @@ struct GameSharedData
   FoodType                                 foodType;
   Coordinate                               snakeHead;
   uint16_t                                 snakeLength;
-  std::array<float, 12>                    neuralVector;
+  NeuralInputs                             neuralVector;
   Direction                                snakeDirection;
   std::array<Coordinate, MAX_SNAKE_LENGTH> snakeBody;
 };
