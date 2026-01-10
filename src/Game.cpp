@@ -6,6 +6,8 @@
 #include "Snake.hpp"
 #include "Types.hpp"
 
+#include <notcurses/notcurses.h>
+
 #include <algorithm>
 #include <array>
 #include <atomic>
@@ -14,21 +16,13 @@
 #include <cstdint>
 #include <format>
 #include <memory>
-#include <notcurses/notcurses.h>
 #include <string>
 #include <thread>
 
-namespace SnakeGame
-{
-
 namespace
 {
-
 constexpr uint16_t PAUSE_DELAY_MS           = 100;
 constexpr uint16_t INITIAL_SPEED_DELAY_MS   = 200;
-constexpr uint8_t  SCORE_PER_FOOD           = 10;
-constexpr uint8_t  SPEED_INCREASE_INTERVAL  = 50;
-constexpr uint8_t  MAX_SPEED                = 10;
 constexpr uint8_t  SPEED_DECREASE_PER_LEVEL = 15;
 
 constexpr uint32_t APPLE_COLOR   = 0xFF0000;
@@ -38,52 +32,18 @@ constexpr uint32_t GRAPE_COLOR   = 0x9400D3;
 constexpr uint32_t ORANGE_COLOR  = 0xFF8C00;
 constexpr uint32_t DEFAULT_COLOR = 0xFFFFFF;
 
-constexpr auto getFoodSymbol(FoodType type) -> const char*
-{
-  switch (type)
-  {
-    case FoodType::APPLE:
-      return "●";
-    case FoodType::CHERRY:
-      return "◆";
-    case FoodType::BANANA:
-      return "◉";
-    case FoodType::GRAPE:
-      return "■";
-    case FoodType::ORANGE:
-      return "★";
-    default:
-      return "*";
-  }
-}
-
-constexpr auto getFoodColor(FoodType type) -> uint32_t
-{
-  switch (type)
-  {
-    case FoodType::APPLE:
-      return APPLE_COLOR;
-    case FoodType::CHERRY:
-      return CHERRY_COLOR;
-    case FoodType::BANANA:
-      return BANANA_COLOR;
-    case FoodType::GRAPE:
-      return GRAPE_COLOR;
-    case FoodType::ORANGE:
-      return ORANGE_COLOR;
-    default:
-      return DEFAULT_COLOR;
-  }
-}
-
 }  // namespace
 
+namespace SnakeGame
+{
+
 Game::Game(uint8_t boardWidth, uint8_t boardHeight)
-  : snake_(nullptr), board_(std::make_unique<Board>(boardWidth, boardHeight)),
-    input_(std::make_unique<Input>()), shmManager_(std::make_unique<SharedMemoryManager>()),
-    commandSocket_(std::make_unique<CommandSocket>()), state_(GameState::MENU), score_(0),
+  : snake_(nullptr), board_(std::make_unique<Board>(boardWidth, boardHeight)), state_(GameState::MENU), score_(0),
     speed_(1), pendingCommand_(IpcCommands::NONE)
 {
+  input_         = std::make_unique<Input>();
+  shmManager_    = std::make_unique<SharedMemoryManager>();
+  commandSocket_ = std::make_unique<CommandSocket>();
   if (shmManager_->isInitialized())
   {
     shmManager_->startAsyncWriter();
@@ -118,7 +78,6 @@ void Game::run()
           break;
         }
         processInput();
-        update();
         render();
         std::this_thread::sleep_for(std::chrono::milliseconds(getDelayMs()));
         break;
@@ -150,7 +109,7 @@ void Game::initialize()
   snake_              = std::make_unique<Snake>(startPos);
   board_->placeFood();
   score_ = 0;
-  speed_ = 1;
+  speed_ = 10;
   state_ = GameState::PLAYING;
   input_->resetInput();
 }
@@ -173,47 +132,6 @@ void Game::processInput() noexcept
   }
 }
 
-void Game::update()
-{
-  if (state_ != GameState::PLAYING)
-  {
-    return;
-  }
-
-  auto newDir = input_->getDirection();
-  if (not newDir.has_value() and pendingDirection_.has_value())
-  {
-    newDir = pendingDirection_;
-  }
-
-  if (newDir.has_value())
-  {
-    snake_->move(newDir.value());
-  }
-  else
-  {
-    snake_->move(snake_->getDirection());
-  }
-
-  pendingDirection_.reset();
-
-  handleCollision();
-
-  if (board_->isFoodAt(snake_->getHead()))
-  {
-    snake_->grow();
-    board_->placeFood(snake_->getBody());
-    score_ += SCORE_PER_FOOD;
-
-    if (score_ % SPEED_INCREASE_INTERVAL == 0 and speed_ < MAX_SPEED)
-    {
-      ++speed_;
-    }
-  }
-
-  updateSharedMemory();
-}
-
 void Game::render() noexcept
 {
   auto* nc       = input_->getNotcurses();
@@ -225,7 +143,6 @@ void Game::render() noexcept
 
   ncplane_erase(stdplane);
 
-  // Draw static border in a consistent dim color
   ncplane_set_fg_rgb8(stdplane, 128, 128, 128);
 
   for (uint8_t col = 0; col < board_->getWidth() + 2; ++col)
@@ -262,8 +179,7 @@ void Game::render() noexcept
   const auto* foodSymbol = getFoodSymbol(foodType);
   const auto  foodColor  = getFoodColor(foodType);
 
-  ncplane_set_fg_rgb8(stdplane, (foodColor >> 16) & 0xFF, (foodColor >> 8) & 0xFF,
-                      foodColor & 0xFF);
+  ncplane_set_fg_rgb8(stdplane, (foodColor >> 16) & 0xFF, (foodColor >> 8) & 0xFF, foodColor & 0xFF);
   ncplane_putstr_yx(stdplane, food.second + 1, food.first + 1, foodSymbol);
 
   ncplane_set_fg_rgb8(stdplane, 255, 255, 255);
@@ -273,8 +189,7 @@ void Game::render() noexcept
 
   ncplane_putstr_yx(stdplane, board_->getHeight() + 3, 0, scoreText.c_str());
   ncplane_putstr_yx(stdplane, board_->getHeight() + 4, 0, speedText.c_str());
-  ncplane_putstr_yx(stdplane, board_->getHeight() + 5, 0,
-                    "Controls: Arrows or WASD | Pause: P | Quit: Q");
+  ncplane_putstr_yx(stdplane, board_->getHeight() + 5, 0, "Controls: Arrows or WASD | Pause: P | Quit: Q");
 
   if (state_ == GameState::PAUSED)
   {
@@ -407,103 +322,6 @@ void Game::showGameOver()
   std::this_thread::sleep_for(std::chrono::milliseconds(PAUSE_DELAY_MS));
 }
 
-auto Game::getDirectionVector() const -> std::array<int, 4>
-{
-  const auto dir = snake_->getDirection();
-  switch (dir)
-  {
-    case Direction::UP:
-      return {1, 0, 0, 0};
-    case Direction::DOWN:
-      return {0, 0, 0, 1};
-    case Direction::LEFT:
-      return {0, 1, 0, 0};
-    case Direction::RIGHT:
-      return {0, 0, 1, 0};
-    default:
-      return {0, 0, 0, 0};
-  }
-}
-
-auto Game::getDangerIndicator() const -> std::array<int, 3>
-{
-  const auto  head       = snake_->getHead();
-  const auto  currentDir = snake_->getDirection();
-  const auto& snakeBody  = snake_->getBody();
-
-  const auto isObstacle = [&](Coordinate pos) -> bool
-  {
-    if (board_->isWall(pos))
-    {
-      return true;
-    }
-    if (std::ranges::any_of(snakeBody, [&](const auto& segment)
-                            { return segment.first == pos.first && segment.second == pos.second; }))
-    {
-      return true;
-    }
-    return false;
-  };
-
-  Coordinate forward;
-  Coordinate left;
-  Coordinate right;
-
-  switch (currentDir)
-  {
-    case Direction::UP:
-      forward = {head.first, static_cast<uint8_t>(head.second - 1)};
-      left    = {static_cast<uint8_t>(head.first - 1), head.second};
-      right   = {static_cast<uint8_t>(head.first + 1), head.second};
-      break;
-    case Direction::DOWN:
-      forward = {head.first, static_cast<uint8_t>(head.second + 1)};
-      left    = {static_cast<uint8_t>(head.first + 1), head.second};
-      right   = {static_cast<uint8_t>(head.first - 1), head.second};
-      break;
-    case Direction::LEFT:
-      forward = {static_cast<uint8_t>(head.first - 1), head.second};
-      left    = {head.first, static_cast<uint8_t>(head.second + 1)};
-      right   = {head.first, static_cast<uint8_t>(head.second - 1)};
-      break;
-    case Direction::RIGHT:
-      forward = {static_cast<uint8_t>(head.first + 1), head.second};
-      left    = {head.first, static_cast<uint8_t>(head.second - 1)};
-      right   = {head.first, static_cast<uint8_t>(head.second + 1)};
-      break;
-  }
-
-  auto danger = std::array<int, 3>{0, 0, 0};
-  danger[0]   = isObstacle(forward) ? 1 : 0;
-  danger[1]   = isObstacle(left) ? 1 : 0;
-  danger[2]   = isObstacle(right) ? 1 : 0;
-
-  return danger;
-}
-
-std::array<int, 11> Game::getBoardState() const
-{
-  const auto danger    = getDangerIndicator();
-  const auto direction = getDirectionVector();
-  const auto head      = snake_->getHead();
-  const auto food      = board_->getFoodPosition();
-
-  auto state = std::array<int, 11>{};
-  state[0]   = danger[0];
-  state[1]   = danger[1];
-  state[2]   = danger[2];
-  state[3]   = direction[0];
-  state[4]   = direction[1];
-  state[5]   = direction[2];
-  state[6]   = direction[3];
-  state[7]   = (food.second < head.second) ? 1 : 0;
-  state[8]   = (food.second > head.second) ? 1 : 0;
-  state[9]   = (food.first > head.first) ? 1 : 0;
-  state[10]  = (food.first < head.first) ? 1 : 0;
-
-  return state;
-}
-
 constexpr auto Game::getDelayMs() const noexcept -> uint16_t
 {
   return INITIAL_SPEED_DELAY_MS - ((speed_ - 1) * SPEED_DECREASE_PER_LEVEL);
@@ -516,18 +334,20 @@ void Game::updateSharedMemory() noexcept
     return;
   }
 
-  auto sharedGameInfo = GameSharedData{.boardWidth     = board_->getWidth(),
-                                       .boardHeight    = board_->getHeight(),
-                                       .score          = score_,
-                                       .speed          = speed_,
-                                       .gameState      = state_,
-                                       .foodPosition   = board_->getFoodPosition(),
-                                       .foodType       = board_->getFoodType(),
-                                       .snakeHead      = {0, 0},
-                                       .snakeLength    = 0,
-                                       .neuralVector   = getBoardState(),
-                                       .snakeDirection = snake_->getDirection(),
-                                       .snakeBody      = {}};
+  auto sharedGameInfo = GameSharedData{
+    .boardWidth     = board_->getWidth(),
+    .boardHeight    = board_->getHeight(),
+    .score          = score_,
+    .speed          = speed_,
+    .gameState      = state_,
+    .foodPosition   = board_->getFoodPosition(),
+    .foodType       = board_->getFoodType(),
+    .snakeHead      = {0, 0},
+    .snakeLength    = 0,
+    .neuralVector   = getNeuralInputs(),
+    .snakeDirection = snake_->getDirection(),
+    .snakeBody      = {}
+  };
 
   if (snake_ != nullptr)
   {
@@ -611,6 +431,109 @@ void Game::processSocketCommand() noexcept
 
     case IpcCommands::NONE:
       break;
+  }
+}
+
+auto Game::getNeuralInputs() const -> NeuralInputs
+{
+  NeuralInputs result = {};
+
+  const auto  head      = snake_->getHead();
+  const auto& snakeBody = snake_->getBody();
+  const auto  foodPos   = board_->getFoodPosition();
+
+  auto findDistance = [&](Direction dir, auto collisionCheck) -> float
+  {
+    Coordinate pos      = head;
+    int        distance = 0;
+
+    while (distance < std::max(board_->getWidth(), board_->getHeight()))
+    {
+      if (dir == Direction::UP)
+      {
+        --pos.second;
+      }
+      else if (dir == Direction::DOWN)
+      {
+        ++pos.second;
+      }
+      else if (dir == Direction::LEFT)
+      {
+        --pos.first;
+      }
+      else if (dir == Direction::RIGHT)
+      {
+        ++pos.first;
+      }
+
+      ++distance;
+
+      if (collisionCheck(pos))
+      {
+        return distance > 0 ? 1.0F / (float)distance : 0.0F;
+      }
+    }
+
+    return 0.0F;
+  };
+
+  result[0] = findDistance(Direction::UP, [this](Coordinate pos) -> bool { return board_->isWall(pos); });
+  result[1] = findDistance(Direction::DOWN, [this](Coordinate pos) -> bool { return board_->isWall(pos); });
+  result[2] = findDistance(Direction::LEFT, [this](Coordinate pos) -> bool { return board_->isWall(pos); });
+  result[3] = findDistance(Direction::RIGHT, [this](Coordinate pos) -> bool { return board_->isWall(pos); });
+
+  result[4] = findDistance(Direction::UP, [foodPos](Coordinate pos) -> bool { return pos == foodPos; });
+  result[5] = findDistance(Direction::DOWN, [foodPos](Coordinate pos) -> bool { return pos == foodPos; });
+  result[6] = findDistance(Direction::LEFT, [foodPos](Coordinate pos) -> bool { return pos == foodPos; });
+  result[7] = findDistance(Direction::RIGHT, [foodPos](Coordinate pos) -> bool { return pos == foodPos; });
+
+  result[8]  = findDistance(Direction::UP, [&snakeBody](Coordinate pos) -> bool
+                            { return std::ranges::find(snakeBody, pos) != snakeBody.end(); });
+  result[9]  = findDistance(Direction::DOWN, [&snakeBody](Coordinate pos) -> bool
+                            { return std::ranges::find(snakeBody, pos) != snakeBody.end(); });
+  result[10] = findDistance(Direction::LEFT, [&snakeBody](Coordinate pos) -> bool
+                            { return std::ranges::find(snakeBody, pos) != snakeBody.end(); });
+  result[11] = findDistance(Direction::RIGHT, [&snakeBody](Coordinate pos) -> bool
+                            { return std::ranges::find(snakeBody, pos) != snakeBody.end(); });
+
+  return result;
+}
+
+constexpr auto Game::getFoodSymbol(FoodType type) -> const char*
+{
+  switch (type)
+  {
+    case FoodType::APPLE:
+      return "●";
+    case FoodType::CHERRY:
+      return "◆";
+    case FoodType::BANANA:
+      return "◉";
+    case FoodType::GRAPE:
+      return "■";
+    case FoodType::ORANGE:
+      return "★";
+    default:
+      return "*";
+  }
+}
+
+constexpr auto Game::getFoodColor(FoodType type) -> uint32_t
+{
+  switch (type)
+  {
+    case FoodType::APPLE:
+      return APPLE_COLOR;
+    case FoodType::CHERRY:
+      return CHERRY_COLOR;
+    case FoodType::BANANA:
+      return BANANA_COLOR;
+    case FoodType::GRAPE:
+      return GRAPE_COLOR;
+    case FoodType::ORANGE:
+      return ORANGE_COLOR;
+    default:
+      return DEFAULT_COLOR;
   }
 }
 

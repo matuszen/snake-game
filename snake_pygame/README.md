@@ -7,13 +7,12 @@ This project provides a visualization of the Snake game in Python (Pygame), whic
 - `main.py` – the main Python script that runs the game visualization.
 - `SnakeGameController.py` – module handling the connection to the C++ game.
 - `/snake_game/build/snake` – executable file of the C++ game.
-- `setup.sh` – installation script for required Python libraries.
 
 ## Requirements
 
-- C++20 compiler (GCC 10+, Clang 10+)  
-- Python 3.10+  
-- Linux (Ubuntu/Debian recommended)  
+- C++20 compiler (GCC 10+, Clang 10+)
+- Python 3.10+
+- Linux (Ubuntu/Debian recommended)
 - Pygame, Numpy, posix_ipc
 
 ## Installation

@@ -24,8 +24,7 @@ void Board::placeFood()
 void Board::placeFood(const std::deque<Coordinate>& snakeBody)
 {
   foodPosition_ = generateRandomPosition();
-  while (std::ranges::any_of(snakeBody,
-                             [this](const auto& segment) { return segment == foodPosition_; }))
+  while (std::ranges::any_of(snakeBody, [this](const auto& segment) -> auto { return segment == foodPosition_; }))
   {
     foodPosition_ = generateRandomPosition();
   }

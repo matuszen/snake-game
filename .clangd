@@ -4,6 +4,7 @@ CompileFlags:
     - "-Wall"
     - "-Wextra"
     - "-Wpedantic"
+  CompilationDatabase: build
 
 Diagnostics:
   UnusedIncludes: Strict
@@ -22,9 +23,11 @@ Diagnostics:
       - portability-*
     Remove:
       - bugprone-easily-swappable-parameters
-      - readability-magic-numbers
       - cppcoreguidelines-avoid-magic-numbers
+      - cppcoreguidelines-pro-type-reinterpret-cast
+      - readability-magic-numbers
       - readability-identifier-length
+      - modernize-use-nodiscard
     CheckOptions:
       readability-identifier-naming.NamespaceCase: CamelCase
       readability-identifier-naming.ClassCase: CamelCase
@@ -37,11 +40,11 @@ Diagnostics:
       readability-identifier-naming.GlobalConstantCase: UPPER_CASE
       readability-function-cognitive-complexity.Threshold: 25
 
-InlayHints:
-  Enabled: No
-
 Hover:
   ShowAKA: Yes
+
+InlayHints:
+  Enabled: No
 
 Index:
   Background: Build

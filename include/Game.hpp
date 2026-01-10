@@ -7,7 +7,6 @@
 #include "Snake.hpp"
 #include "Types.hpp"
 
-#include <array>
 #include <atomic>
 #include <cstdint>
 #include <memory>
@@ -51,7 +50,6 @@ private:
   void initialize();
   void processInput() noexcept;
   void processSocketCommand() noexcept;
-  void update();
   void render() noexcept;
   void handleCollision() noexcept;
   void showMenu();
@@ -60,11 +58,12 @@ private:
 
   void handleCommand(IpcCommands command) noexcept;
 
-  [[nodiscard]] auto getDirectionVector() const -> std::array<int, 4>;
-  [[nodiscard]] auto getDangerIndicator() const -> std::array<int, 3>;
-  [[nodiscard]] auto getBoardState() const -> std::array<int, 11>;
+  auto getNeuralInputs() const -> NeuralInputs;
 
-  [[nodiscard]] constexpr auto getDelayMs() const noexcept -> uint16_t;
+  constexpr auto getDelayMs() const noexcept -> uint16_t;
+
+  static constexpr auto getFoodSymbol(FoodType type) -> const char*;
+  static constexpr auto getFoodColor(FoodType type) -> uint32_t;
 };
 
 }  // namespace SnakeGame

@@ -286,3 +286,7 @@ __marimo__/
 
 # cache files
 .cache
+
+#model autosaves
+py/training/models/best/
+py/training/models/autosaves/

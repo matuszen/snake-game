@@ -14,6 +14,8 @@ import numpy as np
 import posix_ipc
 import snakeAgent
 
+MODEL_PATH = "py/training/models/modelv3_20x20.json"
+
 
 class Direction(IntEnum):
     UP = 0
@@ -62,7 +64,7 @@ class SnakeGameData:
     snake_head: Tuple[int, int]
     snake_length: int
     snake_body: List[Tuple[int, int]]
-    neural_vector: List[int]
+    neural_vector: List[float]
     snake_direction: Direction
 
 
@@ -141,8 +143,8 @@ class SnakeGameController:
             self.memory.read(2)
 
             neural_vector = []
-            for _ in range(11):
-                value = struct.unpack("<i", self.memory.read(4))[0]
+            for _ in range(12):
+                value = struct.unpack("<f", self.memory.read(4))[0]
                 neural_vector.append(value)
 
             snake_direction = Direction(struct.unpack("B", self.memory.read(1))[0])
@@ -199,7 +201,7 @@ class SnakeGameController:
 def main():
     controller = SnakeGameController()
     aiMode = 0
-    model = None
+    # model = None
     if not controller.connect():
         return 1
 
@@ -235,7 +237,7 @@ def main():
                         aiMode = 1
                         command = IpcCommands.START_GAME
                         print("\n[CMD] AI mode ON")
-                        model = snakeAgent.SnakeAgent("models/modelv3.keras")
+                        network = snakeAgent.SnakeAgent(MODEL_PATH)
                     elif key == "w" and aiMode == 0:
                         command = IpcCommands.MOVE_UP
                     elif key == "a" and aiMode == 0:
@@ -253,18 +255,14 @@ def main():
                         command = None
 
                 data = controller.read_data()
-                if aiMode == 1 and data and model:
-                    print(data.neural_vector)
-                    print(data.snake_direction)
-                    dir = model.move(
-                        np.array(data.neural_vector).reshape(1, -1),
-                        data.snake_direction,
-                    )
-                    print(
-                        f"AI input: {data.neural_vector} output: {dir}",
-                        end="",
-                        flush=True,
-                    )
+                if aiMode == 1 and data and network:
+                    inputs = data.neural_vector
+                    outputs = network.move(inputs)
+                    dir_idx = np.argmax(outputs)
+
+                    directions = [Direction.UP, Direction.DOWN, Direction.LEFT, Direction.RIGHT]
+                    dir = directions[dir_idx]
+
                     if dir == Direction.UP:
                         controller.send_command(IpcCommands.MOVE_UP)
                     elif dir == Direction.DOWN:
@@ -273,7 +271,6 @@ def main():
                         controller.send_command(IpcCommands.MOVE_LEFT)
                     elif dir == Direction.RIGHT:
                         controller.send_command(IpcCommands.MOVE_RIGHT)
-
                 if data:
                     print(
                         f"\r[v{data.version:04d}] "
@@ -283,6 +280,7 @@ def main():
                         f"Snake: {data.snake_length:3d} segments | "
                         f"Head: ({data.snake_head[0]:2d},{data.snake_head[1]:2d}) | "
                         f"Food: {data.food_type.name:6s} ({data.food_position[0]:2d},{data.food_position[1]:2d})",
+                        f"Input: {[f'{v:.2f}' for v in data.neural_vector]}",
                         end="",
                         flush=True,
                     )

@@ -27,11 +27,11 @@ public:
   void readInput() noexcept;
   void resetInput() noexcept;
 
-  [[nodiscard]] auto getDirection() const noexcept -> std::optional<Direction>;
-  [[nodiscard]] auto isPauseRequested() const noexcept -> bool;
-  [[nodiscard]] auto isQuitRequested() const noexcept -> bool;
-  [[nodiscard]] auto getNotcurses() noexcept -> notcurses*;
-  [[nodiscard]] auto getStdPlane() noexcept -> ncplane*;
+  auto getDirection() const noexcept -> std::optional<Direction>;
+  auto isPauseRequested() const noexcept -> bool;
+  auto isQuitRequested() const noexcept -> bool;
+  auto getNotcurses() noexcept -> notcurses*;
+  auto getStdPlane() noexcept -> ncplane*;
 
 private:
   bool       initialized_;

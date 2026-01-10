@@ -1,25 +1,31 @@
 #include "SharedMemoryManager.hpp"
 #include "Types.hpp"
 
+#include <fcntl.h>
+#include <sys/mman.h>
+#include <unistd.h>
+
 #include <algorithm>
 #include <atomic>
 #include <cerrno>
 #include <chrono>
 #include <cstdint>
 #include <cstring>
-#include <fcntl.h>
 #include <memory>
 #include <mutex>
 #include <string>
-#include <sys/mman.h>
 #include <thread>
-#include <unistd.h>
 #include <utility>
 
-namespace SnakeGame
+namespace
 {
 
 constexpr int64_t K_SHARED_MEMORY_WRITE_DELAY = 200;
+
+}  // namespace
+
+namespace SnakeGame
+{
 
 SharedMemoryManager::SharedMemoryManager(std::string shmName)
   : shmName_(std::move(shmName)), shmFd_(-1), shmPtr_(nullptr), shmSize_(sizeof(SharedMemoryData)),
@@ -41,7 +47,7 @@ void SharedMemoryManager::startAsyncWriter()
   }
 
   shouldStopWriter_ = false;
-  writerThread_ = std::make_unique<std::thread>(&SharedMemoryManager::writerThreadFunction, this);
+  writerThread_     = std::make_unique<std::thread>(&SharedMemoryManager::writerThreadFunction, this);
 }
 
 void SharedMemoryManager::stopAsyncWriter()
