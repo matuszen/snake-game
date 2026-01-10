@@ -10,7 +10,7 @@ sys.path.insert(0, str(py_folder))
 import numpy as np  # noqa: E402
 import pygame  # noqa: E402
 from snakeAgent import SnakeAgent  # noqa: E402
-from SnakeGameController import Controller, Direction, GameState, IpcCommands  # noqa: E402
+from SnakeGameController import Controller, GameState, IpcCommands  # noqa: E402
 from snakeHeuristicController import SnakeHeuristicAI  # noqa: E402, F402
 
 if not os.environ.get("DISPLAY") and not os.environ.get("WAYLAND_DISPLAY"):
@@ -29,7 +29,7 @@ game_process = subprocess.Popen([cpp_game_path], stdout=subprocess.DEVNULL, stde
 def reset(controller):
     try:
         controller.disconect()
-    except:
+    except:  # noqa: E722, S110
         pass
 
     pygame.quit()
@@ -41,7 +41,7 @@ def reset(controller):
         except subprocess.TimeoutExpired:
             game_process.kill()
 
-    os.execl(sys.executable, sys.executable, *sys.argv)
+    os.execl(sys.executable, sys.executable, *sys.argv)  # noqa: S606
 
 
 # Zmienna globalna na proces gry
@@ -56,14 +56,14 @@ def restart_game_process(width, height):
         try:
             game_process.terminate()
             game_process.wait(timeout=0.5)
-        except:
+        except:  # noqa: E722
             game_process.kill()
 
     # 2. Uruchom nowy proces z argumentami wymiarów
     # UWAGA: Twój C++ musi obsługiwać argumenty (argv), np: ./snake_game 20 20
     try:
         print(f"[SYSTEM] Restarting C++ game with size {width}x{height}...")
-        game_process = subprocess.Popen(
+        game_process = subprocess.Popen(  # noqa: S603
             [str(cpp_game_path), str(width), str(height)], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL
         )
         time.sleep(0.5)  # Daj mu chwilę na start
