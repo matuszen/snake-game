@@ -278,11 +278,13 @@ def main():
         print("Nie udało się połączyć z grą C++")
         return 1
 
+    # --- Zmienne stanu gry ---
     aiMode = False
     algoMode = False
     network = None
     heuristic_bot = None
 
+    # --- Inicjalizacja Pygame ---
     pygame.display.init()
     pygame.font.init()
 
