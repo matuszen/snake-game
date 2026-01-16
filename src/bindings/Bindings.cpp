@@ -15,7 +15,7 @@ using StepResult = SnakeGame::StepResult;
 using GameState  = SnakeGame::GameState;
 using Direction  = SnakeGame::Direction;
 
-PYBIND11_MODULE(snake_game, m)
+PYBIND11_MODULE(snake_lib, m)
 {
   m.doc() = "Snake Game Python Bindings";
 

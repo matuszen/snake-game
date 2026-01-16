@@ -1,11 +1,6 @@
 import mmap
-import select
 import socket
 import struct
-import sys
-import termios
-import time
-import tty
 from collections import deque
 from dataclasses import dataclass
 from enum import IntEnum
@@ -203,7 +198,6 @@ class SnakeHeuristicAI:
     def get_adjacencies(self, pos: Tuple[int, int]) -> List[Tuple[int, int]]:
         x, y = pos
         adjacencies = []
-        # Góra, Prawo, Dół, Lewo
         for dx, dy in [(0, -1), (1, 0), (0, 1), (-1, 0)]:
             nx, ny = x + dx, y + dy
             if 0 <= nx < self.board_width and 0 <= ny < self.board_height:
@@ -227,8 +221,6 @@ class SnakeHeuristicAI:
                 return paths[current]
 
             for next_pos in self.get_adjacencies(current):
-                # Sprawdź czy pozycja jest wolna (nie zajęta przez węża)
-                # Ogon można odwiedzić, bo w momencie dotarcia tam już się przesunie
                 if next_pos not in paths:
                     if next_pos not in snake_set or next_pos == end:
                         queue.append(next_pos)
@@ -258,28 +250,17 @@ class SnakeHeuristicAI:
         if not path_to_food or len(path_to_food) < 2:
             return False
 
-        # Symuluj węża po przejściu ścieżki i zjedzeniu
-        # Nowa głowa będzie na końcu ścieżki (tam gdzie jedzenie)
         food_pos = path_to_food[-1]
 
-        # Symuluj ruch węża wzdłuż ścieżki
-        # Wąż przesuwa się o długość ścieżki-1 (bo głowa już jest na starcie)
-        # path_length = len(path_to_food) - 1
+        new_snake = [food_pos]
 
-        # Buduj nowego węża po zjedzeniu
-        # Głowa na pozycji jedzenia + wąż przesuwa się o path_length i rośnie o 1
-        new_snake = [food_pos]  # Nowa głowa na jedzeniu
-
-        # Dodaj resztę ciała - wąż rośnie, więc nie usuwamy ogona
         for i, pos in enumerate(snake_body):
-            if i < len(snake_body):  # Wąż rośnie, zachowujemy wszystkie segmenty
+            if i < len(snake_body):
                 new_snake.append(pos)
 
-        # Teraz sprawdź czy z nowej pozycji można dotrzeć do ogona
         new_head = new_snake[0]
         new_tail = new_snake[-1]
 
-        # Usuń ogon ze sprawdzania, bo gdy tam dotrzemy, będzie już wolny
         path_to_tail = self.bfs_search(new_head, new_tail, new_snake[:-1])
 
         return path_to_tail is not None
@@ -301,6 +282,75 @@ class SnakeHeuristicAI:
         else:
             return current_dir
 
+    def _get_opposite_directions(self) -> dict:
+        return {
+            Direction.UP: Direction.DOWN,
+            Direction.DOWN: Direction.UP,
+            Direction.LEFT: Direction.RIGHT,
+            Direction.RIGHT: Direction.LEFT,
+        }
+
+    def _try_move_to_food(
+        self,
+        head: Tuple[int, int],
+        food: Tuple[int, int],
+        snake_body: List[Tuple[int, int]],
+        current_dir: Direction,
+        opposite_dirs: dict,
+    ) -> Optional[Direction]:
+        path_to_food = self.bfs_search(head, food, snake_body)
+
+        if path_to_food and len(path_to_food) > 1:
+            if self.is_safe_move(path_to_food, snake_body):
+                next_pos = path_to_food[1]
+                next_dir = self.get_direction_to_pos(head, next_pos, current_dir)
+                if next_dir != opposite_dirs.get(current_dir):
+                    return next_dir
+
+        return None
+
+    def _try_move_to_tail(
+        self, head: Tuple[int, int], snake_body: List[Tuple[int, int]], current_dir: Direction, opposite_dirs: dict
+    ) -> Optional[Direction]:
+        if len(snake_body) <= 1:
+            return None
+
+        tail = snake_body[-1]
+        snake_without_tail = snake_body[:-1]
+        path_to_tail = self.bfs_search(head, tail, snake_without_tail)
+
+        if path_to_tail and len(path_to_tail) > 1:
+            next_pos = path_to_tail[1]
+            next_dir = self.get_direction_to_pos(head, next_pos, current_dir)
+            if next_dir != opposite_dirs.get(current_dir):
+                return next_dir
+
+        return None
+
+    def _find_best_space_move(
+        self, head: Tuple[int, int], snake_body: List[Tuple[int, int]], current_dir: Direction, opposite_dirs: dict
+    ) -> Optional[Direction]:
+        best_move = None
+        best_space = -1
+
+        for next_pos in self.get_adjacencies(head):
+            if next_pos in snake_body:
+                continue
+
+            next_dir = self.get_direction_to_pos(head, next_pos, current_dir)
+
+            if next_dir == opposite_dirs.get(current_dir):
+                continue
+
+            future_snake = [next_pos] + snake_body[:-1]
+            free_space = self.count_free_space(next_pos, future_snake)
+
+            if free_space > best_space:
+                best_space = free_space
+                best_move = next_dir
+
+        return best_move
+
     def get_next_move(self, data: SnakeGameData) -> Direction:
         self.board_width = data.board_width
         self.board_height = data.board_height
@@ -310,160 +360,18 @@ class SnakeHeuristicAI:
         snake_body = data.snake_body
         current_dir = data.snake_direction
 
-        # Nie zawracaj w miejscu
-        opposite_dirs = {
-            Direction.UP: Direction.DOWN,
-            Direction.DOWN: Direction.UP,
-            Direction.LEFT: Direction.RIGHT,
-            Direction.RIGHT: Direction.LEFT,
-        }
+        opposite_dirs = self._get_opposite_directions()
 
-        # 1. Spróbuj znaleźć ścieżkę do jedzenia
-        path_to_food = self.bfs_search(head, food, snake_body)
+        move = self._try_move_to_food(head, food, snake_body, current_dir, opposite_dirs)
+        if move is not None:
+            return move
 
-        if path_to_food and len(path_to_food) > 1:
-            # Sprawdź czy ścieżka jest bezpieczna (czy po zjedzeniu można dotrzeć do ogona)
-            if self.is_safe_move(path_to_food, snake_body):
-                next_pos = path_to_food[1]  # Pierwszy krok w ścieżce
-                next_dir = self.get_direction_to_pos(head, next_pos, current_dir)
-                if next_dir != opposite_dirs.get(current_dir):
-                    return next_dir
+        move = self._try_move_to_tail(head, snake_body, current_dir, opposite_dirs)
+        if move is not None:
+            return move
 
-        # 2. Jeśli nie ma bezpiecznej ścieżki do jedzenia, idź w kierunku ogona
-        if len(snake_body) > 1:
-            tail = snake_body[-1]
-            # Usuń ogon z przeszkód bo będzie się przesuwał
-            snake_without_tail = snake_body[:-1]
-            path_to_tail = self.bfs_search(head, tail, snake_without_tail)
+        move = self._find_best_space_move(head, snake_body, current_dir, opposite_dirs)
+        if move is not None:
+            return move
 
-            if path_to_tail and len(path_to_tail) > 1:
-                next_pos = path_to_tail[1]
-                next_dir = self.get_direction_to_pos(head, next_pos, current_dir)
-                if next_dir != opposite_dirs.get(current_dir):
-                    return next_dir
-
-        # 3. W ostateczności, wybierz ruch z największą wolną przestrzenią
-        best_move = None
-        best_space = -1
-
-        for next_pos in self.get_adjacencies(head):
-            # Nie wchodź w ciało węża
-            if next_pos in snake_body:
-                continue
-
-            next_dir = self.get_direction_to_pos(head, next_pos, current_dir)
-
-            # Nie zawracaj
-            if next_dir == opposite_dirs.get(current_dir):
-                continue
-
-            # Symuluj ruch i sprawdź dostępną przestrzeń
-            future_snake = [next_pos] + snake_body[:-1]  # Wąż się przesuwa (nie rośnie)
-            free_space = self.count_free_space(next_pos, future_snake)
-
-            if free_space > best_space:
-                best_space = free_space
-                best_move = next_dir
-
-        if best_move is not None:
-            return best_move
-
-        # 4. Jeśli wszystko zawodzi, kontynuuj obecny kierunek (prawdopodobnie game over)
         return current_dir
-
-
-def main() -> None:
-    controller = SnakeGameController()
-    heuristic_ai = SnakeHeuristicAI()
-
-    if not controller.connect():
-        return 1
-
-    print("\n🐍 Snake Heuristic AI Controller")
-    print("=" * 70)
-    print("Algorytm heurystyczny (pathfinding + bezpieczeństwo)")
-    print()
-    print("Sterowanie:")
-    print("  r - Start/Restart gry z algorytmem")
-    print("  q - Quit")
-    print("  Ctrl+C - Wyjście")
-    print()
-
-    ai_active = False
-    game_started = False
-
-    try:
-        old_settings = termios.tcgetattr(sys.stdin)
-        try:
-            tty.setcbreak(sys.stdin.fileno())
-
-            while True:
-                # Sprawdź input od użytkownika
-                if select.select([sys.stdin], [], [], 0)[0]:
-                    key = sys.stdin.read(1).lower()
-
-                    if key == "r":
-                        controller.send_command(IpcCommands.START_GAME)
-                        ai_active = True
-                        game_started = True
-                        print("\n[CMD] Start game with Heuristic AI")
-                    elif key == "q":
-                        controller.send_command(IpcCommands.QUIT_GAME)
-                        print("\n[CMD] Quit game")
-                        break
-
-                # Odczytaj stan gry
-                data = controller.read_data()
-
-                if data:
-                    # Wyświetl status
-                    print(
-                        f"\r[v{data.version:04d}] "
-                        f"State: {data.game_state.name:10s} | "
-                        f"Score: {data.score:4d} | "
-                        f"Speed: {data.speed:2d} | "
-                        f"Snake: {data.snake_length:3d} | "
-                        f"Head: ({data.snake_head[0]:2d},{data.snake_head[1]:2d}) | "
-                        f"Food: ({data.food_position[0]:2d},{data.food_position[1]:2d})",
-                        end="",
-                        flush=True,
-                    )
-
-                    # Jeśli AI jest aktywne i gra trwa
-                    if ai_active and data.game_state == GameState.PLAYING:
-                        # Pobierz decyzję od algorytmu heurystycznego
-                        direction = heuristic_ai.get_next_move(data)
-
-                        # Wyślij komendę
-                        command_map = {
-                            Direction.UP: IpcCommands.MOVE_UP,
-                            Direction.DOWN: IpcCommands.MOVE_DOWN,
-                            Direction.LEFT: IpcCommands.MOVE_LEFT,
-                            Direction.RIGHT: IpcCommands.MOVE_RIGHT,
-                        }
-
-                        if direction in command_map:
-                            controller.send_command(command_map[direction])
-
-                    # Jeśli gra się skończyła
-                    elif game_started and data.game_state == GameState.GAME_OVER:
-                        print(f"\n\n🎮 GAME OVER! Final Score: {data.score}")
-                        print(f"   Snake Length: {data.snake_length}")
-                        ai_active = False
-                        game_started = False
-
-                time.sleep(0.01)  # 10ms delay
-
-        finally:
-            termios.tcsetattr(sys.stdin, termios.TCSADRAIN, old_settings)
-
-    except KeyboardInterrupt:
-        print("\n\n✓ Heuristic AI stopped")
-    finally:
-        controller.disconnect()
-
-    return 0
-
-
-if __name__ == "__main__":
-    sys.exit(main())

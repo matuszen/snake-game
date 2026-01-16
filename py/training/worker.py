@@ -1,12 +1,9 @@
-import sys
-
-sys.path.insert(0, ".")
 import copy
 
 import numpy as np
-import py.training.snake_game as snakelib
 import ray
 
+from py import snake_lib as snakelib
 from py.training.neural import Neural
 
 
@@ -23,6 +20,12 @@ class Worker:
         self.games = [snakelib.Game(config.WIDTH, config.HEIGHT) for _ in range(pop_size)]
 
         self.gamestates = [game.initialize_game() for game in self.games]
+        self.directions = [
+            snakelib.Direction.UP,
+            snakelib.Direction.DOWN,
+            snakelib.Direction.LEFT,
+            snakelib.Direction.RIGHT,
+        ]
 
     def run(self):
         fitness = self.eval()
@@ -41,14 +44,8 @@ class Worker:
                 inputs = self.gamestates[i].distances
                 outputs = self.population[i].predict(inputs)
                 direction = np.argmax(outputs)
-                directions = [
-                    snakelib.Direction.UP,
-                    snakelib.Direction.DOWN,
-                    snakelib.Direction.LEFT,
-                    snakelib.Direction.RIGHT,
-                ]
 
-                self.gamestates[i] = self.games[i].step_game(directions[direction])
+                self.gamestates[i] = self.games[i].step_game(self.directions[direction])
 
                 if self.gamestates[i].fruit_picked_up:
                     fitness[i] += 1
@@ -71,8 +68,8 @@ class Worker:
         sorted_indices = np.argsort(fitness)[::-1]
         sorted_population = [self.population[i] for i in sorted_indices]
         sorted_fitness = np.array([fitness[i] for i in sorted_indices])
-        # progress = self.gen_number / self.config.GENERATIONS
-        mutation_rate = self.config.MUTATION_RATE  # * (1 - progress * 0.5)
+
+        mutation_rate = self.config.MUTATION_RATE
         new_pop = []
 
         num_retain = int(self.pop_size * self.config.POP_RETENTION)
@@ -82,7 +79,6 @@ class Worker:
         for i in range(num_retain):
             new_pop.append(sorted_population[i])
 
-        # Weight based breeding, anyone can breed for higher variety
         if np.max(sorted_fitness) > 0:
             probabilities = sorted_fitness / np.sum(sorted_fitness)
         else:

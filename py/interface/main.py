@@ -4,15 +4,14 @@ import sys
 import time
 from pathlib import Path
 
-current_file_path = Path(__file__).resolve()
-py_folder = current_file_path.parent.parent
-sys.path.insert(0, str(py_folder))
-import numpy as np  # noqa: E402
-import pygame  # noqa: E402
-from snakeAgent import SnakeAgent  # noqa: E402
-from SnakeGameController import Controller, Direction, FoodType, GameState, IpcCommands  # noqa: E402
-from snakeHeuristicController import SnakeHeuristicAI  # noqa: E402, F402
+import numpy as np
+import pygame
 
+from py.interface.heuristicController import SnakeHeuristicAI
+from py.interface.SnakeGameController import Controller, Direction, FoodType, GameState, IpcCommands
+from py.snakeAgent import SnakeAgent
+
+current_file_path = Path(__file__).resolve()
 if not os.environ.get("DISPLAY") and not os.environ.get("WAYLAND_DISPLAY"):
     os.environ["SDL_VIDEODRIVER"] = "dummy"
     os.environ["SDL_AUDIODRIVER"] = "dummy"
@@ -57,7 +56,7 @@ def update_layout(map_width, map_height):
     load_images()
 
 
-def load_images():
+def load_images():  # noqa: C901
     """Ładuje obrazy. Informuje o sukcesie lub braku pliku."""
     global GRAPHICS
 
@@ -182,7 +181,7 @@ def draw_board(screen, width, height):
     pygame.draw.rect(screen, (100, 100, 100), (OFFSET_X, OFFSET_Y, board_px_w, board_px_h), 2)
 
 
-def draw_snake(screen, snake_head, snake_body, snake_dir):
+def draw_snake(screen, snake_head, snake_body, snake_dir):  # noqa: C901
     body_without_head = [part for part in snake_body if part != snake_head]
     segments = [snake_head] + body_without_head
     tail_pos = segments[-1] if segments else None
@@ -266,7 +265,7 @@ def draw_snake(screen, snake_head, snake_body, snake_dir):
         pygame.draw.rect(screen, (0, 200, 0), (px, py, CELL_SIZE, CELL_SIZE))
 
 
-def main():
+def main():  # noqa: C901
     global SCREEN_WIDTH, SCREEN_HEIGHT
     controller = Controller()
 
