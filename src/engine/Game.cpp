@@ -40,22 +40,22 @@ Game::Game(const uint8_t boardWidth, const uint8_t boardHeight)
 
 void Game::run()
 {
-  using Clock = std::chrono::steady_clock;
-  auto lastTime = Clock::now();
+  using Clock            = std::chrono::steady_clock;
+  auto   lastTime        = Clock::now();
   double timeAccumulator = 0.0;
 
   while (state_ != GameState::QUIT)
   {
-    auto currentTime = Clock::now();
-    std::chrono::duration<double, std::milli> elapsed = currentTime - lastTime;
-    lastTime = currentTime;
+    auto                                      currentTime = Clock::now();
+    std::chrono::duration<double, std::milli> elapsed     = currentTime - lastTime;
+    lastTime                                              = currentTime;
 
     processSocketCommand();
 
     if (state_ == GameState::PLAYING)
     {
-      timeAccumulator += elapsed.count();
-      const double targetDelay = static_cast<double>(getDelayMs());
+      timeAccumulator          += elapsed.count();
+      const double targetDelay  = static_cast<double>(getDelayMs());
 
       if (timeAccumulator >= targetDelay)
       {
@@ -65,14 +65,14 @@ void Game::run()
           currentDirection = *pendingDirection_;
           pendingDirection_.reset();
         }
-        
+
         update(currentDirection);
-        
+
         timeAccumulator -= targetDelay;
 
-        if (timeAccumulator > targetDelay) 
+        if (timeAccumulator > targetDelay)
         {
-            timeAccumulator = 0.0;
+          timeAccumulator = 0.0;
         }
         updateSharedMemory();
       }
