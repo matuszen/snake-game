@@ -40,27 +40,50 @@ Game::Game(const uint8_t boardWidth, const uint8_t boardHeight)
 
 void Game::run()
 {
+  using Clock = std::chrono::steady_clock;
+  auto lastTime = Clock::now();
+  double timeAccumulator = 0.0;
+
   while (state_ != GameState::QUIT)
   {
+    auto currentTime = Clock::now();
+    std::chrono::duration<double, std::milli> elapsed = currentTime - lastTime;
+    lastTime = currentTime;
+
     processSocketCommand();
 
     if (state_ == GameState::PLAYING)
     {
-      auto currentDirection = snake_ ? snake_->getDirection() : Direction::UP;
-      if (pendingDirection_)
+      timeAccumulator += elapsed.count();
+      const double targetDelay = static_cast<double>(getDelayMs());
+
+      if (timeAccumulator >= targetDelay)
       {
-        currentDirection = *pendingDirection_;
-        pendingDirection_.reset();
+        auto currentDirection = snake_ ? snake_->getDirection() : Direction::UP;
+        if (pendingDirection_)
+        {
+          currentDirection = *pendingDirection_;
+          pendingDirection_.reset();
+        }
+        
+        update(currentDirection);
+        
+        timeAccumulator -= targetDelay;
+
+        if (timeAccumulator > targetDelay) 
+        {
+            timeAccumulator = 0.0;
+        }
+        updateSharedMemory();
       }
-      update(currentDirection);
-      std::this_thread::sleep_for(std::chrono::milliseconds(getDelayMs()));
     }
     else
     {
-      std::this_thread::sleep_for(std::chrono::milliseconds(50));
+      timeAccumulator = 0.0;
+      updateSharedMemory();
+      std::this_thread::sleep_for(std::chrono::milliseconds(10));
     }
-
-    updateSharedMemory();
+    std::this_thread::sleep_for(std::chrono::milliseconds(1));
   }
 }
 
@@ -118,7 +141,7 @@ void Game::update(const Direction direction)
     fruitPickedThisFrame_ = true;
     snake_->grow();
     score_ += 10;
-    board_->placeFood();
+    board_->placeFood(snake_->getBody());
   }
 }
 
