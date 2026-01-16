@@ -1,64 +1,62 @@
 name: CI
 on:
   push:
-    branches: [ master, develop/* ]
+    branches: [ master ]
   pull_request:
-    branches: [ master, develop/* ]
+    branches: [ master ]
 
 jobs:
   format-cpp:
-    name: Clang-Format C++ Check
+    name: C++ clang-format
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
-
       - name: Install clang-format
-        run: sudo apt-get update && sudo apt-get install -y clang-format
-
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y clang-format
       - name: Check C++ formatting
         run: clang-format --style=file --dry-run -Werror $(find src -name '*.cpp' -o -name '*.hpp')
 
   build-cpp:
-    name: Build C++
+    name: C++ compile
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
-
       - name: Install build dependencies
         run: |
           sudo apt-get update
-          sudo apt-get install -y cmake make pkg-config libnotcurses-dev pybind11-dev
-
+          sudo apt-get install -y cmake make pkg-config pybind11-dev
       - name: Configure CMake
         run: |
           mkdir -p build
           cd build
           cmake ..
-
       - name: Build project
         run: |
           cd build
           make
 
   lint-python:
-    name: Ruff Python Lint & Format
+    name: Python lint & format
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
-
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
           python-version: '3.12'
-
-      - name: Install ruff
-        run: pip install ruff
-
-      - name: Ruff check
-        run: ruff check py
-
-      - name: Ruff format check
-        run: ruff format --check py
+      - name: Install dependencies
+        run: |
+          pip install ruff isort
+          sudo apt-get update
+          sudo apt-get install -y flake8
+      - name: ruff check
+        run: ruff check py/
+      - name: isort check
+        run: isort py/ --check --diff
+      - name: flake8 check
+        run: flake8 py/

@@ -2,7 +2,6 @@ import logging
 import os
 import sys
 
-sys.path.insert(0, ".")
 import matplotlib.pyplot as plt
 import numpy as np
 import ray
@@ -18,16 +17,7 @@ logging.getLogger("ray._raylet").setLevel(logging.CRITICAL)
 ray.init(log_to_driver=False, ignore_reinit_error=True)
 
 
-def main():
-    config = Config()
-    workers = [
-        Worker.remote(config, pop_size=config.POPULATION_SIZE, hidden_size=config.HIDDEN_SIZE)
-        for _ in range(config.WORKERS)
-    ]
-    best_network = None
-    best_fit = -1
-    best_history = []
-    worker_history = [[] for _ in range(config.WORKERS)]
+def print_config(config):
     print("=" * 60)
     print("SNAKE AI TRAINING - CONFIGURATION".center(60))
     print("=" * 60)
@@ -45,55 +35,60 @@ def main():
     print("=" * 60)
     print()
 
-    for gen in range(config.GENERATIONS):
-        futures = [worker.run.remote() for worker in workers]
-        results = ray.get(futures)
-        global_best = 0
-        # migrations
-        if gen > 0 and gen % config.MIGRATION_INTERVAL == 0:
-            try:
-                mig_best_net = [result["best_network"] for result in results]
-                mig_global_best = mig_best_net[np.argmax([result["best_fitness"] for result in results])]
-                futures = [worker.inject_network.remote(mig_global_best) for worker in workers]
-                save_network(
-                    mig_global_best,
-                    f"py/training/models/autosaves/migration{gen}_{int(np.max([result['best_fitness'] for result in results]))}.json",  # noqa
-                )
-                save_network(best_network, f"py/training/models/best/best_network_gen{gen}_{best_fit}.json")
 
-                ray.get(futures, timeout=30)
-            except Exception as e:
-                print(f"Migration failed: {e}", flush=True)
+def handle_migration(gen, config, workers, results, best_network, best_fit):
+    if gen > 0 and gen % config.MIGRATION_INTERVAL == 0:
+        try:
+            mig_best_net = [result["best_network"] for result in results]
+            mig_global_best = mig_best_net[np.argmax([result["best_fitness"] for result in results])]
+            futures = [worker.inject_network.remote(mig_global_best) for worker in workers]
+            save_network(
+                mig_global_best,
+                f"py/training/models/autosaves/migration{gen}_{int(np.max([result['best_fitness'] for result in results]))}.json",  # noqa
+            )
+            save_network(best_network, f"py/training/models/best/best_network_gen{gen}_{best_fit}.json")
 
-        output_lines = []
-        for worker, result in enumerate(results):
-            best_snake = result["best_network"]
-            max_fit = result["best_fitness"]
-            avg_fit = result["avg_fitness"]
-            output_lines.append(f"Worker {worker}: Gen {gen} | Max: {max_fit:.2f} | Avg: {avg_fit:.2f}")
+            ray.get(futures, timeout=30)
+        except Exception as e:
+            print(f"Migration failed: {e}", flush=True)
 
-            if max_fit > best_fit:
-                best_fit = max_fit
-                best_network = best_snake
 
-            if max_fit > global_best:
-                global_best = max_fit
+def process_generation(gen, config, workers, results, best_history, worker_history):
+    global_best = 0
+    best_fit = -1
+    best_network = None
 
-            worker_history[worker].append(max_fit)
-        best_history.append(global_best)
-        output_lines.append(
-            f"\nGeneration {gen} complete. Generation Best: {global_best:.2f}. Global Best: {best_fit:.2f}"
-        )
+    handle_migration(gen, config, workers, results, best_network, best_fit)
 
-        if gen > 0:
-            sys.stdout.write(f"\033[{len(output_lines) + 1}A")
-            sys.stdout.flush()
+    output_lines = []
+    for worker, result in enumerate(results):
+        best_snake = result["best_network"]
+        max_fit = result["best_fitness"]
+        avg_fit = result["avg_fitness"]
+        output_lines.append(f"Worker {worker}: Gen {gen} | Max: {max_fit:.2f} | Avg: {avg_fit:.2f}")
 
-        for line in output_lines:
-            print(f"\033[2K{line}")
+        if max_fit > best_fit:
+            best_fit = max_fit
+            best_network = best_snake
 
-    print("Training complete. Saving best network...")
-    save_network(best_network, f"py/training/models/network_{int(best_fit)}.json")
+        if max_fit > global_best:
+            global_best = max_fit
+
+        worker_history[worker].append(max_fit)
+    best_history.append(global_best)
+    output_lines.append(f"\nGeneration {gen} complete. Generation Best: {global_best:.2f}. Global Best: {best_fit:.2f}")
+
+    if gen > 0:
+        sys.stdout.write(f"\033[{len(output_lines) + 1}A")
+        sys.stdout.flush()
+
+    for line in output_lines:
+        print(f"\033[2K{line}")
+
+    return best_network, best_fit
+
+
+def plot_training_progress(config, best_history, worker_history):
     num_workers = config.WORKERS
     fig, axes = plt.subplots(num_workers + 1, 1, figsize=(12, 4 * (num_workers + 1)))
 
@@ -114,6 +109,29 @@ def main():
     plt.tight_layout()
     plt.savefig("py/training/models/training_progress.png", dpi=150)
     plt.show()
+
+
+def main():
+    config = Config()
+    workers = [
+        Worker.remote(config, pop_size=config.POPULATION_SIZE, hidden_size=config.HIDDEN_SIZE)
+        for _ in range(config.WORKERS)
+    ]
+    best_network = None
+    best_fit = -1
+    best_history = []
+    worker_history = [[] for _ in range(config.WORKERS)]
+
+    print_config(config)
+
+    for gen in range(config.GENERATIONS):
+        futures = [worker.run.remote() for worker in workers]
+        results = ray.get(futures)
+        best_network, best_fit = process_generation(gen, config, workers, results, best_history, worker_history)
+
+    print("Training complete. Saving best network...")
+    save_network(best_network, f"py/training/models/network_{int(best_fit)}.json")
+    plot_training_progress(config, best_history, worker_history)
 
     ray.shutdown()
 

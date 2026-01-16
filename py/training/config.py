@@ -1,28 +1,26 @@
-# Hyperparameters and such
-
-
 class Config:
-    def __init__(self):
-        self.WIDTH = 20
-        self.HEIGHT = 20
-        self.MAX_STEPS = 150  # max steps without eating fruit
+    """Configuration parameters for the Snake AI training."""
 
-        self.INPUT_SIZE = 12
-        self.HIDDEN_SIZE = 32
-        self.OUTPUT_SIZE = 4
-        self.WEIGHT_RANGE = 3.0
+    WIDTH = 20
+    HEIGHT = 20
+    MAX_STEPS = 150
 
-        self.MUTATION_RATE = 0.2
-        self.MUTATION_VARIANCE = 0.5
+    INPUT_SIZE = 12
+    HIDDEN_SIZE = 32
+    OUTPUT_SIZE = 4
+    WEIGHT_RANGE = 3.0
 
-        self.POP_RETENTION = 0.1  # all 3 of these need to sum to 1.0
-        self.POP_CHILDREN = 0.80
-        self.POP_RANDOM = 0.1
+    MUTATION_RATE = 0.2
+    MUTATION_VARIANCE = 0.5
 
-        self.GENERATIONS = 2000
-        self.POPULATION_SIZE = 200  # how many agents per worker
-        self.WORKERS = 4
-        self.MIGRATION_INTERVAL = 50
+    POP_RETENTION = 0.1
+    POP_CHILDREN = 0.80
+    POP_RANDOM = 0.1
 
-        self.FOOD_REWARD = 10
-        self.STEP_REWARD = 0.001
+    GENERATIONS = 2000
+    POPULATION_SIZE = 200
+    WORKERS = 4
+    MIGRATION_INTERVAL = 50
+
+    FOOD_REWARD = 10
+    STEP_REWARD = 0.001
