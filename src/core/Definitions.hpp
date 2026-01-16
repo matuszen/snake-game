@@ -10,7 +10,7 @@
 namespace SnakeGame
 {
 
-inline constexpr uint8_t          DEFAULT_BOARD_WIDTH  = 40;
+inline constexpr uint8_t          DEFAULT_BOARD_WIDTH  = 20;
 inline constexpr uint8_t          DEFAULT_BOARD_HEIGHT = 20;
 inline constexpr std::string_view DEFAULT_SHM_NAME     = "/snake_game_shm";
 inline constexpr std::string_view DEFAULT_SOCKET_PATH  = "/tmp/snake_game.sock";
