@@ -13,6 +13,7 @@
 #include <cstdint>
 #include <iostream>
 #include <memory>
+#include <ratio>
 #include <thread>
 
 namespace SnakeGame
@@ -40,22 +41,24 @@ Game::Game(const uint8_t boardWidth, const uint8_t boardHeight)
 
 void Game::run()
 {
-  using Clock            = std::chrono::steady_clock;
+  using Clock      = std::chrono::steady_clock;
+  using DurationMs = std::chrono::duration<double, std::milli>;
+
   auto   lastTime        = Clock::now();
   double timeAccumulator = 0.0;
 
   while (state_ != GameState::QUIT)
   {
-    auto                                      currentTime = Clock::now();
-    std::chrono::duration<double, std::milli> elapsed     = currentTime - lastTime;
-    lastTime                                              = currentTime;
+    const auto currentTime = Clock::now();
+    const auto elapsed     = DurationMs(currentTime - lastTime);
+    lastTime               = currentTime;
 
     processSocketCommand();
 
     if (state_ == GameState::PLAYING)
     {
-      timeAccumulator          += elapsed.count();
-      const double targetDelay  = static_cast<double>(getDelayMs());
+      timeAccumulator        += elapsed.count();
+      const auto targetDelay  = static_cast<double>(getDelayMs());
 
       if (timeAccumulator >= targetDelay)
       {
