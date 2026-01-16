@@ -7,7 +7,7 @@ on:
 
 jobs:
   format-cpp:
-    name: C++ clang-Format
+    name: C++ clang-format
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code

@@ -11,15 +11,6 @@ check_build_tools() {
     return 0
 }
 
-check_gcc_version() {
-    local gcc_version
-    gcc_version=$(g++ -dumpversion | cut -d. -f1)
-    if [ "$gcc_version" -lt 10 ]; then
-        return 1
-    fi
-    return 0
-}
-
 check_python_tools() {
     echo "Checking for Python tools..."
     source .venv/bin/activate
@@ -50,13 +41,6 @@ if ! check_build_tools; then
         pkg-config \
         git \
         libc6-dev > /dev/null 2>&1
-fi
-
-if ! check_gcc_version; then
-    echo "Upgrading GCC to version 10+..."
-    sudo apt-get install -y -qq gcc-10 g++-10 > /dev/null 2>&1
-    sudo update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-10 100 > /dev/null 2>&1
-    sudo update-alternatives --install /usr/bin/g++ g++ /usr/bin/g++-10 100 > /dev/null 2>&1
 fi
 
 if [ ! -d ".venv" ]; then

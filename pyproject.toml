@@ -20,7 +20,19 @@ exclude = [
 [tool.ruff.lint]
 select = ["E", "F", "W", "C90"]
 extend-select = ["B", "D", "I", "S"]
-extend-ignore = ["E203", "D100", "D101", "D102", "D103", "D107", "C901", "S108", "S311"]
+extend-ignore = [
+    "E203",
+    "D100",
+    "D101",
+    "D102",
+    "D103",
+    "D107",
+    "C901",
+    "S108",
+    "S311",
+    "D213",
+    "D203",
+]
 
 [tool.ruff.lint.isort]
 known-first-party = ["py"]
