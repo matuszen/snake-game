@@ -38,7 +38,6 @@ GRAPHICS = {}
 
 
 def update_layout(map_width, map_height):
-
     global CELL_SIZE, OFFSET_X, OFFSET_Y, SCREEN_WIDTH, SCREEN_HEIGHT
 
     target_board_height = SCREEN_HEIGHT * 0.80
@@ -129,7 +128,7 @@ def restart_game_process(width, height):
 
     try:
         print(f"[SYSTEM] Restarting C++ game with size {width}x{height}...")
-        game_process = subprocess.Popen( # noqa: S603
+        game_process = subprocess.Popen(  # noqa: S603
             [str(cpp_game_path), str(width), str(height)], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL
         )
         current_process_size = (width, height)
