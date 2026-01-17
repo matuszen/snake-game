@@ -222,7 +222,6 @@ void Game::processSocketCommand() noexcept
             newDimensions.second <= maxBoardDimension)
         {
           board_ = std::make_unique<Board>(newDimensions);
-          initialize();
         }
       }
       break;
