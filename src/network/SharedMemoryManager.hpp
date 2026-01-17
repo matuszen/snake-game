@@ -3,7 +3,6 @@
 #include "Definitions.hpp"
 
 #include <atomic>
-#include <cstddef>
 #include <cstdint>
 #include <memory>
 #include <mutex>
@@ -38,7 +37,6 @@ private:
   std::string                  shmName_;
 
   int32_t shmFd_;
-  size_t  shmSize_;
   void*   shmPtr_;
   bool    initialized_;
 

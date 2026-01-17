@@ -10,6 +10,7 @@
 #include <unistd.h>
 
 #include <algorithm>
+#include <array>
 #include <atomic>
 #include <cerrno>
 #include <chrono>
@@ -21,6 +22,7 @@
 #include <string>
 #include <thread>
 #include <utility>
+#include <vector>
 
 namespace SnakeGame
 {
@@ -69,11 +71,13 @@ void CommandSocket::stop()
   const auto clientFd = socket(AF_UNIX, SOCK_STREAM, 0);
   if (clientFd >= 0)
   {
-    auto addr       = sockaddr_un{};
+    constexpr uint32_t addrSize = sizeof(sockaddr_un);
+    auto               addr     = sockaddr_un{};
+
     addr.sun_family = AF_UNIX;
     copySocketPath(std::span{addr.sun_path}, socketPath_);
 
-    [[maybe_unused]] const auto _ = connect(clientFd, reinterpret_cast<const sockaddr*>(&addr), sizeof(addr));
+    [[maybe_unused]] const auto _ = connect(clientFd, reinterpret_cast<const sockaddr*>(&addr), addrSize);
     close(clientFd);
   }
 
@@ -98,17 +102,17 @@ auto CommandSocket::initializeSocket() -> bool
   serverFd_ = socket(AF_UNIX, SOCK_STREAM, 0);
   if (serverFd_ < 0)
   {
-    std::cerr << "Błąd tworzenia socketu\n";
+    std::cerr << "Error creating socket\n";
     return false;
   }
-
-  auto addr       = sockaddr_un{};
-  addr.sun_family = AF_UNIX;
+  constexpr uint32_t addrSize = sizeof(sockaddr_un);
+  auto               addr     = sockaddr_un{};
+  addr.sun_family             = AF_UNIX;
   copySocketPath(std::span{addr.sun_path}, socketPath_);
 
-  if (bind(serverFd_, reinterpret_cast<const sockaddr*>(&addr), sizeof(addr)) < 0)
+  if (bind(serverFd_, reinterpret_cast<const sockaddr*>(&addr), addrSize) < 0)
   {
-    std::cerr << "Błąd bind socketu\n";
+    std::cerr << "Error binding socket\n";
     close(serverFd_);
     serverFd_ = -1;
     return false;
@@ -117,7 +121,7 @@ auto CommandSocket::initializeSocket() -> bool
   constexpr int32_t backlog = 5;
   if (listen(serverFd_, backlog) < 0)
   {
-    std::cerr << "Błąd listen na sockecie\n";
+    std::cerr << "Error listening on socket\n";
     close(serverFd_);
     serverFd_ = -1;
     return false;
@@ -158,7 +162,7 @@ void CommandSocket::serverThreadFunction()
     {
       if (errno != EINTR)
       {
-        std::cerr << "Błąd select na sockecie\n";
+        std::cerr << "Error on select on socket\n";
       }
       continue;
     }
@@ -173,7 +177,7 @@ void CommandSocket::serverThreadFunction()
     {
       if (errno != EINTR and errno != EAGAIN)
       {
-        std::cerr << "Błąd accept połączenia\n";
+        std::cerr << "Error accepting connection\n";
       }
       continue;
     }
@@ -184,14 +188,15 @@ void CommandSocket::serverThreadFunction()
       break;
     }
 
-    constexpr auto recvTimeout = timeval{
-      .tv_sec  = 1,
-      .tv_usec = 0,
+    constexpr uint32_t timevalSize = sizeof(timeval);
+    constexpr auto     recvTimeout = timeval{
+          .tv_sec  = 1,
+          .tv_usec = 0,
     };
 
-    if (setsockopt(clientFd, SOL_SOCKET, SO_RCVTIMEO, &recvTimeout, sizeof(recvTimeout)) < 0)
+    if (setsockopt(clientFd, SOL_SOCKET, SO_RCVTIMEO, &recvTimeout, timevalSize) < 0)
     {
-      std::cerr << "Błąd ustawiania timeoutu na sockecie\n";
+      std::cerr << "Error setting timeout on socket\n";
     }
 
     handleClient(clientFd);
@@ -201,8 +206,10 @@ void CommandSocket::serverThreadFunction()
 
 void CommandSocket::handleClient(const int32_t clientFd)
 {
-  uint8_t    cmdByte   = 0;
-  const auto bytesRead = recv(clientFd, &cmdByte, sizeof(cmdByte), 0);
+  constexpr auto commandBufferSize = sizeof(uint8_t);
+  uint8_t        commandByte       = 0;
+
+  const auto bytesRead = recv(clientFd, &commandByte, commandBufferSize, 0);
 
   if (bytesRead < 0)
   {
@@ -214,26 +221,40 @@ void CommandSocket::handleClient(const int32_t clientFd)
     return;
   }
 
-  if (bytesRead != static_cast<ssize_t>(sizeof(cmdByte)))
+  if (bytesRead != static_cast<ssize_t>(commandBufferSize))
   {
     return;
   }
 
-  if (cmdByte > static_cast<uint8_t>(IpcCommands::QUIT_GAME))
+  if (commandByte > static_cast<uint8_t>(IpcCommands::QUIT_GAME))
   {
-    std::cerr << "Nieprawidłowa komenda: " << static_cast<int>(cmdByte) << '\n';
+    std::cerr << "Invalid command: " << static_cast<int32_t>(commandByte) << '\n';
     return;
   }
 
-  const auto command = static_cast<IpcCommands>(cmdByte);
+  const auto           command = static_cast<IpcCommands>(commandByte);
+  std::vector<uint8_t> payload;
+
+  if (command == IpcCommands::CHANGE_BOARD_SIZE)
+  {
+    std::array<uint8_t, 2> buf{};
+
+    const size_t bytes = recv(clientFd, buf.data(), buf.size(), 0);
+    if (bytes != buf.size())
+    {
+      std::cerr << "Error during reading CHANGE_BOARD_SIZE command\n";
+      return;
+    }
+    payload.assign(std::begin(buf), std::end(buf));
+  }
 
   if (callback_)
   {
-    callback_(command);
+    callback_(command, payload);
   }
-
-  constexpr uint8_t ack = 1;
-  send(clientFd, &ack, sizeof(ack), 0);
+  constexpr auto    ackSize = sizeof(uint8_t);
+  constexpr uint8_t ack     = 1;
+  send(clientFd, &ack, ackSize, 0);
 }
 
 void CommandSocket::copySocketPath(const std::span<char> destinationBuffer, const std::string& source) noexcept

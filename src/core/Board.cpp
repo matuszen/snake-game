@@ -9,8 +9,8 @@
 namespace SnakeGame
 {
 
-Board::Board(const uint8_t width, const uint8_t height)
-  : width_(width), height_(height), foodPosition_{0, 0}, foodType_(FoodType::APPLE)
+Board::Board(const BoardDimensions dimensions)
+  : width_(dimensions.first), height_(dimensions.second), foodPosition_{0, 0}, foodType_(FoodType::APPLE)
 {
   placeFood();
 }

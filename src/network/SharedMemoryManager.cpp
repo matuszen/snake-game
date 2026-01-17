@@ -21,8 +21,8 @@ namespace SnakeGame
 {
 
 SharedMemoryManager::SharedMemoryManager(std::string shmName)
-  : hasNewData_(false), shouldStopWriter_(false), shmName_(std::move(shmName)), shmFd_(-1),
-    shmSize_(sizeof(SharedMemoryData)), shmPtr_(nullptr), initialized_(initializeSharedMemory())
+  : hasNewData_(false), shouldStopWriter_(false), shmName_(std::move(shmName)), shmFd_(-1), shmPtr_(nullptr),
+    initialized_(initializeSharedMemory())
 {
 }
 
@@ -90,14 +90,14 @@ auto SharedMemoryManager::initializeSharedMemory() -> bool
     return false;
   }
 
-  if (ftruncate(shmFd_, static_cast<off_t>(shmSize_)) == -1)
+  if (ftruncate(shmFd_, static_cast<off_t>(SHARED_MEMORY_SIZE)) == -1)
   {
     close(shmFd_);
     shm_unlink(shmName_.c_str());
     return false;
   }
 
-  shmPtr_ = mmap(nullptr, shmSize_, PROT_READ | PROT_WRITE, MAP_SHARED, shmFd_, 0);
+  shmPtr_ = mmap(nullptr, SHARED_MEMORY_SIZE, PROT_READ | PROT_WRITE, MAP_SHARED, shmFd_, 0);
   if (shmPtr_ == MAP_FAILED)
   {
     close(shmFd_);
@@ -115,7 +115,7 @@ void SharedMemoryManager::cleanupSharedMemory() noexcept
 {
   if (shmPtr_ != nullptr and shmPtr_ != MAP_FAILED)
   {
-    munmap(shmPtr_, shmSize_);
+    munmap(shmPtr_, SHARED_MEMORY_SIZE);
     shmPtr_ = nullptr;
   }
 

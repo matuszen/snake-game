@@ -13,14 +13,16 @@
 #include <cstdint>
 #include <iostream>
 #include <memory>
+#include <mutex>
 #include <ratio>
 #include <thread>
+#include <vector>
 
 namespace SnakeGame
 {
 
-Game::Game(const uint8_t boardWidth, const uint8_t boardHeight)
-  : snake_(nullptr), board_(std::make_unique<Board>(boardWidth, boardHeight)), pendingCommand_(IpcCommands::NONE),
+Game::Game(const BoardDimensions boardSize)
+  : snake_(nullptr), board_(std::make_unique<Board>(boardSize)), pendingCommand_(IpcCommands::NONE),
     state_(GameState::MENU), score_(0), speed_(1), fruitPickedThisFrame_(false)
 {
   shmManager_    = std::make_unique<SharedMemoryManager>();
@@ -30,7 +32,8 @@ Game::Game(const uint8_t boardWidth, const uint8_t boardHeight)
     shmManager_->startAsyncWriter();
   }
 
-  const auto started = commandSocket_->start([this](IpcCommands cmd) -> void { this->handleCommand(cmd); });
+  const auto started = commandSocket_->start([this](IpcCommands cmd, const std::vector<uint8_t>& payload) -> void
+                                             { this->handleCommand(cmd, payload); });
 
   if (not started)
   {
@@ -205,6 +208,23 @@ void Game::processSocketCommand() noexcept
       state_ = GameState::QUIT;
       break;
 
+    case IpcCommands::CHANGE_BOARD_SIZE:
+      if (state_ == GameState::MENU)
+      {
+        auto newDimensions = BoardDimensions{0, 0};
+        {
+          const std::lock_guard<std::mutex> lock(commandMutex_);
+          newDimensions = pendingBoardSize_;
+        }
+
+        if (newDimensions.first >= 5 and newDimensions.second >= 5)
+        {
+          board_ = std::make_unique<Board>(newDimensions);
+          initialize();
+        }
+      }
+      break;
+
     case IpcCommands::NONE:
       break;
   }
@@ -232,8 +252,13 @@ void Game::handleCollision() noexcept
   }
 }
 
-void Game::handleCommand(IpcCommands command) noexcept
+void Game::handleCommand(IpcCommands command, const std::vector<uint8_t>& payload) noexcept
 {
+  if (command == IpcCommands::CHANGE_BOARD_SIZE and payload.size() == 2)
+  {
+    const std::lock_guard<std::mutex> lock(commandMutex_);
+    pendingBoardSize_ = {payload[0], payload[1]};
+  }
   pendingCommand_.store(command, std::memory_order_release);
 }
 
