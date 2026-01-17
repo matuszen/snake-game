@@ -217,7 +217,9 @@ void Game::processSocketCommand() noexcept
           newDimensions = pendingBoardSize_;
         }
 
-        if (newDimensions.first >= 5 and newDimensions.second >= 5)
+        constexpr uint8_t MAX_BOARD_DIMENSION = 100;
+        if (newDimensions.first >= 5 and newDimensions.second >= 5 and
+            newDimensions.first <= MAX_BOARD_DIMENSION and newDimensions.second <= MAX_BOARD_DIMENSION)
         {
           board_ = std::make_unique<Board>(newDimensions);
           initialize();
