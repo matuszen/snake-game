@@ -226,7 +226,7 @@ void CommandSocket::handleClient(const int32_t clientFd)
     return;
   }
 
-  if (commandByte > static_cast<uint8_t>(IpcCommands::QUIT_GAME))
+  if (commandByte > static_cast<uint8_t>(IpcCommands::CHANGE_BOARD_SIZE))
   {
     std::cerr << "Invalid command: " << static_cast<int32_t>(commandByte) << '\n';
     return;
