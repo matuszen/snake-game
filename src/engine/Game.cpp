@@ -23,7 +23,7 @@ namespace SnakeGame
 
 Game::Game(const BoardDimensions boardSize)
   : snake_(nullptr), board_(std::make_unique<Board>(boardSize)), pendingCommand_(IpcCommands::NONE),
-    state_(GameState::MENU), score_(0), speed_(1), fruitPickedThisFrame_(false)
+    pendingBoardSize_({0, 0}), state_(GameState::MENU), score_(0), speed_(1), fruitPickedThisFrame_(false)
 {
   shmManager_    = std::make_unique<SharedMemoryManager>();
   commandSocket_ = std::make_unique<CommandSocket>();
