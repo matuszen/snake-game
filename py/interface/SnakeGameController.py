@@ -67,7 +67,7 @@ class SnakeGameController:
     def __init__(self, shm_name: str = SHM_NAME, socket_path: str = SOCKET_PATH):
         self.shm_name = shm_name
         self.socket_path = socket_path
-        self.shm_fd: Optional[posix_ipc.SharedMemory] = None
+        self.shm: Optional[posix_ipc.SharedMemory] = None
         self.memory: Optional[mmap.mmap] = None
         self.last_version = 0
 
