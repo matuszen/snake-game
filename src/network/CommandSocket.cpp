@@ -162,7 +162,7 @@ void CommandSocket::serverThreadFunction()
     {
       if (errno != EINTR)
       {
-        std::cerr << "Error on select on socket\n";
+        std::cerr << "Error during select on socket\n";
       }
       continue;
     }
