@@ -243,6 +243,9 @@ void CommandSocket::handleClient(const int32_t clientFd)
     if (bytes != buf.size())
     {
       std::cerr << "Error during reading CHANGE_BOARD_SIZE command\n";
+      constexpr auto    nackSize = sizeof(uint8_t);
+      constexpr uint8_t nack     = 0;
+      send(clientFd, &nack, nackSize, 0);
       return;
     }
     payload.assign(std::begin(buf), std::end(buf));
