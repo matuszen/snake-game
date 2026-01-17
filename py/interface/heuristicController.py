@@ -23,7 +23,7 @@ class SnakeHeuristicAI:
 
     def bfs_search(
         self, start: tuple[int, int], end: tuple[int, int], snake_body: list[tuple[int, int]]
-    ) -> list[tuple[int, int]] | None:
+    ) -> Optional[list[tuple[int, int]]]:
         if start == end:
             return [start]
 
