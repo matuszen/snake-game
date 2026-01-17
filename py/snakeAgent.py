@@ -1,7 +1,3 @@
-import sys
-
-sys.path.insert(0, ".")
-
 from py.training.neural import Neural
 from py.training.utils import load_network
 

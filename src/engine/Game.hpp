@@ -11,6 +11,7 @@
 #include <memory>
 #include <mutex>
 #include <optional>
+#include <vector>
 
 namespace SnakeGame
 {
@@ -18,7 +19,7 @@ namespace SnakeGame
 class Game
 {
 public:
-  Game(uint8_t boardWidth = DEFAULT_BOARD_WIDTH, uint8_t boardHeight = DEFAULT_BOARD_HEIGHT);
+  Game(BoardDimensions boardSize = {DEFAULT_BOARD_WIDTH, DEFAULT_BOARD_HEIGHT});
   ~Game() = default;
 
   Game(const Game& other)           = delete;
@@ -40,6 +41,7 @@ private:
   std::atomic<IpcCommands>             pendingCommand_;
   std::mutex                           commandMutex_;
   std::optional<Direction>             pendingDirection_;
+  BoardDimensions                      pendingBoardSize_{0, 0};
 
   GameState state_;
   uint16_t  score_;
@@ -50,7 +52,7 @@ private:
   void update(Direction direction);
   void processSocketCommand() noexcept;
   void handleCollision() noexcept;
-  void handleCommand(IpcCommands command) noexcept;
+  void handleCommand(IpcCommands command, const std::vector<uint8_t>& payload) noexcept;
   void updateSharedMemory() noexcept;
   auto getDelayMs() const noexcept -> uint16_t;
 };

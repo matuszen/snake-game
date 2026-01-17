@@ -12,31 +12,16 @@
                 "focus": false,
                 "panel": "shared",
                 "showReuseMessage": false,
-                "clear": false
+                "clear": false,
             },
             "group": "none"
         },
         {
-            "label": "Configure CMake",
-            "type": "shell",
-            "command": "mkdir -p build && cd build && cmake ..",
-            "problemMatcher": [],
-            "presentation": {
-                "echo": true,
-                "reveal": "always",
-                "focus": false,
-                "panel": "shared",
-                "showReuseMessage": false,
-                "clear": false
-            },
-            "group": "build"
-        },
-        {
             "label": "Build project",
             "type": "shell",
-            "command": "cd build && make",
+            "command": "mkdir -p ${workspaceFolder}/build && cd ${workspaceFolder}/build && cmake .. && make",
             "problemMatcher": [
-                "$gcc"
+                "$gcc",
             ],
             "presentation": {
                 "echo": true,
@@ -44,20 +29,17 @@
                 "focus": false,
                 "panel": "shared",
                 "showReuseMessage": false,
-                "clear": false
+                "clear": false,
             },
             "group": {
                 "kind": "build",
-                "isDefault": true
+                "isDefault": true,
             },
-            "dependsOn": [
-                "Build: CMake Configure"
-            ]
         },
         {
             "label": "Run game",
             "type": "shell",
-            "command": "${workspaceFolder}/run.sh",
+            "command": "source .venv/bin/activate && python3 py/interface/main.py",
             "problemMatcher": [],
             "presentation": {
                 "echo": true,
@@ -65,17 +47,17 @@
                 "focus": true,
                 "panel": "dedicated",
                 "showReuseMessage": false,
-                "clear": true
+                "clear": true,
             },
             "group": "none",
             "dependsOn": [
-                "Build: Compile Project"
-            ]
+                "Build: Compile Project",
+            ],
         },
         {
             "label": "Start training",
             "type": "shell",
-            "command": "${workspaceFolder}/train.sh",
+            "command": "source .venv/bin/activate && python3 py/training/training.py",
             "problemMatcher": [],
             "presentation": {
                 "echo": true,
@@ -83,15 +65,15 @@
                 "focus": true,
                 "panel": "dedicated",
                 "showReuseMessage": false,
-                "clear": true
+                "clear": true,
             },
             "group": "none",
             "dependsOn": [
-                "Build: Compile Project"
-            ]
+                "Build: Compile Project",
+            ],
         },
         {
-            "label": "Clean",
+            "label": "Clean build files",
             "type": "shell",
             "command": "rm -rf build",
             "problemMatcher": [],
@@ -101,9 +83,9 @@
                 "focus": false,
                 "panel": "shared",
                 "showReuseMessage": false,
-                "clear": false
+                "clear": false,
             },
-            "group": "none"
-        }
-    ]
+            "group": "none",
+        },
+    ],
 }

@@ -2,28 +2,31 @@
 
 #include <array>
 #include <atomic>
+#include <cstddef>
 #include <cstdint>
 #include <functional>
 #include <string_view>
 #include <utility>
+#include <vector>
 
 namespace SnakeGame
 {
 
-inline constexpr uint8_t          DEFAULT_BOARD_WIDTH  = 20;
-inline constexpr uint8_t          DEFAULT_BOARD_HEIGHT = 20;
-inline constexpr std::string_view DEFAULT_SHM_NAME     = "/snake_game_shm";
-inline constexpr std::string_view DEFAULT_SOCKET_PATH  = "/tmp/snake_game.sock";
+inline constexpr std::string_view DEFAULT_SHM_NAME    = "/snake_game_shm";
+inline constexpr std::string_view DEFAULT_SOCKET_PATH = "/tmp/snake_game.sock";
 
-inline constexpr uint16_t INITIAL_SNAKE_LENGTH   = 3;
-inline constexpr uint16_t INITIAL_SPEED_DELAY_MS = 200;
+inline constexpr uint8_t DEFAULT_BOARD_WIDTH  = 20;
+inline constexpr uint8_t DEFAULT_BOARD_HEIGHT = 20;
 
-inline constexpr uint16_t SNAKE_MAX_LENGTH          = 2048;
-inline constexpr uint8_t  SPEED_DECREASE_PER_LEVEL  = 15;
-constexpr int64_t         SHARED_MEMORY_WRITE_DELAY = 200;
+inline constexpr uint16_t INITIAL_SNAKE_LENGTH = 3;
+inline constexpr uint16_t SNAKE_MAX_LENGTH     = 2048;
 
-using Coordinate   = std::pair<uint8_t, uint8_t>;
-using NeuralInputs = std::array<float, 12>;
+inline constexpr uint16_t INITIAL_SPEED_DELAY_MS   = 200;
+inline constexpr uint8_t  SPEED_DECREASE_PER_LEVEL = 15;
+
+using Coordinate      = std::pair<uint8_t, uint8_t>;
+using BoardDimensions = Coordinate;
+using NeuralInputs    = std::array<float, 12>;
 
 enum class Direction : uint8_t
 {
@@ -62,6 +65,7 @@ enum class IpcCommands : uint8_t
   MOVE_RIGHT,
   RESTART_GAME,
   QUIT_GAME,
+  CHANGE_BOARD_SIZE,
 };
 
 struct StepResult
@@ -96,6 +100,9 @@ struct SharedMemoryData
   GameSharedData        gameData{};
 };
 
-using CommandCallback = std::function<void(IpcCommands)>;
+inline constexpr size_t  SHARED_MEMORY_SIZE        = sizeof(SharedMemoryData);
+inline constexpr int64_t SHARED_MEMORY_WRITE_DELAY = 200;
+
+using CommandCallback = std::function<void(IpcCommands, const std::vector<uint8_t>&)>;
 
 }  // namespace SnakeGame

@@ -7,15 +7,17 @@
 #include <pybind11/stl.h>
 
 #include <cstdint>
+#include <memory>
 
 namespace Py = pybind11;
 
-using Game       = SnakeGame::Game;
-using StepResult = SnakeGame::StepResult;
-using GameState  = SnakeGame::GameState;
-using Direction  = SnakeGame::Direction;
+using Game            = SnakeGame::Game;
+using StepResult      = SnakeGame::StepResult;
+using GameState       = SnakeGame::GameState;
+using Direction       = SnakeGame::Direction;
+using BoardDimensions = SnakeGame::BoardDimensions;
 
-PYBIND11_MODULE(snake_game, m)
+PYBIND11_MODULE(snake_lib, m)
 {
   m.doc() = "Snake Game Python Bindings";
 
@@ -40,13 +42,19 @@ PYBIND11_MODULE(snake_game, m)
     .def_readonly("fruit_picked_up", &StepResult::fruitPickedUp);
 
   Py::class_<Game>(m, "Game")
-    .def(Py::init<uint8_t, uint8_t>(), Py::arg("board_width") = 20, Py::arg("board_height") = 20)
+    .def(Py::init([](const uint8_t width, const uint8_t height) -> auto
+                  { return std::make_unique<Game>(BoardDimensions{width, height}); }),
+         Py::arg("width") = 20, Py::arg("height") = 20)
     .def(
       "initialize_game",
       [](Game& g) -> StepResult
       {
         g.reset();
-        return {.distances = g.getNeuralInputs(), .isGameOver = false, .fruitPickedUp = false};
+        return {
+          .distances     = g.getNeuralInputs(),
+          .isGameOver    = false,
+          .fruitPickedUp = false,
+        };
       },
       "Initialize/reset the game and return distances vector")
     .def("step_game", &Game::step, Py::arg("direction"), "Step the game by one frame and return step result");

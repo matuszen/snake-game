@@ -1,13 +1,10 @@
 import json
-import sys
 from pathlib import Path
 
-sys.path.insert(0, ".")
 from py.training.neural import Neural
 
 
 def save_network(network: Neural, filepath: str) -> None:
-    # Ensure directory exists
     Path(filepath).parent.mkdir(parents=True, exist_ok=True)
 
     data = {

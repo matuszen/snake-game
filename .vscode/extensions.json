@@ -3,8 +3,11 @@
         "editorconfig.editorconfig",
         "xaver.clang-format",
         "llvm-vs-code-extensions.vscode-clangd",
-        "ms-vscode.cmake-tools",
         "charliermarsh.ruff",
-        "ms-vscode.cpptools"
+        "ms-vscode.cpptools",
+        "ms-python.isort",
+        "ms-python.flake8",
+        "ms-python.mypy-type-checker",
+        "tamasfe.even-better-toml",
     ]
 }

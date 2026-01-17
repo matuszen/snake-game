@@ -24,19 +24,16 @@ A Snake game implementation in C++.
 
 Run the automated setup script to install all dependencies:
 
-```bash
+```sh
 ./setup.sh
 ```
 
 ## Build & Run
 
-### Using VS Code Tasks
+```sh
+./build.sh
+```
 
-- **Ctrl+Shift+B** - Build project
-- **Ctrl+Shift+P** → "Tasks: Run Task" → "Run game"
-
-### Manual Build
-
-```bash
+```sh
 ./run.sh
 ```
