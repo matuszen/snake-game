@@ -4,19 +4,23 @@ import sys
 import time
 from pathlib import Path
 
-import numpy as np
-import pygame
-
-from py.interface.heuristicController import SnakeHeuristicAI
-from py.interface.SnakeGameController import Controller, Direction, FoodType, GameState, IpcCommands
-from py.snakeAgent import SnakeAgent
-
 current_file_path = Path(__file__).resolve()
+project_root = current_file_path.parent.parent.parent
+if str(project_root) not in sys.path:
+    sys.path.insert(0, str(project_root))
+
+import numpy as np  # noqa: E402, I001
+import pygame  # noqa: E402
+from heuristicController import SnakeHeuristicAI  # noqa: E402
+from SnakeGameController import Direction, FoodType, GameState, IpcCommands  # noqa: E402
+from SnakeGameController import SnakeGameController as Controller  # noqa: E402
+
+from py.snakeAgent import SnakeAgent  # noqa: E402
+
 if not os.environ.get("DISPLAY") and not os.environ.get("WAYLAND_DISPLAY"):
     os.environ["SDL_VIDEODRIVER"] = "dummy"
     os.environ["SDL_AUDIODRIVER"] = "dummy"
 
-project_root = Path(__file__).parent.parent.parent
 cpp_game_path = project_root / "build" / "src" / "app" / "snake_game"
 assets_path = current_file_path.parent / "assets"
 
@@ -116,7 +120,7 @@ def load_images():  # noqa: C901
     print("-----------------------------\n")
 
 
-def restart_game_process(width, height):
+def restart_game_process():
     global game_process, cpp_game_path, current_process_size
     if game_process:
         try:
@@ -126,12 +130,12 @@ def restart_game_process(width, height):
             game_process.kill()
 
     try:
-        print(f"[SYSTEM] Restarting C++ game with size {width}x{height}...")
+        current_process_size = (20, 20)
+        print(f"[SYSTEM] Restarting C++ game with size {current_process_size[0]}x{current_process_size[1]}...")
         game_process = subprocess.Popen(  # noqa: S603
-            [str(cpp_game_path), str(width), str(height)], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL
+            [str(cpp_game_path)], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL
         )
-        current_process_size = (width, height)
-        update_layout(width, height)
+        update_layout(current_process_size[0], current_process_size[1])
         time.sleep(0.5)
         return True
     except Exception as e:
@@ -139,7 +143,7 @@ def restart_game_process(width, height):
         return False
 
 
-restart_game_process(20, 20)
+restart_game_process()
 
 
 def draw_legend(screen, font, lines):
@@ -266,7 +270,7 @@ def draw_snake(screen, snake_head, snake_body, snake_dir):  # noqa: C901
 
 
 def main():  # noqa: C901
-    global SCREEN_WIDTH, SCREEN_HEIGHT
+    global SCREEN_WIDTH, SCREEN_HEIGHT, current_process_size
     controller = Controller()
 
     for _ in range(20):
@@ -412,14 +416,13 @@ def main():  # noqa: C901
                         elif event.key in [pygame.K_RETURN, pygame.K_KP_ENTER]:
                             target_w, target_h = AVAILABLE_MAP_SIZES[map_menu_idx]
                             if (target_w, target_h) != current_process_size:
-                                if restart_game_process(target_w, target_h):
-                                    controller.disconnect()
-                                    time.sleep(1.0)
-                                    controller = Controller()
-                                    controller.connect()
+                                success = controller.send_command(IpcCommands.CHANGE_BOARD_SIZE, target_w, target_h)
+                                if success:
+                                    current_process_size = (target_w, target_h)
+                                    update_layout(target_w, target_h)
                             menu_sub_state = 0
 
-        # ODCZYT
+        # ODCZYT DANYCH
         packets_read = 0
         data_updated = False
         while True:
@@ -445,7 +448,6 @@ def main():  # noqa: C901
             if aiMode or algoMode:
                 if data.version != last_ai_decision_version:
                     calculated_direction = None
-                    current_head_x, current_head_y = data.snake_head
                     current_dir = int(data.snake_direction)
 
                     if algoMode and heuristic_bot:

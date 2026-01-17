@@ -12,7 +12,7 @@ namespace SnakeGame
 class Board
 {
 public:
-  Board(uint8_t width, uint8_t height);
+  Board(BoardDimensions dimensions);
   ~Board() = default;
 
   Board(const Board& other)                   = delete;
