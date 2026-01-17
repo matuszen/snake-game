@@ -41,7 +41,7 @@ private:
   std::atomic<IpcCommands>             pendingCommand_;
   std::mutex                           commandMutex_;
   std::optional<Direction>             pendingDirection_;
-  BoardDimensions                      pendingBoardSize_;
+  BoardDimensions                      pendingBoardSize_{0, 0};
 
   GameState state_;
   uint16_t  score_;

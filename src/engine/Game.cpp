@@ -23,7 +23,7 @@ namespace SnakeGame
 
 Game::Game(const BoardDimensions boardSize)
   : snake_(nullptr), board_(std::make_unique<Board>(boardSize)), pendingCommand_(IpcCommands::NONE),
-    pendingBoardSize_({0, 0}), state_(GameState::MENU), score_(0), speed_(1), fruitPickedThisFrame_(false)
+    state_(GameState::MENU), score_(0), speed_(1), fruitPickedThisFrame_(false)
 {
   shmManager_    = std::make_unique<SharedMemoryManager>();
   commandSocket_ = std::make_unique<CommandSocket>();
@@ -217,9 +217,9 @@ void Game::processSocketCommand() noexcept
           newDimensions = pendingBoardSize_;
         }
 
-        constexpr uint8_t MAX_BOARD_DIMENSION = 100;
-        if (newDimensions.first >= 5 and newDimensions.second >= 5 and
-            newDimensions.first <= MAX_BOARD_DIMENSION and newDimensions.second <= MAX_BOARD_DIMENSION)
+        constexpr uint8_t maxBoardDimension = 50;
+        if (newDimensions.first >= 5 and newDimensions.second >= 5 and newDimensions.first <= maxBoardDimension and
+            newDimensions.second <= maxBoardDimension)
         {
           board_ = std::make_unique<Board>(newDimensions);
           initialize();

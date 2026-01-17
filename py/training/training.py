@@ -1,14 +1,20 @@
 import logging
 import os
 import sys
+from pathlib import Path
 
 import matplotlib.pyplot as plt
 import numpy as np
 import ray
 
-from py.training.config import Config
-from py.training.utils import save_network
-from py.training.worker import Worker
+current_file_path = Path(__file__).resolve()
+project_root = current_file_path.parent.parent.parent
+if str(project_root) not in sys.path:
+    sys.path.insert(0, str(project_root))
+
+from py.training.config import Config  # noqa: E402
+from py.training.utils import save_network  # noqa: E402
+from py.training.worker import Worker  # noqa: E402
 
 os.environ["RAY_DISABLE_MEMORY_MONITOR"] = "1"
 logging.getLogger("ray.core_worker").setLevel(logging.CRITICAL)

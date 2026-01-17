@@ -422,6 +422,7 @@ def main():  # noqa: C901
                                     update_layout(target_w, target_h)
                             menu_sub_state = 0
 
+        # ODCZYT DANYCH
         packets_read = 0
         data_updated = False
         while True:
@@ -447,7 +448,6 @@ def main():  # noqa: C901
             if aiMode or algoMode:
                 if data.version != last_ai_decision_version:
                     calculated_direction = None
-                    current_head_x, current_head_y = data.snake_head
                     current_dir = int(data.snake_direction)
 
                     if algoMode and heuristic_bot:
