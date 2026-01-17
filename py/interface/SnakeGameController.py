@@ -170,8 +170,20 @@ class SnakeGameController:
             sock.send(struct.pack("B", command.value))
 
             if command == IpcCommands.CHANGE_BOARD_SIZE and len(args) == 2:
-                sock.send(struct.pack("BB", args[0], args[1]))
+                try:
+                    width = int(args[0])
+                    height = int(args[1])
+                except (TypeError, ValueError):
+                    print("Invalid board size arguments: must be integers.")
+                    sock.close()
+                    return False
 
+                if not (0 <= width <= 255 and 0 <= height <= 255):
+                    print("Invalid board size arguments: must be in range 0-255.")
+                    sock.close()
+                    return False
+
+                sock.send(struct.pack("BB", width, height))
             ack = sock.recv(1)
             sock.close()
 
