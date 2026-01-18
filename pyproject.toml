@@ -28,6 +28,9 @@ extend-ignore = [
     "S311",
     "D213",
     "D203",
+    "D103",
+    "D101",
+    "D102",
 ]
 
 [tool.ruff.lint.isort]

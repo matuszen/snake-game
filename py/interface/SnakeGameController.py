@@ -1,4 +1,4 @@
-"""Interface for communicating with the C++ Snake Game engine via Shared Memory and IPC Sockets."""
+"""Controller for interfacing with the C++ Snake Game engine via IPC."""
 
 import mmap
 import socket
@@ -11,6 +11,8 @@ import posix_ipc
 
 
 class Direction(IntEnum):
+    """Enumeration of snake movement directions."""
+
     UP = 0
     DOWN = 1
     LEFT = 2
@@ -18,6 +20,8 @@ class Direction(IntEnum):
 
 
 class GameState(IntEnum):
+    """Enumeration of possible game states."""
+
     MENU = 0
     PLAYING = 1
     PAUSED = 2
@@ -26,6 +30,8 @@ class GameState(IntEnum):
 
 
 class FoodType(IntEnum):
+    """Enumeration of food types in the game."""
+
     APPLE = 0
     CHERRY = 1
     BANANA = 2
@@ -34,6 +40,8 @@ class FoodType(IntEnum):
 
 
 class IpcCommands(IntEnum):
+    """Enumeration of inter-process communication commands."""
+
     NONE = 0
     START_GAME = 1
     MOVE_UP = 2
@@ -210,6 +218,16 @@ class SnakeGameController:
             return None
 
     def send_command(self, command: IpcCommands, *args) -> bool:
+        """Send a command to the game engine via socket.
+
+        Args:
+            command (IpcCommands): The command to send.
+            *args: Additional arguments (e.g., board size for CHANGE_BOARD_SIZE).
+
+        Returns:
+            bool: True if command was sent and acknowledged, False otherwise.
+
+        """
         try:
             sock = socket.socket(socket.AF_UNIX, socket.SOCK_STREAM)
             sock.settimeout(1.0)

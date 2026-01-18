@@ -1,3 +1,5 @@
+"""Ray worker for parallel genetic algorithm training."""
+
 import copy
 
 import numpy as np
@@ -9,7 +11,32 @@ from py.training.neural import Neural
 
 @ray.remote
 class Worker:
+    """Distributed worker for training a population of neural networks.
+
+    This Ray remote class manages a population of neural networks, evaluates
+    their fitness by playing Snake, and evolves them using genetic algorithms.
+
+    Attributes:
+        gen_number (int): Current generation number.
+        config (Config): Training configuration.
+        pop_size (int): Size of the population.
+        hidden_size (int): Size of hidden layer in networks.
+        population (list): List of Neural networks in this worker.
+        games (list): List of Snake game instances.
+        gamestates (list): Current game states for each individual.
+        directions (list): Available movement directions.
+
+    """
+
     def __init__(self, config, pop_size, hidden_size):
+        """Initialize worker with a random population.
+
+        Args:
+            config (Config): Training configuration object.
+            pop_size (int): Number of individuals in the population.
+            hidden_size (int): Number of hidden neurons in each network.
+
+        """
         self.gen_number = 0
         self.config = config
         self.pop_size = pop_size
@@ -28,11 +55,26 @@ class Worker:
         ]
 
     def run(self):
+        """Execute one generation: evaluate fitness and evolve population.
+
+        Returns:
+            dict: Statistics including best network, best fitness, and average fitness.
+
+        """
         fitness = self.eval()
         stats = self.evolve(fitness)
         return stats
 
     def eval(self):
+        """Evaluate fitness of all individuals in the population.
+
+        Each individual plays a full game of Snake. Fitness is computed based
+        on food collected and survival time.
+
+        Returns:
+            list: Fitness scores for each individual in the population.
+
+        """
         fitness = [0] * self.pop_size
         active = [True] * self.pop_size
         steps = [0] * self.pop_size
@@ -65,6 +107,17 @@ class Worker:
         return fitness
 
     def evolve(self, fitness):
+        """Evolve the population using genetic algorithm operators.
+
+        Applies selection, crossover, and mutation to create the next generation.
+
+        Args:
+            fitness (list): Fitness scores for current population.
+
+        Returns:
+            dict: Dictionary with best network, best fitness, and average fitness.
+
+        """
         sorted_indices = np.argsort(fitness)[::-1]
         sorted_population = [self.population[i] for i in sorted_indices]
         sorted_fitness = np.array([fitness[i] for i in sorted_indices])
@@ -108,6 +161,15 @@ class Worker:
         }
 
     def inject_network(self, network):
+        """Inject a migrated network into the population.
+
+        Replaces a random individual with the provided network (typically
+        the global best from another worker).
+
+        Args:
+            network (Neural): Network to inject into the population.
+
+        """
         try:
             replace_idx = np.random.randint(0, self.pop_size)
             self.population[replace_idx] = copy.deepcopy(network)

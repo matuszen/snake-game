@@ -1,5 +1,33 @@
+"""Configuration parameters for Snake AI genetic algorithm training."""
+
+
 class Config:
-    """Configuration parameters for the Snake AI training."""
+    """Configuration parameters for the Snake AI training.
+
+    This class contains all hyperparameters and settings for training a neural
+    network to play Snake using a genetic algorithm with multiple workers.
+
+    Attributes:
+        WIDTH (int): Game board width in tiles.
+        HEIGHT (int): Game board height in tiles.
+        MAX_STEPS (int): Maximum steps without eating food before game ends.
+        INPUT_SIZE (int): Number of input neurons (sensor count).
+        HIDDEN_SIZE (int): Number of hidden layer neurons.
+        OUTPUT_SIZE (int): Number of output neurons (4 directions).
+        WEIGHT_RANGE (float): Range for weight initialization [-range, +range].
+        MUTATION_RATE (float): Probability of mutating each weight.
+        MUTATION_VARIANCE (float): Maximum variance for weight mutations.
+        POP_RETENTION (float): Fraction of top performers to keep unchanged.
+        POP_CHILDREN (float): Fraction of population to generate via crossover.
+        POP_RANDOM (float): Fraction of population to randomly reinitialize.
+        GENERATIONS (int): Total number of training generations.
+        POPULATION_SIZE (int): Number of individuals in each worker's population.
+        WORKERS (int): Number of parallel training workers.
+        MIGRATION_INTERVAL (int): Generations between worker synchronizations.
+        FOOD_REWARD (float): Fitness reward for eating food.
+        STEP_REWARD (float): Fitness reward per step survived.
+
+    """
 
     WIDTH = 20
     HEIGHT = 20
