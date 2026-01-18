@@ -17,6 +17,10 @@ from SnakeGameController import SnakeGameController as Controller  # noqa: E402
 
 from py.snakeAgent import SnakeAgent  # noqa: E402
 
+if os.name != "posix":
+    print("[SYSTEM] This program is only supported on Linux systems.")
+    sys.exit(1)
+
 if not os.environ.get("DISPLAY") and not os.environ.get("WAYLAND_DISPLAY"):
     os.environ["SDL_VIDEODRIVER"] = "dummy"
     os.environ["SDL_AUDIODRIVER"] = "dummy"
@@ -25,8 +29,11 @@ cpp_game_path = project_root / "build" / "src" / "app" / "snake_game"
 assets_path = current_file_path.parent / "assets"
 
 # --- ZMIENNE GLOBALNE KONFIGURACJI ---
-SCREEN_WIDTH = 1920
-SCREEN_HEIGHT = 1080
+DEFAULT_WINDOW_WIDTH = 1024
+DEFAULT_WINDOW_HEIGHT = 768
+
+SCREEN_WIDTH = DEFAULT_WINDOW_WIDTH
+SCREEN_HEIGHT = DEFAULT_WINDOW_HEIGHT
 CELL_SIZE = 20
 OFFSET_X = 0
 OFFSET_Y = 0
@@ -36,20 +43,31 @@ AVAILABLE_MAP_SIZES = [(10, 10), (20, 20), (30, 30), (40, 40), (20, 10), (10, 20
 game_process = None
 current_process_size = (20, 20)
 
-# --- ZASOBY GRAFICZNE ---
 GRAPHICS = {}
+FONTS = {}
+
+
+def update_fonts():
+    global FONTS
+    base_scale = SCREEN_HEIGHT
+    FONTS["large"] = pygame.font.SysFont(None, int(base_scale * 0.06))
+    FONTS["medium"] = pygame.font.SysFont(None, int(base_scale * 0.04))
+    FONTS["small"] = pygame.font.SysFont(None, int(base_scale * 0.025))
 
 
 def update_layout(map_width, map_height):
     global CELL_SIZE, OFFSET_X, OFFSET_Y, SCREEN_WIDTH, SCREEN_HEIGHT
 
-    target_board_height = SCREEN_HEIGHT * 0.80
-    new_cell_size = int(target_board_height / map_height)
+    safe_margin = 10
 
-    if new_cell_size * map_width > SCREEN_WIDTH * 0.95:
-        new_cell_size = int((SCREEN_WIDTH * 0.95) / map_width)
+    available_width = SCREEN_WIDTH - (safe_margin * 2)
+    available_height = SCREEN_HEIGHT - (safe_margin * 2)
 
-    CELL_SIZE = max(1, new_cell_size)
+    cell_w = available_width // map_width
+    cell_h = available_height // map_height
+
+    CELL_SIZE = int(min(cell_w, cell_h))
+    CELL_SIZE = max(1, CELL_SIZE)
 
     board_pixel_w = map_width * CELL_SIZE
     board_pixel_h = map_height * CELL_SIZE
@@ -61,10 +79,7 @@ def update_layout(map_width, map_height):
 
 
 def load_images():  # noqa: C901
-    """Ładuje obrazy. Informuje o sukcesie lub braku pliku."""
     global GRAPHICS
-
-    print("\n--- INICJALIZACJA GRAFIKI ---")
 
     def get_path(filename):
         paths_to_check = [assets_path / filename, current_file_path.parent / filename]
@@ -73,7 +88,6 @@ def load_images():  # noqa: C901
                 return path
         return None
 
-    # 1. Ładowanie TŁA
     bg_filename = "background.png"
     bg_path = get_path(bg_filename)
 
@@ -81,32 +95,25 @@ def load_images():  # noqa: C901
         try:
             img = pygame.image.load(str(bg_path)).convert()
             GRAPHICS["background"] = pygame.transform.scale(img, (SCREEN_WIDTH, SCREEN_HEIGHT))
-            print(f"✓ Wczytano tło: {bg_filename}")
         except Exception:
             GRAPHICS["background"] = None
     else:
-        print(f"X Nie znaleziono grafiki: {bg_filename}")
         GRAPHICS["background"] = None
 
-    # 2. Ładowanie elementów gry
     def load_game_sprite(filename):
         path = get_path(filename)
         if path:
             try:
                 img = pygame.image.load(str(path)).convert_alpha()
-                print(f"✓ Wczytano grafikę: {filename}")
                 return pygame.transform.scale(img, (CELL_SIZE, CELL_SIZE))
             except Exception:
-                return
-        else:
-            print(f"X nie znaleziono grafiki: {filename}")
+                return None
         return None
 
     GRAPHICS["head"] = load_game_sprite("head.png")
     GRAPHICS["body"] = load_game_sprite("body.png")
     GRAPHICS["corner"] = load_game_sprite("bodyRight.png")
     GRAPHICS["tail"] = load_game_sprite("tail.png")
-
     GRAPHICS["board1"] = load_game_sprite("board1.png")
     GRAPHICS["board2"] = load_game_sprite("board2.png")
 
@@ -117,7 +124,6 @@ def load_images():  # noqa: C901
         FoodType.GRAPE: load_game_sprite("grape.png"),
         FoodType.ORANGE: load_game_sprite("orange.png"),
     }
-    print("-----------------------------\n")
 
 
 def restart_game_process():
@@ -135,7 +141,6 @@ def restart_game_process():
         game_process = subprocess.Popen(  # noqa: S603
             [str(cpp_game_path)], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL
         )
-        update_layout(current_process_size[0], current_process_size[1])
         time.sleep(0.5)
         return True
     except Exception as e:
@@ -146,18 +151,31 @@ def restart_game_process():
 restart_game_process()
 
 
+def draw_text_with_bg(screen, text_surf, x, y, align="topleft", bg_color=(0, 0, 0, 150)):
+    rect = text_surf.get_rect()
+    if align == "topleft":
+        rect.topleft = (x, y)
+    elif align == "bottomright":
+        rect.bottomright = (x, y)
+    elif align == "center":
+        rect.center = (x, y)
+
+    padding = 6
+    bg_rect = rect.inflate(padding * 2, padding * 2)
+    s = pygame.Surface((bg_rect.width, bg_rect.height), pygame.SRCALPHA)
+    s.fill(bg_color)
+    screen.blit(s, bg_rect.topleft)
+
+    screen.blit(text_surf, rect)
+    return bg_rect.height
+
+
 def draw_legend(screen, font, lines):
-    start_y = SCREEN_HEIGHT - 30
-    for line in reversed(lines):
-        text_surf = font.render(line, True, (200, 200, 200))
-        text_rect = text_surf.get_rect()
-        text_rect.bottomright = (SCREEN_WIDTH - 20, start_y)
-
-        shadow_surf = font.render(line, True, (0, 0, 0))
-        screen.blit(shadow_surf, (text_rect.x + 2, text_rect.y + 2))
-
-        screen.blit(text_surf, text_rect)
-        start_y -= 30
+    start_y = SCREEN_HEIGHT - 10
+    for line in lines:
+        text_surf = font.render(line, True, (220, 220, 220))
+        h = draw_text_with_bg(screen, text_surf, SCREEN_WIDTH - 10, start_y, align="bottomright")
+        start_y -= h + 4
 
 
 def draw_board(screen, width, height):
@@ -198,7 +216,6 @@ def draw_snake(screen, snake_head, snake_body, snake_dir):  # noqa: C901
     if img_body and not img_corner:
         img_corner = img_body
 
-    # --- KROK 1: RYSOWANIE CIAŁA I OGONA ---
     for i in range(1, len(segments)):
         segment = segments[i]
         if segment == tail_pos and i != len(segments) - 1:
@@ -226,7 +243,6 @@ def draw_snake(screen, snake_head, snake_body, snake_dir):  # noqa: C901
                 angle = -90
             elif dx == -1:
                 angle = 90
-
             img_to_draw = img_tail if img_tail else img_body
             rotated = pygame.transform.rotate(img_to_draw, angle)
             screen.blit(rotated, (px, py))
@@ -281,30 +297,27 @@ def main():  # noqa: C901
         print("Nie udało się połączyć z grą C++")
         return 1
 
-    # --- Zmienne stanu gry ---
     aiMode = False
     algoMode = False
     network = None
     heuristic_bot = None
 
-    # --- Inicjalizacja Pygame ---
     pygame.display.init()
     pygame.font.init()
 
-    info = pygame.display.Info()
-    SCREEN_WIDTH = info.current_w
-    SCREEN_HEIGHT = info.current_h
-    screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT), pygame.NOFRAME)
+    os.environ["SDL_VIDEO_CENTERED"] = "1"
 
-    pygame.display.set_caption("Snake Game Viewer - Fullscreen")
-    clock = pygame.time.Clock()
+    is_fullscreen = False
+    SCREEN_WIDTH = DEFAULT_WINDOW_WIDTH
+    SCREEN_HEIGHT = DEFAULT_WINDOW_HEIGHT
 
+    screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT), pygame.RESIZABLE)
+    pygame.display.set_caption("Snake Game Viewer")
+
+    update_fonts()
     update_layout(current_process_size[0], current_process_size[1])
 
-    font_large = pygame.font.SysFont(None, int(SCREEN_HEIGHT * 0.06))
-    font_medium = pygame.font.SysFont(None, int(SCREEN_HEIGHT * 0.04))
-    font_small = pygame.font.SysFont(None, int(SCREEN_HEIGHT * 0.03))
-
+    clock = pygame.time.Clock()
     running = True
 
     models_dir = Path(__file__).parent.parent / "training" / "models"
@@ -315,7 +328,6 @@ def main():  # noqa: C901
 
     current_model_name = available_models[0] if available_models else "Brak modeli"
 
-    menu_options = ["Włącz grę (Manual)", "Tryb AI", "Tryb Algorytmu", "Ustawienia AI", "Rozmiar Mapy", "Zamknij grę"]
     menu_selection = 0
     menu_sub_state = 0
     model_selection_idx = 0
@@ -329,6 +341,19 @@ def main():  # noqa: C901
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 running = False
+
+            elif event.type == pygame.VIDEORESIZE:
+                if not is_fullscreen:
+                    SCREEN_WIDTH = event.w
+                    SCREEN_HEIGHT = event.h
+                    screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT), pygame.RESIZABLE)
+                    update_fonts()
+                    if data:
+                        update_layout(data.board_width, data.board_height)
+                    else:
+                        update_layout(current_process_size[0], current_process_size[1])
+                    should_render = True
+
             elif event.type == pygame.KEYDOWN:
                 should_render = True
 
@@ -339,7 +364,7 @@ def main():  # noqa: C901
                     controller.send_command(IpcCommands.START_GAME)
                 elif event.key == pygame.K_r:
                     w, h = current_process_size
-                    if restart_game_process(w, h):
+                    if restart_game_process():
                         controller.disconnect()
                         time.sleep(0.5)
                         controller = Controller()
@@ -365,11 +390,13 @@ def main():  # noqa: C901
 
                 # --- MENU ---
                 if data and data.game_state == GameState.MENU:
+                    MENU_ITEMS_COUNT = 7
+
                     if menu_sub_state == 0:
                         if event.key in [pygame.K_w, pygame.K_UP]:
-                            menu_selection = (menu_selection - 1) % len(menu_options)
+                            menu_selection = (menu_selection - 1) % MENU_ITEMS_COUNT
                         elif event.key in [pygame.K_s, pygame.K_DOWN]:
-                            menu_selection = (menu_selection + 1) % len(menu_options)
+                            menu_selection = (menu_selection + 1) % MENU_ITEMS_COUNT
                         elif event.key in [pygame.K_RETURN, pygame.K_KP_ENTER]:
                             if menu_selection == 0:
                                 aiMode, algoMode = False, False
@@ -395,6 +422,25 @@ def main():  # noqa: C901
                                 else:
                                     map_menu_idx = 0
                             elif menu_selection == 5:
+                                is_fullscreen = not is_fullscreen
+                                if is_fullscreen:
+                                    screen = pygame.display.set_mode((0, 0), pygame.FULLSCREEN)
+                                else:
+                                    os.environ["SDL_VIDEO_CENTERED"] = "1"
+                                    SCREEN_WIDTH = DEFAULT_WINDOW_WIDTH
+                                    SCREEN_HEIGHT = DEFAULT_WINDOW_HEIGHT
+                                    screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT), pygame.RESIZABLE)
+
+                                    pygame.event.clear()
+
+                                SCREEN_WIDTH, SCREEN_HEIGHT = screen.get_size()
+                                update_fonts()
+                                if data:
+                                    update_layout(data.board_width, data.board_height)
+                                else:
+                                    update_layout(current_process_size[0], current_process_size[1])
+
+                            elif menu_selection == 6:
                                 controller.send_command(IpcCommands.QUIT_GAME)
                                 running = False
 
@@ -422,7 +468,7 @@ def main():  # noqa: C901
                                     update_layout(target_w, target_h)
                             menu_sub_state = 0
 
-        # ODCZYT DANYCH
+        # --- DANE ---
         packets_read = 0
         data_updated = False
         while True:
@@ -443,7 +489,7 @@ def main():  # noqa: C901
         if data_updated:
             should_render = True
 
-        # AI
+        # --- AI ---
         if data.game_state == GameState.PLAYING and data_updated:
             if aiMode or algoMode:
                 if data.version != last_ai_decision_version:
@@ -461,14 +507,12 @@ def main():  # noqa: C901
                     if calculated_direction is not None:
                         cmd = IpcCommands.NONE
                         dir_val = int(calculated_direction)
-                        is_opposite = False
-                        if (
+                        is_opposite = (
                             (current_dir == 0 and dir_val == 1)
                             or (current_dir == 1 and dir_val == 0)
                             or (current_dir == 2 and dir_val == 3)
                             or (current_dir == 3 and dir_val == 2)
-                        ):
-                            is_opposite = True
+                        )
 
                         if not is_opposite and dir_val != current_dir:
                             if dir_val == 0:
@@ -484,7 +528,7 @@ def main():  # noqa: C901
 
                     last_ai_decision_version = data.version
 
-        # RYSOWANIE
+        # --- RENDER ---
         if should_render:
             if GRAPHICS.get("background"):
                 screen.blit(GRAPHICS["background"], (0, 0))
@@ -493,51 +537,59 @@ def main():  # noqa: C901
 
             if data.game_state == GameState.MENU:
                 if menu_sub_state == 0:
-                    t = font_large.render("Snake Game Launcher", True, (0, 255, 0))
+                    current_screen_text = "Tryb Okienkowy" if is_fullscreen else "Pełny Ekran"
+                    menu_options = [
+                        "Włącz grę (Manual)",
+                        "Tryb AI",
+                        "Tryb Algorytmu",
+                        "Ustawienia AI",
+                        "Rozmiar Mapy",
+                        current_screen_text,
+                        "Zamknij grę",
+                    ]
+
+                    t = FONTS["large"].render("Snake Game Launcher", True, (0, 255, 0))
                     screen.blit(t, (SCREEN_WIDTH // 2 - t.get_width() // 2, SCREEN_HEIGHT * 0.1))
 
-                    m_info = font_small.render(f"Model: {current_model_name}", True, (100, 255, 255))
+                    m_info = FONTS["small"].render(f"Model: {current_model_name}", True, (100, 255, 255))
                     screen.blit(m_info, (SCREEN_WIDTH // 2 - m_info.get_width() // 2, SCREEN_HEIGHT * 0.18))
 
                     cur_w, cur_h = current_process_size
-                    size_info = font_small.render(f"Mapa: {cur_w}x{cur_h}", True, (200, 200, 200))
+                    size_info = FONTS["small"].render(f"Mapa: {cur_w}x{cur_h}", True, (200, 200, 200))
                     screen.blit(size_info, (SCREEN_WIDTH // 2 - size_info.get_width() // 2, SCREEN_HEIGHT * 0.22))
 
                     menu_start_y = SCREEN_HEIGHT * 0.35
                     for i, opt in enumerate(menu_options):
                         col = (255, 255, 0) if i == menu_selection else (255, 255, 255)
                         prefix = "> " if i == menu_selection else "   "
-                        surf = font_medium.render(prefix + opt, True, col)
-                        screen.blit(surf, (SCREEN_WIDTH // 2 - 200, menu_start_y + i * (SCREEN_HEIGHT * 0.06)))
+                        surf = FONTS["medium"].render(prefix + opt, True, col)
+                        text_x = SCREEN_WIDTH // 2 - 200
+                        screen.blit(surf, (text_x, menu_start_y + i * (SCREEN_HEIGHT * 0.06)))
 
-                    draw_legend(screen, font_small, ["[ENTER] Wybierz", "[W / S] Nawigacja", "[Q] Zamknij"])
+                    draw_legend(screen, FONTS["small"], ["[ENTER] Wybierz", "[W / S] Nawigacja", "[Q] Zamknij"])
 
                 elif menu_sub_state == 1:
-                    t = font_large.render("Wybierz model", True, (0, 200, 255))
+                    t = FONTS["large"].render("Wybierz model", True, (0, 200, 255))
                     screen.blit(t, (SCREEN_WIDTH // 2 - t.get_width() // 2, SCREEN_HEIGHT * 0.1))
-
                     list_start_y = SCREEN_HEIGHT * 0.25
                     for i, m_file in enumerate(available_models):
                         if i > 15:
                             break
                         is_selected = i == model_selection_idx
                         is_active = m_file == current_model_name
-                        color = (200, 200, 200)
-                        if is_selected:
-                            color = (255, 255, 0)
+                        color = (255, 255, 0) if is_selected else (200, 200, 200)
                         if is_active:
                             color = (0, 255, 0)
                         prefix = "> " if is_selected else "  "
                         suffix = " [AKTYWNY]" if is_active else ""
                         text_str = f"{prefix}{m_file}{suffix}"
-                        surf = font_medium.render(text_str, True, color)
+                        surf = FONTS["medium"].render(text_str, True, color)
                         screen.blit(surf, (SCREEN_WIDTH // 2 - 350, list_start_y + i * (SCREEN_HEIGHT * 0.045)))
-                    draw_legend(screen, font_small, ["[ENTER] Wybierz model", "[W / S] Nawigacja", "[ESC] Powrót"])
+                    draw_legend(screen, FONTS["small"], ["[ENTER] Wybierz model", "[W / S] Nawigacja", "[ESC] Powrót"])
 
                 elif menu_sub_state == 2:
-                    t = font_large.render("Wybierz Rozmiar Mapy", True, (255, 100, 255))
+                    t = FONTS["large"].render("Wybierz Rozmiar Mapy", True, (255, 100, 255))
                     screen.blit(t, (SCREEN_WIDTH // 2 - t.get_width() // 2, SCREEN_HEIGHT * 0.1))
-
                     list_start_y = SCREEN_HEIGHT * 0.25
                     for i, (w, h) in enumerate(AVAILABLE_MAP_SIZES):
                         is_selected = i == map_menu_idx
@@ -548,9 +600,9 @@ def main():  # noqa: C901
                         prefix = "> " if is_selected else "  "
                         suffix = " [AKTYWNY]" if is_active else ""
                         text_str = f"{prefix}{w} x {h}{suffix}"
-                        surf = font_medium.render(text_str, True, color)
+                        surf = FONTS["medium"].render(text_str, True, color)
                         screen.blit(surf, (SCREEN_WIDTH // 2 - 150, list_start_y + i * (SCREEN_HEIGHT * 0.06)))
-                    draw_legend(screen, font_small, ["[ENTER] Zatwierdź", "[W / S] Nawigacja", "[ESC] Anuluj"])
+                    draw_legend(screen, FONTS["small"], ["[ENTER] Zatwierdź", "[W / S] Nawigacja", "[ESC] Anuluj"])
 
             elif data.game_state in [GameState.PLAYING, GameState.GAME_OVER]:
                 draw_board(screen, data.board_width, data.board_height)
@@ -559,7 +611,6 @@ def main():  # noqa: C901
                 fx, fy = data.food_position
                 ftype = data.food_type
                 food_img = GRAPHICS.get("foods", {}).get(ftype)
-
                 if food_img:
                     screen.blit(food_img, (OFFSET_X + fx * CELL_SIZE, OFFSET_Y + fy * CELL_SIZE))
                 else:
@@ -570,24 +621,31 @@ def main():  # noqa: C901
                     )
 
                 m_str = "AI" if aiMode else ("ALGO" if algoMode else "MANUAL")
-                screen.blit(font_medium.render(f"Wynik: {data.score} | Tryb: {m_str}", True, (255, 255, 255)), (20, 20))
+                score_txt = FONTS["medium"].render(f"Wynik: {data.score} | Tryb: {m_str}", True, (255, 255, 255))
+                draw_text_with_bg(screen, score_txt, 10, 10)
 
                 if data.game_state == GameState.GAME_OVER:
-                    t = font_large.render("KONIEC GRY", True, (255, 0, 0))
+                    overlay = pygame.Surface((SCREEN_WIDTH, SCREEN_HEIGHT), pygame.SRCALPHA)
+                    overlay.fill((0, 0, 0, 180))
+                    screen.blit(overlay, (0, 0))
+
+                    t = FONTS["large"].render("KONIEC GRY", True, (255, 0, 0))
                     screen.blit(t, (SCREEN_WIDTH // 2 - t.get_width() // 2, SCREEN_HEIGHT // 2 - 50))
-                    screen.blit(
-                        font_medium.render(f"Wynik: {data.score}", True, (255, 255, 255)),
-                        (SCREEN_WIDTH // 2 - 50, SCREEN_HEIGHT // 2 + 10),
-                    )
-                    restart_msg = font_medium.render("[T] ZAGRAJ PONOWNIE", True, (0, 255, 0))
+
+                    s_msg = FONTS["medium"].render(f"Wynik: {data.score}", True, (255, 255, 255))
+                    screen.blit(s_msg, (SCREEN_WIDTH // 2 - s_msg.get_width() // 2, SCREEN_HEIGHT // 2 + 10))
+
+                    restart_msg = FONTS["medium"].render("[T] ZAGRAJ PONOWNIE", True, (0, 255, 0))
                     screen.blit(
                         restart_msg, (SCREEN_WIDTH // 2 - restart_msg.get_width() // 2, SCREEN_HEIGHT // 2 + 60)
                     )
 
+                legend_lines = []
                 if aiMode or algoMode:
-                    draw_legend(screen, font_small, ["[R] Menu Główne", "[Q] Zamknij"])
+                    legend_lines = ["[R] Menu Główne", "[Q] Zamknij"]
                 else:
-                    draw_legend(screen, font_small, ["[WASD] Ruch", "[R] Menu Główne", "[Q] Zamknij"])
+                    legend_lines = ["[WASD] Ruch", "[R] Menu Główne", "[Q] Zamknij"]
+                draw_legend(screen, FONTS["small"], legend_lines)
 
             pygame.display.flip()
             should_render = False
