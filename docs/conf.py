@@ -17,6 +17,15 @@ extensions = [
     "breathe",
 ]
 
+autodoc_mock_imports = [
+    "numpy",
+    "ray",
+    "posix_ipc",
+    "matplotlib",
+    "pygame",
+    "py.snake_lib",
+]
+
 templates_path = ["_templates"]
 exclude_patterns = ["_build", "Thumbs.db", ".DS_Store"]
 
