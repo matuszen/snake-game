@@ -52,10 +52,10 @@ using NeuralInputs = std::array<float, 12>;
  */
 enum class Direction : uint8_t
 {
-  UP,     ///< Move upward (decrease y).
-  DOWN,   ///< Move downward (increase y).
-  LEFT,   ///< Move left (decrease x).
-  RIGHT,  ///< Move right (increase x).
+  UP,     ///< Move upward.
+  DOWN,   ///< Move downward.
+  LEFT,   ///< Move left.
+  RIGHT,  ///< Move right.
 };
 
 /**

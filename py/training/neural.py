@@ -56,7 +56,7 @@ class Neural:
 
         """
         if len(input) != len(self.inputs):
-            raise ValueError("Input sizes dont match!")
+            raise ValueError("Input sizes don't match!")
         self.inputs = input
 
         for node, _ in enumerate(self.hidden):
