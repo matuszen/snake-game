@@ -17,6 +17,16 @@ extensions = [
     "breathe",
 ]
 
+# Mock external dependencies imports to avoid installing them in CI environment
+autodoc_mock_imports = [
+    "numpy",
+    "ray",
+    "posix_ipc",
+    "matplotlib",
+    "pygame",
+    "py.snake_lib",  # Mock the C++ binding module
+]
+
 templates_path = ["_templates"]
 exclude_patterns = ["_build", "Thumbs.db", ".DS_Store"]
 
