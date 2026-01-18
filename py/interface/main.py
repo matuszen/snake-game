@@ -1,4 +1,3 @@
-import ctypes
 import os
 import subprocess
 import sys
@@ -18,11 +17,9 @@ from SnakeGameController import SnakeGameController as Controller  # noqa: E402
 
 from py.snakeAgent import SnakeAgent  # noqa: E402
 
-try:
-    if os.name == "nt":
-        ctypes.windll.user32.SetProcessDPIAware()
-except Exception as e:
-    print(f"[SYSTEM] Nie udało się ustawić DPI Awareness: {e}")
+if os.name != "posix":
+    print("[SYSTEM] This program is only supported on Linux systems.")
+    sys.exit(1)
 
 if not os.environ.get("DISPLAY") and not os.environ.get("WAYLAND_DISPLAY"):
     os.environ["SDL_VIDEODRIVER"] = "dummy"
@@ -110,7 +107,7 @@ def load_images():  # noqa: C901
                 img = pygame.image.load(str(path)).convert_alpha()
                 return pygame.transform.scale(img, (CELL_SIZE, CELL_SIZE))
             except Exception:
-                return
+                return None
         return None
 
     GRAPHICS["head"] = load_game_sprite("head.png")

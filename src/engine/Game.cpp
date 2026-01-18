@@ -224,6 +224,10 @@ void Game::processSocketCommand() noexcept
           board_ = std::make_unique<Board>(newDimensions);
         }
       }
+      else
+      {
+        std::cerr << "Cannot change board size while game is running!\n";
+      }
       break;
 
     case IpcCommands::NONE:
