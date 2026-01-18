@@ -1,0 +1,236 @@
+<?xml version='1.0' encoding='UTF-8' standalone='no'?>
+<doxygen xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="compound.xsd" version="1.9.8" xml:lang="en-US">
+  <compounddef id="Definitions_8hpp" kind="file" language="C++">
+    <compoundname>Definitions.hpp</compoundname>
+    <includes local="no">array</includes>
+    <includes local="no">atomic</includes>
+    <includes local="no">cstddef</includes>
+    <includes local="no">cstdint</includes>
+    <includes local="no">functional</includes>
+    <includes local="no">string_view</includes>
+    <includes local="no">utility</includes>
+    <includes local="no">vector</includes>
+    <includedby refid="Bindings_8cpp" local="yes">src/bindings/Bindings.cpp</includedby>
+    <includedby refid="Board_8cpp" local="yes">src/core/Board.cpp</includedby>
+    <includedby refid="Board_8hpp" local="yes">src/core/Board.hpp</includedby>
+    <includedby refid="Snake_8cpp" local="yes">src/core/Snake.cpp</includedby>
+    <includedby refid="Snake_8hpp" local="yes">src/core/Snake.hpp</includedby>
+    <includedby refid="Game_8cpp" local="yes">src/engine/Game.cpp</includedby>
+    <includedby refid="Game_8hpp" local="yes">src/engine/Game.hpp</includedby>
+    <includedby refid="CommandSocket_8cpp" local="yes">src/network/CommandSocket.cpp</includedby>
+    <includedby refid="CommandSocket_8hpp" local="yes">src/network/CommandSocket.hpp</includedby>
+    <includedby refid="SharedMemoryManager_8cpp" local="yes">src/network/SharedMemoryManager.cpp</includedby>
+    <includedby refid="SharedMemoryManager_8hpp" local="yes">src/network/SharedMemoryManager.hpp</includedby>
+    <incdepgraph>
+      <node id="1">
+        <label>src/core/Definitions.hpp</label>
+        <link refid="Definitions_8hpp"/>
+        <childnode refid="2" relation="include">
+        </childnode>
+        <childnode refid="3" relation="include">
+        </childnode>
+        <childnode refid="4" relation="include">
+        </childnode>
+        <childnode refid="5" relation="include">
+        </childnode>
+        <childnode refid="6" relation="include">
+        </childnode>
+        <childnode refid="7" relation="include">
+        </childnode>
+        <childnode refid="8" relation="include">
+        </childnode>
+        <childnode refid="9" relation="include">
+        </childnode>
+      </node>
+      <node id="2">
+        <label>array</label>
+      </node>
+      <node id="3">
+        <label>atomic</label>
+      </node>
+      <node id="4">
+        <label>cstddef</label>
+      </node>
+      <node id="5">
+        <label>cstdint</label>
+      </node>
+      <node id="6">
+        <label>functional</label>
+      </node>
+      <node id="7">
+        <label>string_view</label>
+      </node>
+      <node id="8">
+        <label>utility</label>
+      </node>
+      <node id="9">
+        <label>vector</label>
+      </node>
+    </incdepgraph>
+    <invincdepgraph>
+      <node id="2">
+        <label>src/core/Board.hpp</label>
+        <link refid="Board_8hpp_source"/>
+        <childnode refid="3" relation="include">
+        </childnode>
+      </node>
+      <node id="1">
+        <label>src/core/Definitions.hpp</label>
+        <link refid="Definitions_8hpp"/>
+        <childnode refid="2" relation="include">
+        </childnode>
+        <childnode refid="4" relation="include">
+        </childnode>
+        <childnode refid="3" relation="include">
+        </childnode>
+        <childnode refid="5" relation="include">
+        </childnode>
+        <childnode refid="6" relation="include">
+        </childnode>
+      </node>
+      <node id="4">
+        <label>src/core/Snake.hpp</label>
+        <link refid="Snake_8hpp_source"/>
+        <childnode refid="3" relation="include">
+        </childnode>
+      </node>
+      <node id="3">
+        <label>src/engine/Game.hpp</label>
+        <link refid="Game_8hpp_source"/>
+      </node>
+      <node id="5">
+        <label>src/network/CommandSocket.hpp</label>
+        <link refid="CommandSocket_8hpp_source"/>
+        <childnode refid="3" relation="include">
+        </childnode>
+      </node>
+      <node id="6">
+        <label>src/network/SharedMemoryManager.hpp</label>
+        <link refid="SharedMemoryManager_8hpp_source"/>
+        <childnode refid="3" relation="include">
+        </childnode>
+      </node>
+    </invincdepgraph>
+    <innerclass refid="structSnakeGame_1_1StepResult" prot="public">SnakeGame::StepResult</innerclass>
+    <innerclass refid="structSnakeGame_1_1GameSharedData" prot="public">SnakeGame::GameSharedData</innerclass>
+    <innerclass refid="structSnakeGame_1_1SharedMemoryData" prot="public">SnakeGame::SharedMemoryData</innerclass>
+    <innernamespace refid="namespaceSnakeGame">SnakeGame</innernamespace>
+    <briefdescription>
+<para>Core type definitions, constants, and enumerations for the Snake Game. </para>
+    </briefdescription>
+    <detaileddescription>
+<para>This file contains all shared data structures, enums, and constants used across the game engine, including IPC structures and neural network input types. </para>
+    </detaileddescription>
+    <programlisting>
+<codeline lineno="1"><highlight class="preprocessor">#pragma<sp/>once</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="2"><highlight class="normal"></highlight></codeline>
+<codeline lineno="3"><highlight class="normal"></highlight><highlight class="preprocessor">#include<sp/>&lt;array&gt;</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="4"><highlight class="normal"></highlight><highlight class="preprocessor">#include<sp/>&lt;atomic&gt;</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="5"><highlight class="normal"></highlight><highlight class="preprocessor">#include<sp/>&lt;cstddef&gt;</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="6"><highlight class="normal"></highlight><highlight class="preprocessor">#include<sp/>&lt;cstdint&gt;</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="7"><highlight class="normal"></highlight><highlight class="preprocessor">#include<sp/>&lt;functional&gt;</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="8"><highlight class="normal"></highlight><highlight class="preprocessor">#include<sp/>&lt;string_view&gt;</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="9"><highlight class="normal"></highlight><highlight class="preprocessor">#include<sp/>&lt;utility&gt;</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="10"><highlight class="normal"></highlight><highlight class="preprocessor">#include<sp/>&lt;vector&gt;</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="11"><highlight class="normal"></highlight></codeline>
+<codeline lineno="20"><highlight class="normal"></highlight><highlight class="keyword">namespace<sp/></highlight><highlight class="normal">SnakeGame</highlight></codeline>
+<codeline lineno="21"><highlight class="normal">{</highlight></codeline>
+<codeline lineno="22"><highlight class="normal"></highlight></codeline>
+<codeline lineno="24" refid="Definitions_8hpp_1aeef324886f34d7b74d437f9371fdf8da" refkind="member"><highlight class="keyword">inline</highlight><highlight class="normal"><sp/></highlight><highlight class="keyword">constexpr</highlight><highlight class="normal"><sp/>std::string_view<sp/><ref refid="Definitions_8hpp_1aeef324886f34d7b74d437f9371fdf8da" kindref="member">DEFAULT_SHM_NAME</ref><sp/><sp/><sp/><sp/>=<sp/></highlight><highlight class="stringliteral">&quot;/snake_game_shm&quot;</highlight><highlight class="normal">;</highlight></codeline>
+<codeline lineno="26" refid="Definitions_8hpp_1a60bd9a90a2bed13b155271aad7f41bb9" refkind="member"><highlight class="keyword">inline</highlight><highlight class="normal"><sp/></highlight><highlight class="keyword">constexpr</highlight><highlight class="normal"><sp/>std::string_view<sp/><ref refid="Definitions_8hpp_1a60bd9a90a2bed13b155271aad7f41bb9" kindref="member">DEFAULT_SOCKET_PATH</ref><sp/>=<sp/></highlight><highlight class="stringliteral">&quot;/tmp/snake_game.sock&quot;</highlight><highlight class="normal">;</highlight></codeline>
+<codeline lineno="27"><highlight class="normal"></highlight></codeline>
+<codeline lineno="29" refid="Definitions_8hpp_1aa9f23904372aceac17a3002588db8529" refkind="member"><highlight class="keyword">inline</highlight><highlight class="normal"><sp/></highlight><highlight class="keyword">constexpr</highlight><highlight class="normal"><sp/>uint8_t<sp/><ref refid="Definitions_8hpp_1aa9f23904372aceac17a3002588db8529" kindref="member">DEFAULT_BOARD_WIDTH</ref><sp/><sp/>=<sp/>20;</highlight></codeline>
+<codeline lineno="31" refid="Definitions_8hpp_1a242f31aea4a505038b424bb38bc6d308" refkind="member"><highlight class="keyword">inline</highlight><highlight class="normal"><sp/></highlight><highlight class="keyword">constexpr</highlight><highlight class="normal"><sp/>uint8_t<sp/><ref refid="Definitions_8hpp_1a242f31aea4a505038b424bb38bc6d308" kindref="member">DEFAULT_BOARD_HEIGHT</ref><sp/>=<sp/>20;</highlight></codeline>
+<codeline lineno="32"><highlight class="normal"></highlight></codeline>
+<codeline lineno="34" refid="Definitions_8hpp_1ab344fbcdbedcb9ec1d7a94b8151fa36c" refkind="member"><highlight class="keyword">inline</highlight><highlight class="normal"><sp/></highlight><highlight class="keyword">constexpr</highlight><highlight class="normal"><sp/>uint16_t<sp/><ref refid="Definitions_8hpp_1ab344fbcdbedcb9ec1d7a94b8151fa36c" kindref="member">INITIAL_SNAKE_LENGTH</ref><sp/>=<sp/>3;</highlight></codeline>
+<codeline lineno="36" refid="Definitions_8hpp_1ae367788e9ca771b77a1480d3c03b11a0" refkind="member"><highlight class="keyword">inline</highlight><highlight class="normal"><sp/></highlight><highlight class="keyword">constexpr</highlight><highlight class="normal"><sp/>uint16_t<sp/><ref refid="Definitions_8hpp_1ae367788e9ca771b77a1480d3c03b11a0" kindref="member">SNAKE_MAX_LENGTH</ref><sp/><sp/><sp/><sp/><sp/>=<sp/>2048;</highlight></codeline>
+<codeline lineno="37"><highlight class="normal"></highlight></codeline>
+<codeline lineno="39" refid="Definitions_8hpp_1aba2dfbd3f226ac66d6d8cdb79e93f7e3" refkind="member"><highlight class="keyword">inline</highlight><highlight class="normal"><sp/></highlight><highlight class="keyword">constexpr</highlight><highlight class="normal"><sp/>uint16_t<sp/><ref refid="Definitions_8hpp_1aba2dfbd3f226ac66d6d8cdb79e93f7e3" kindref="member">INITIAL_SPEED_DELAY_MS</ref><sp/><sp/><sp/>=<sp/>200;</highlight></codeline>
+<codeline lineno="41" refid="Definitions_8hpp_1af5d458b85d3198ffc820f854ea11fa72" refkind="member"><highlight class="keyword">inline</highlight><highlight class="normal"><sp/></highlight><highlight class="keyword">constexpr</highlight><highlight class="normal"><sp/>uint8_t<sp/><sp/><ref refid="Definitions_8hpp_1af5d458b85d3198ffc820f854ea11fa72" kindref="member">SPEED_DECREASE_PER_LEVEL</ref><sp/>=<sp/>15;</highlight></codeline>
+<codeline lineno="42"><highlight class="normal"></highlight></codeline>
+<codeline lineno="44" refid="Definitions_8hpp_1a9de414d17ba4549d37f38debb57e2625" refkind="member"><highlight class="keyword">using<sp/></highlight><highlight class="normal"><ref refid="Definitions_8hpp_1a9de414d17ba4549d37f38debb57e2625" kindref="member">Coordinate</ref><sp/><sp/><sp/><sp/><sp/><sp/>=<sp/>std::pair&lt;uint8_t,<sp/>uint8_t&gt;;</highlight></codeline>
+<codeline lineno="46" refid="Definitions_8hpp_1ab62ac345e97184ff1b52fd754948605e" refkind="member"><highlight class="keyword">using<sp/></highlight><highlight class="normal"><ref refid="Definitions_8hpp_1ab62ac345e97184ff1b52fd754948605e" kindref="member">BoardDimensions</ref><sp/>=<sp/><ref refid="Definitions_8hpp_1a9de414d17ba4549d37f38debb57e2625" kindref="member">Coordinate</ref>;</highlight></codeline>
+<codeline lineno="48" refid="Definitions_8hpp_1a5caf71587ea73a69d4a36903cff574d2" refkind="member"><highlight class="keyword">using<sp/></highlight><highlight class="normal"><ref refid="Definitions_8hpp_1a5caf71587ea73a69d4a36903cff574d2" kindref="member">NeuralInputs</ref><sp/><sp/><sp/><sp/>=<sp/>std::array&lt;float,<sp/>12&gt;;</highlight></codeline>
+<codeline lineno="49"><highlight class="normal"></highlight></codeline>
+<codeline lineno="53" refid="Definitions_8hpp_1a1241edc7a177c9eaec6c48e19f1db416" refkind="member"><highlight class="normal"></highlight><highlight class="keyword">enum<sp/>class</highlight><highlight class="normal"><sp/><ref refid="Definitions_8hpp_1a1241edc7a177c9eaec6c48e19f1db416" kindref="member">Direction</ref><sp/>:<sp/>uint8_t</highlight></codeline>
+<codeline lineno="54"><highlight class="normal">{</highlight></codeline>
+<codeline lineno="55"><highlight class="normal"><sp/><sp/><ref refid="Definitions_8hpp_1a1241edc7a177c9eaec6c48e19f1db416afbaedde498cdead4f2780217646e9ba1" kindref="member">UP</ref>,<sp/><sp/><sp/><sp/></highlight></codeline>
+<codeline lineno="56"><highlight class="normal"><sp/><sp/><ref refid="Definitions_8hpp_1a1241edc7a177c9eaec6c48e19f1db416ac4e0e4e3118472beeb2ae75827450f1f" kindref="member">DOWN</ref>,<sp/><sp/></highlight></codeline>
+<codeline lineno="57"><highlight class="normal"><sp/><sp/><ref refid="Definitions_8hpp_1a1241edc7a177c9eaec6c48e19f1db416a684d325a7303f52e64011467ff5c5758" kindref="member">LEFT</ref>,<sp/><sp/></highlight></codeline>
+<codeline lineno="58"><highlight class="normal"><sp/><sp/><ref refid="Definitions_8hpp_1a1241edc7a177c9eaec6c48e19f1db416a21507b40c80068eda19865706fdc2403" kindref="member">RIGHT</ref>,<sp/></highlight></codeline>
+<codeline lineno="59"><highlight class="normal">};</highlight></codeline>
+<codeline lineno="60"><highlight class="normal"></highlight></codeline>
+<codeline lineno="64" refid="Definitions_8hpp_1a4033b62bd7d1a2feeba9579dc97abfaa" refkind="member"><highlight class="normal"></highlight><highlight class="keyword">enum<sp/>class</highlight><highlight class="normal"><sp/><ref refid="Definitions_8hpp_1a4033b62bd7d1a2feeba9579dc97abfaa" kindref="member">GameState</ref><sp/>:<sp/>uint8_t</highlight></codeline>
+<codeline lineno="65"><highlight class="normal">{</highlight></codeline>
+<codeline lineno="66"><highlight class="normal"><sp/><sp/><ref refid="Definitions_8hpp_1a4033b62bd7d1a2feeba9579dc97abfaaa3ed53fbeb1eab0443561b68ca0c0b5cf" kindref="member">MENU</ref>,<sp/><sp/><sp/><sp/><sp/><sp/></highlight></codeline>
+<codeline lineno="67"><highlight class="normal"><sp/><sp/><ref refid="Definitions_8hpp_1a4033b62bd7d1a2feeba9579dc97abfaaa50366a49630a416ab3ccaa004196027e" kindref="member">PLAYING</ref>,<sp/><sp/><sp/></highlight></codeline>
+<codeline lineno="68"><highlight class="normal"><sp/><sp/><ref refid="Definitions_8hpp_1a4033b62bd7d1a2feeba9579dc97abfaaa99b2439e63f73ad515f7ab2447a80673" kindref="member">PAUSED</ref>,<sp/><sp/><sp/><sp/></highlight></codeline>
+<codeline lineno="69"><highlight class="normal"><sp/><sp/><ref refid="Definitions_8hpp_1a4033b62bd7d1a2feeba9579dc97abfaaaf8454a27e1df41397bf42444fe5aa45b" kindref="member">GAME_OVER</ref>,<sp/></highlight></codeline>
+<codeline lineno="70"><highlight class="normal"><sp/><sp/><ref refid="Definitions_8hpp_1a4033b62bd7d1a2feeba9579dc97abfaaa5dfd352dd6b7a5d118237fcf1e19fcc1" kindref="member">QUIT</ref>,<sp/><sp/><sp/><sp/><sp/><sp/></highlight></codeline>
+<codeline lineno="71"><highlight class="normal">};</highlight></codeline>
+<codeline lineno="72"><highlight class="normal"></highlight></codeline>
+<codeline lineno="76" refid="Definitions_8hpp_1a0b5249e273705ca59543765d960233ad" refkind="member"><highlight class="normal"></highlight><highlight class="keyword">enum<sp/>class</highlight><highlight class="normal"><sp/><ref refid="Definitions_8hpp_1a0b5249e273705ca59543765d960233ad" kindref="member">FoodType</ref><sp/>:<sp/>uint8_t</highlight></codeline>
+<codeline lineno="77"><highlight class="normal">{</highlight></codeline>
+<codeline lineno="78"><highlight class="normal"><sp/><sp/><ref refid="Definitions_8hpp_1a0b5249e273705ca59543765d960233ada4c462d6dd59d782386bb1cdad0060c70" kindref="member">APPLE</ref>,<sp/><sp/></highlight></codeline>
+<codeline lineno="79"><highlight class="normal"><sp/><sp/><ref refid="Definitions_8hpp_1a0b5249e273705ca59543765d960233adaa3dfdcec65c824a3d784228dd8796f49" kindref="member">CHERRY</ref>,<sp/></highlight></codeline>
+<codeline lineno="80"><highlight class="normal"><sp/><sp/><ref refid="Definitions_8hpp_1a0b5249e273705ca59543765d960233adab252d1fe1c0c16d001027c2fce9b6529" kindref="member">BANANA</ref>,<sp/></highlight></codeline>
+<codeline lineno="81"><highlight class="normal"><sp/><sp/><ref refid="Definitions_8hpp_1a0b5249e273705ca59543765d960233adaec90ea0091d7876704e8b9f5bcab47a0" kindref="member">GRAPE</ref>,<sp/><sp/></highlight></codeline>
+<codeline lineno="82"><highlight class="normal"><sp/><sp/><ref refid="Definitions_8hpp_1a0b5249e273705ca59543765d960233ada5b6490317b6f7270bc3ab5ffd07c1f52" kindref="member">ORANGE</ref>,<sp/></highlight></codeline>
+<codeline lineno="83"><highlight class="normal"><sp/><sp/><ref refid="Definitions_8hpp_1a0b5249e273705ca59543765d960233ada4905ac9d6a22bdfc1ae096094ce6248d" kindref="member">COUNT</ref>,<sp/><sp/></highlight></codeline>
+<codeline lineno="84"><highlight class="normal">};</highlight></codeline>
+<codeline lineno="85"><highlight class="normal"></highlight></codeline>
+<codeline lineno="89" refid="Definitions_8hpp_1a2969908cc132900702a633c926450135" refkind="member"><highlight class="normal"></highlight><highlight class="keyword">enum<sp/>class</highlight><highlight class="normal"><sp/><ref refid="Definitions_8hpp_1a2969908cc132900702a633c926450135" kindref="member">IpcCommands</ref><sp/>:<sp/>uint8_t</highlight></codeline>
+<codeline lineno="90"><highlight class="normal">{</highlight></codeline>
+<codeline lineno="91"><highlight class="normal"><sp/><sp/><ref refid="Definitions_8hpp_1a2969908cc132900702a633c926450135ab50339a10e1de285ac99d4c3990b8693" kindref="member">NONE</ref>,<sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/></highlight></codeline>
+<codeline lineno="92"><highlight class="normal"><sp/><sp/><ref refid="Definitions_8hpp_1a2969908cc132900702a633c926450135ac2062c3b54b5826abf3e88338853b5ec" kindref="member">START_GAME</ref>,<sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/></highlight></codeline>
+<codeline lineno="93"><highlight class="normal"><sp/><sp/><ref refid="Definitions_8hpp_1a2969908cc132900702a633c926450135ae397b4fa67c25cc1c9eae980cfdd43eb" kindref="member">MOVE_UP</ref>,<sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/></highlight></codeline>
+<codeline lineno="94"><highlight class="normal"><sp/><sp/><ref refid="Definitions_8hpp_1a2969908cc132900702a633c926450135a8b32429247158c80deab773f4e04e1c2" kindref="member">MOVE_DOWN</ref>,<sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/></highlight></codeline>
+<codeline lineno="95"><highlight class="normal"><sp/><sp/><ref refid="Definitions_8hpp_1a2969908cc132900702a633c926450135ad7aa835d76fc894935ade13f4d0624f8" kindref="member">MOVE_LEFT</ref>,<sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/></highlight></codeline>
+<codeline lineno="96"><highlight class="normal"><sp/><sp/><ref refid="Definitions_8hpp_1a2969908cc132900702a633c926450135a3dc5ed1f827e8c9a6392edb90af992d5" kindref="member">MOVE_RIGHT</ref>,<sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/></highlight></codeline>
+<codeline lineno="97"><highlight class="normal"><sp/><sp/><ref refid="Definitions_8hpp_1a2969908cc132900702a633c926450135a926c029e01a9337ea37e350ac649f917" kindref="member">RESTART_GAME</ref>,<sp/><sp/><sp/><sp/><sp/><sp/></highlight></codeline>
+<codeline lineno="98"><highlight class="normal"><sp/><sp/><ref refid="Definitions_8hpp_1a2969908cc132900702a633c926450135ad670e5511ca46cf781e4242eef0c8eba" kindref="member">QUIT_GAME</ref>,<sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/></highlight></codeline>
+<codeline lineno="99"><highlight class="normal"><sp/><sp/><ref refid="Definitions_8hpp_1a2969908cc132900702a633c926450135a521e1f27b4b8a734800c7015b6e694bf" kindref="member">CHANGE_BOARD_SIZE</ref>,<sp/></highlight></codeline>
+<codeline lineno="100"><highlight class="normal">};</highlight></codeline>
+<codeline lineno="101"><highlight class="normal"></highlight></codeline>
+<codeline lineno="105" refid="structSnakeGame_1_1StepResult" refkind="compound"><highlight class="normal"></highlight><highlight class="keyword">struct<sp/></highlight><highlight class="normal"><ref refid="structSnakeGame_1_1StepResult" kindref="compound">StepResult</ref></highlight></codeline>
+<codeline lineno="106"><highlight class="normal">{</highlight></codeline>
+<codeline lineno="107" refid="structSnakeGame_1_1StepResult_1ae3cad427ceda892fa74f7f9f9de116d8" refkind="member"><highlight class="normal"><sp/><sp/><ref refid="Definitions_8hpp_1a5caf71587ea73a69d4a36903cff574d2" kindref="member">NeuralInputs</ref><sp/><ref refid="structSnakeGame_1_1StepResult_1ae3cad427ceda892fa74f7f9f9de116d8" kindref="member">distances</ref>;<sp/><sp/><sp/><sp/><sp/></highlight></codeline>
+<codeline lineno="108" refid="structSnakeGame_1_1StepResult_1a87c34abc54899945f16ee05d2b91e955" refkind="member"><highlight class="normal"><sp/><sp/></highlight><highlight class="keywordtype">bool</highlight><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><ref refid="structSnakeGame_1_1StepResult_1a87c34abc54899945f16ee05d2b91e955" kindref="member">isGameOver</ref>;<sp/><sp/><sp/><sp/></highlight></codeline>
+<codeline lineno="109" refid="structSnakeGame_1_1StepResult_1a3953a5e19d1ee41e964d9fdfdd2d6ca1" refkind="member"><highlight class="normal"><sp/><sp/></highlight><highlight class="keywordtype">bool</highlight><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><ref refid="structSnakeGame_1_1StepResult_1a3953a5e19d1ee41e964d9fdfdd2d6ca1" kindref="member">fruitPickedUp</ref>;<sp/></highlight></codeline>
+<codeline lineno="110"><highlight class="normal">};</highlight></codeline>
+<codeline lineno="111"><highlight class="normal"></highlight></codeline>
+<codeline lineno="113" refid="Definitions_8hpp_1aaf0b781b9925da2241d26be1210f6824" refkind="member"><highlight class="keyword">using<sp/></highlight><highlight class="normal"><ref refid="Definitions_8hpp_1aaf0b781b9925da2241d26be1210f6824" kindref="member">SnakeBody</ref><sp/>=<sp/>std::array&lt;Coordinate,<sp/>SNAKE_MAX_LENGTH&gt;;</highlight></codeline>
+<codeline lineno="114"><highlight class="normal"></highlight></codeline>
+<codeline lineno="120" refid="structSnakeGame_1_1GameSharedData" refkind="compound"><highlight class="normal"></highlight><highlight class="keyword">struct<sp/></highlight><highlight class="normal"><ref refid="structSnakeGame_1_1GameSharedData" kindref="compound">GameSharedData</ref></highlight></codeline>
+<codeline lineno="121"><highlight class="normal">{</highlight></codeline>
+<codeline lineno="122" refid="structSnakeGame_1_1GameSharedData_1a40c36f23893ec09ec07a3d7e487cad7c" refkind="member"><highlight class="normal"><sp/><sp/>uint8_t<sp/><sp/><sp/><sp/><sp/><sp/><ref refid="structSnakeGame_1_1GameSharedData_1a40c36f23893ec09ec07a3d7e487cad7c" kindref="member">boardWidth</ref>;<sp/><sp/><sp/><sp/><sp/></highlight></codeline>
+<codeline lineno="123" refid="structSnakeGame_1_1GameSharedData_1ac168c7ddb1f1826b212aaeb0fa2f3dc0" refkind="member"><highlight class="normal"><sp/><sp/>uint8_t<sp/><sp/><sp/><sp/><sp/><sp/><ref refid="structSnakeGame_1_1GameSharedData_1ac168c7ddb1f1826b212aaeb0fa2f3dc0" kindref="member">boardHeight</ref>;<sp/><sp/><sp/><sp/></highlight></codeline>
+<codeline lineno="124" refid="structSnakeGame_1_1GameSharedData_1a1fade0034807f46e584515703e579c9c" refkind="member"><highlight class="normal"><sp/><sp/>uint16_t<sp/><sp/><sp/><sp/><sp/><ref refid="structSnakeGame_1_1GameSharedData_1a1fade0034807f46e584515703e579c9c" kindref="member">score</ref>;<sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/></highlight></codeline>
+<codeline lineno="125" refid="structSnakeGame_1_1GameSharedData_1a0c35437f18abb7972638334ba43a04dc" refkind="member"><highlight class="normal"><sp/><sp/>uint8_t<sp/><sp/><sp/><sp/><sp/><sp/><ref refid="structSnakeGame_1_1GameSharedData_1a0c35437f18abb7972638334ba43a04dc" kindref="member">speed</ref>;<sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/></highlight></codeline>
+<codeline lineno="126" refid="structSnakeGame_1_1GameSharedData_1ad9fb164ce2e21efffd08f6f2706f29c1" refkind="member"><highlight class="normal"><sp/><sp/><ref refid="Definitions_8hpp_1a4033b62bd7d1a2feeba9579dc97abfaa" kindref="member">GameState</ref><sp/><sp/><sp/><sp/><ref refid="structSnakeGame_1_1GameSharedData_1ad9fb164ce2e21efffd08f6f2706f29c1" kindref="member">gameState</ref>;<sp/><sp/><sp/><sp/><sp/><sp/></highlight></codeline>
+<codeline lineno="127" refid="structSnakeGame_1_1GameSharedData_1a6d7dc286f404ce85e4d3ce24e7cd9fa7" refkind="member"><highlight class="normal"><sp/><sp/><ref refid="Definitions_8hpp_1a9de414d17ba4549d37f38debb57e2625" kindref="member">Coordinate</ref><sp/><sp/><sp/><ref refid="structSnakeGame_1_1GameSharedData_1a6d7dc286f404ce85e4d3ce24e7cd9fa7" kindref="member">foodPosition</ref>;<sp/><sp/><sp/></highlight></codeline>
+<codeline lineno="128" refid="structSnakeGame_1_1GameSharedData_1a78a7ddbd82bfe2ed4c08f039cb5907ce" refkind="member"><highlight class="normal"><sp/><sp/><ref refid="Definitions_8hpp_1a0b5249e273705ca59543765d960233ad" kindref="member">FoodType</ref><sp/><sp/><sp/><sp/><sp/><ref refid="structSnakeGame_1_1GameSharedData_1a78a7ddbd82bfe2ed4c08f039cb5907ce" kindref="member">foodType</ref>;<sp/><sp/><sp/><sp/><sp/><sp/><sp/></highlight></codeline>
+<codeline lineno="129" refid="structSnakeGame_1_1GameSharedData_1a0d009e755fc2140489a18195ee2bb0d4" refkind="member"><highlight class="normal"><sp/><sp/><ref refid="Definitions_8hpp_1a9de414d17ba4549d37f38debb57e2625" kindref="member">Coordinate</ref><sp/><sp/><sp/><ref refid="structSnakeGame_1_1GameSharedData_1a0d009e755fc2140489a18195ee2bb0d4" kindref="member">snakeHead</ref>;<sp/><sp/><sp/><sp/><sp/><sp/></highlight></codeline>
+<codeline lineno="130" refid="structSnakeGame_1_1GameSharedData_1aa55a50d0a2a0ca99aa9311b22e20ea03" refkind="member"><highlight class="normal"><sp/><sp/>uint16_t<sp/><sp/><sp/><sp/><sp/><ref refid="structSnakeGame_1_1GameSharedData_1aa55a50d0a2a0ca99aa9311b22e20ea03" kindref="member">snakeLength</ref>;<sp/><sp/><sp/><sp/></highlight></codeline>
+<codeline lineno="131" refid="structSnakeGame_1_1GameSharedData_1a95b8d65ff705552fd703ba94766df20a" refkind="member"><highlight class="normal"><sp/><sp/><ref refid="Definitions_8hpp_1a5caf71587ea73a69d4a36903cff574d2" kindref="member">NeuralInputs</ref><sp/><ref refid="structSnakeGame_1_1GameSharedData_1a95b8d65ff705552fd703ba94766df20a" kindref="member">neuralVector</ref>;<sp/><sp/><sp/></highlight></codeline>
+<codeline lineno="132" refid="structSnakeGame_1_1GameSharedData_1a9c383dbe994dfeb78614b06fc5313587" refkind="member"><highlight class="normal"><sp/><sp/><ref refid="Definitions_8hpp_1a1241edc7a177c9eaec6c48e19f1db416" kindref="member">Direction</ref><sp/><sp/><sp/><sp/><ref refid="structSnakeGame_1_1GameSharedData_1a9c383dbe994dfeb78614b06fc5313587" kindref="member">snakeDirection</ref>;<sp/></highlight></codeline>
+<codeline lineno="133" refid="structSnakeGame_1_1GameSharedData_1ad347fb062fcdd2d33c9ba6014f868cd5" refkind="member"><highlight class="normal"><sp/><sp/><ref refid="Definitions_8hpp_1aaf0b781b9925da2241d26be1210f6824" kindref="member">SnakeBody</ref><sp/><sp/><sp/><sp/><ref refid="structSnakeGame_1_1GameSharedData_1ad347fb062fcdd2d33c9ba6014f868cd5" kindref="member">snakeBody</ref>;<sp/><sp/><sp/><sp/><sp/><sp/></highlight></codeline>
+<codeline lineno="134"><highlight class="normal">};</highlight></codeline>
+<codeline lineno="135"><highlight class="normal"></highlight></codeline>
+<codeline lineno="141" refid="structSnakeGame_1_1SharedMemoryData" refkind="compound"><highlight class="normal"></highlight><highlight class="keyword">struct<sp/></highlight><highlight class="normal"><ref refid="structSnakeGame_1_1SharedMemoryData" kindref="compound">SharedMemoryData</ref></highlight></codeline>
+<codeline lineno="142"><highlight class="normal">{</highlight></codeline>
+<codeline lineno="143" refid="structSnakeGame_1_1SharedMemoryData_1ab65a883b39783350638f8fb3aca1ec1d" refkind="member"><highlight class="normal"><sp/><sp/>std::atomic&lt;bool&gt;<sp/><sp/><sp/><sp/><sp/><ref refid="structSnakeGame_1_1SharedMemoryData_1ab65a883b39783350638f8fb3aca1ec1d" kindref="member">isWriting</ref>{</highlight><highlight class="keyword">false</highlight><highlight class="normal">};<sp/></highlight></codeline>
+<codeline lineno="144" refid="structSnakeGame_1_1SharedMemoryData_1a4eebd3275064268a946f358b0df11cdd" refkind="member"><highlight class="normal"><sp/><sp/>std::atomic&lt;uint32_t&gt;<sp/><ref refid="structSnakeGame_1_1SharedMemoryData_1a4eebd3275064268a946f358b0df11cdd" kindref="member">version</ref>{0};<sp/><sp/><sp/><sp/><sp/><sp/><sp/></highlight></codeline>
+<codeline lineno="145" refid="structSnakeGame_1_1SharedMemoryData_1a184443eae2c4feff12a3c05c4a36ad4e" refkind="member"><highlight class="normal"><sp/><sp/><ref refid="structSnakeGame_1_1GameSharedData" kindref="compound">GameSharedData</ref><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><ref refid="structSnakeGame_1_1SharedMemoryData_1a184443eae2c4feff12a3c05c4a36ad4e" kindref="member">gameData</ref>{};<sp/><sp/><sp/><sp/><sp/><sp/><sp/></highlight></codeline>
+<codeline lineno="146"><highlight class="normal">};</highlight></codeline>
+<codeline lineno="147"><highlight class="normal"></highlight></codeline>
+<codeline lineno="149" refid="Definitions_8hpp_1a5a748a77677da4c514104d0a7d9f1b18" refkind="member"><highlight class="keyword">inline</highlight><highlight class="normal"><sp/></highlight><highlight class="keyword">constexpr</highlight><highlight class="normal"><sp/></highlight><highlight class="keywordtype">size_t</highlight><highlight class="normal"><sp/><sp/><ref refid="Definitions_8hpp_1a5a748a77677da4c514104d0a7d9f1b18" kindref="member">SHARED_MEMORY_SIZE</ref><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>=<sp/></highlight><highlight class="keyword">sizeof</highlight><highlight class="normal">(<ref refid="structSnakeGame_1_1SharedMemoryData" kindref="compound">SharedMemoryData</ref>);</highlight></codeline>
+<codeline lineno="151" refid="Definitions_8hpp_1a9dff4d3ff5b45265079f605d8fec91e7" refkind="member"><highlight class="keyword">inline</highlight><highlight class="normal"><sp/></highlight><highlight class="keyword">constexpr</highlight><highlight class="normal"><sp/>int64_t<sp/><ref refid="Definitions_8hpp_1a9dff4d3ff5b45265079f605d8fec91e7" kindref="member">SHARED_MEMORY_WRITE_DELAY</ref><sp/>=<sp/>200;</highlight></codeline>
+<codeline lineno="152"><highlight class="normal"></highlight></codeline>
+<codeline lineno="154" refid="Definitions_8hpp_1ab385adae626bc9c7138560666b08bcea" refkind="member"><highlight class="keyword">using<sp/></highlight><highlight class="normal"><ref refid="Definitions_8hpp_1ab385adae626bc9c7138560666b08bcea" kindref="member">CommandCallback</ref><sp/>=<sp/>std::function&lt;void(<ref refid="Definitions_8hpp_1a2969908cc132900702a633c926450135" kindref="member">IpcCommands</ref>,<sp/></highlight><highlight class="keyword">const</highlight><highlight class="normal"><sp/>std::vector&lt;uint8_t&gt;&amp;)&gt;;</highlight></codeline>
+<codeline lineno="155"><highlight class="normal"></highlight></codeline>
+<codeline lineno="156"><highlight class="normal">}<sp/><sp/></highlight><highlight class="comment">//<sp/>namespace<sp/>SnakeGame</highlight><highlight class="normal"></highlight></codeline>
+    </programlisting>
+    <location file="src/core/Definitions.hpp"/>
+  </compounddef>
+</doxygen>

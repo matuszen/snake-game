@@ -1,0 +1,82 @@
+<?xml version='1.0' encoding='UTF-8' standalone='no'?>
+<doxygen xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="compound.xsd" version="1.9.8" xml:lang="en-US">
+  <compounddef id="structSnakeGame_1_1SharedMemoryData" kind="struct" language="C++" prot="public">
+    <compoundname>SnakeGame::SharedMemoryData</compoundname>
+    <includes refid="Definitions_8hpp" local="no">Definitions.hpp</includes>
+    <sectiondef kind="public-attrib">
+      <memberdef kind="variable" id="structSnakeGame_1_1SharedMemoryData_1ab65a883b39783350638f8fb3aca1ec1d" prot="public" static="no" mutable="no">
+        <type>std::atomic&lt; bool &gt;</type>
+        <definition>std::atomic&lt;bool&gt; SnakeGame::SharedMemoryData::isWriting</definition>
+        <argsstring></argsstring>
+        <name>isWriting</name>
+        <qualifiedname>SnakeGame::SharedMemoryData::isWriting</qualifiedname>
+        <initializer>{false}</initializer>
+        <briefdescription>
+<para>Write lock flag. </para>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="src/core/Definitions.hpp" line="143" column="19" bodyfile="src/core/Definitions.hpp" bodystart="143" bodyend="143"/>
+      </memberdef>
+      <memberdef kind="variable" id="structSnakeGame_1_1SharedMemoryData_1a4eebd3275064268a946f358b0df11cdd" prot="public" static="no" mutable="no">
+        <type>std::atomic&lt; uint32_t &gt;</type>
+        <definition>std::atomic&lt;uint32_t&gt; SnakeGame::SharedMemoryData::version</definition>
+        <argsstring></argsstring>
+        <name>version</name>
+        <qualifiedname>SnakeGame::SharedMemoryData::version</qualifiedname>
+        <initializer>{0}</initializer>
+        <briefdescription>
+<para>Version counter for readers. </para>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="src/core/Definitions.hpp" line="144" column="15" bodyfile="src/core/Definitions.hpp" bodystart="144" bodyend="144"/>
+      </memberdef>
+      <memberdef kind="variable" id="structSnakeGame_1_1SharedMemoryData_1a184443eae2c4feff12a3c05c4a36ad4e" prot="public" static="no" mutable="no">
+        <type><ref refid="structSnakeGame_1_1GameSharedData" kindref="compound">GameSharedData</ref></type>
+        <definition>GameSharedData SnakeGame::SharedMemoryData::gameData</definition>
+        <argsstring></argsstring>
+        <name>gameData</name>
+        <qualifiedname>SnakeGame::SharedMemoryData::gameData</qualifiedname>
+        <initializer>{}</initializer>
+        <briefdescription>
+<para>The actual game state data. </para>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="src/core/Definitions.hpp" line="145" column="25" bodyfile="src/core/Definitions.hpp" bodystart="145" bodyend="145"/>
+      </memberdef>
+    </sectiondef>
+    <briefdescription>
+<para>Shared memory layout with synchronization flags. </para>
+    </briefdescription>
+    <detaileddescription>
+<para>This structure ensures safe concurrent access to game state between processes. </para>
+    </detaileddescription>
+    <collaborationgraph>
+      <node id="2">
+        <label>SnakeGame::GameSharedData</label>
+        <link refid="structSnakeGame_1_1GameSharedData"/>
+      </node>
+      <node id="1">
+        <label>SnakeGame::SharedMemoryData</label>
+        <link refid="structSnakeGame_1_1SharedMemoryData"/>
+        <childnode refid="2" relation="usage">
+          <edgelabel>gameData</edgelabel>
+        </childnode>
+      </node>
+    </collaborationgraph>
+    <location file="src/core/Definitions.hpp" line="141" column="1" bodyfile="src/core/Definitions.hpp" bodystart="142" bodyend="146"/>
+    <listofallmembers>
+      <member refid="structSnakeGame_1_1SharedMemoryData_1a184443eae2c4feff12a3c05c4a36ad4e" prot="public" virt="non-virtual"><scope>SnakeGame::SharedMemoryData</scope><name>gameData</name></member>
+      <member refid="structSnakeGame_1_1SharedMemoryData_1ab65a883b39783350638f8fb3aca1ec1d" prot="public" virt="non-virtual"><scope>SnakeGame::SharedMemoryData</scope><name>isWriting</name></member>
+      <member refid="structSnakeGame_1_1SharedMemoryData_1a4eebd3275064268a946f358b0df11cdd" prot="public" virt="non-virtual"><scope>SnakeGame::SharedMemoryData</scope><name>version</name></member>
+    </listofallmembers>
+  </compounddef>
+</doxygen>

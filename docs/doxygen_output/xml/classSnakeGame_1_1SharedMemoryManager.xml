@@ -1,0 +1,428 @@
+<?xml version='1.0' encoding='UTF-8' standalone='no'?>
+<doxygen xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="compound.xsd" version="1.9.8" xml:lang="en-US">
+  <compounddef id="classSnakeGame_1_1SharedMemoryManager" kind="class" language="C++" prot="public">
+    <compoundname>SnakeGame::SharedMemoryManager</compoundname>
+    <includes refid="SharedMemoryManager_8hpp" local="no">SharedMemoryManager.hpp</includes>
+    <sectiondef kind="private-attrib">
+      <memberdef kind="variable" id="classSnakeGame_1_1SharedMemoryManager_1a17ec9ce5ab8cf5e5ecf303b1ebc40b4b" prot="private" static="no" mutable="no">
+        <type><ref refid="structSnakeGame_1_1GameSharedData" kindref="compound">GameSharedData</ref></type>
+        <definition>GameSharedData SnakeGame::SharedMemoryManager::writeBuffer_</definition>
+        <argsstring></argsstring>
+        <name>writeBuffer_</name>
+        <qualifiedname>SnakeGame::SharedMemoryManager::writeBuffer_</qualifiedname>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="src/network/SharedMemoryManager.hpp" line="69" column="32" bodyfile="src/network/SharedMemoryManager.hpp" bodystart="69" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="classSnakeGame_1_1SharedMemoryManager_1a40b53a3a654eb3b8cedad6f67c39acbc" prot="private" static="no" mutable="no">
+        <type>std::mutex</type>
+        <definition>std::mutex SnakeGame::SharedMemoryManager::bufferMutex_</definition>
+        <argsstring></argsstring>
+        <name>bufferMutex_</name>
+        <qualifiedname>SnakeGame::SharedMemoryManager::bufferMutex_</qualifiedname>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="src/network/SharedMemoryManager.hpp" line="70" column="32" bodyfile="src/network/SharedMemoryManager.hpp" bodystart="70" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="classSnakeGame_1_1SharedMemoryManager_1ae460ccff41572f463d72735ab1c388bd" prot="private" static="no" mutable="no">
+        <type>std::atomic&lt; bool &gt;</type>
+        <definition>std::atomic&lt;bool&gt; SnakeGame::SharedMemoryManager::hasNewData_</definition>
+        <argsstring></argsstring>
+        <name>hasNewData_</name>
+        <qualifiedname>SnakeGame::SharedMemoryManager::hasNewData_</qualifiedname>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="src/network/SharedMemoryManager.hpp" line="71" column="26" bodyfile="src/network/SharedMemoryManager.hpp" bodystart="71" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="classSnakeGame_1_1SharedMemoryManager_1a992f2c9c25581cce52d238706476867e" prot="private" static="no" mutable="no">
+        <type>std::unique_ptr&lt; std::thread &gt;</type>
+        <definition>std::unique_ptr&lt;std::thread&gt; SnakeGame::SharedMemoryManager::writerThread_</definition>
+        <argsstring></argsstring>
+        <name>writerThread_</name>
+        <qualifiedname>SnakeGame::SharedMemoryManager::writerThread_</qualifiedname>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="src/network/SharedMemoryManager.hpp" line="72" column="19" bodyfile="src/network/SharedMemoryManager.hpp" bodystart="72" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="classSnakeGame_1_1SharedMemoryManager_1a1950c28ae05ec1a18583263167061a81" prot="private" static="no" mutable="no">
+        <type>std::atomic&lt; bool &gt;</type>
+        <definition>std::atomic&lt;bool&gt; SnakeGame::SharedMemoryManager::shouldStopWriter_</definition>
+        <argsstring></argsstring>
+        <name>shouldStopWriter_</name>
+        <qualifiedname>SnakeGame::SharedMemoryManager::shouldStopWriter_</qualifiedname>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="src/network/SharedMemoryManager.hpp" line="73" column="26" bodyfile="src/network/SharedMemoryManager.hpp" bodystart="73" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="classSnakeGame_1_1SharedMemoryManager_1ad803fb98499afcad48e0ea836d76cef6" prot="private" static="no" mutable="no">
+        <type>std::string</type>
+        <definition>std::string SnakeGame::SharedMemoryManager::shmName_</definition>
+        <argsstring></argsstring>
+        <name>shmName_</name>
+        <qualifiedname>SnakeGame::SharedMemoryManager::shmName_</qualifiedname>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="src/network/SharedMemoryManager.hpp" line="74" column="32" bodyfile="src/network/SharedMemoryManager.hpp" bodystart="74" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="classSnakeGame_1_1SharedMemoryManager_1adb8f4f9ade1ea6615e72be0cc8921fa7" prot="private" static="no" mutable="no">
+        <type>int32_t</type>
+        <definition>int32_t SnakeGame::SharedMemoryManager::shmFd_</definition>
+        <argsstring></argsstring>
+        <name>shmFd_</name>
+        <qualifiedname>SnakeGame::SharedMemoryManager::shmFd_</qualifiedname>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="src/network/SharedMemoryManager.hpp" line="76" column="11" bodyfile="src/network/SharedMemoryManager.hpp" bodystart="76" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="classSnakeGame_1_1SharedMemoryManager_1a948c02ca932f5a7ee7c5266c3b4d3ba7" prot="private" static="no" mutable="no">
+        <type>void *</type>
+        <definition>void* SnakeGame::SharedMemoryManager::shmPtr_</definition>
+        <argsstring></argsstring>
+        <name>shmPtr_</name>
+        <qualifiedname>SnakeGame::SharedMemoryManager::shmPtr_</qualifiedname>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="src/network/SharedMemoryManager.hpp" line="77" column="10" bodyfile="src/network/SharedMemoryManager.hpp" bodystart="77" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="classSnakeGame_1_1SharedMemoryManager_1a954db84415a02c0249f27097102d9cb1" prot="private" static="no" mutable="no">
+        <type>bool</type>
+        <definition>bool SnakeGame::SharedMemoryManager::initialized_</definition>
+        <argsstring></argsstring>
+        <name>initialized_</name>
+        <qualifiedname>SnakeGame::SharedMemoryManager::initialized_</qualifiedname>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="src/network/SharedMemoryManager.hpp" line="78" column="11" bodyfile="src/network/SharedMemoryManager.hpp" bodystart="78" bodyend="-1"/>
+      </memberdef>
+    </sectiondef>
+    <sectiondef kind="public-func">
+      <memberdef kind="function" id="classSnakeGame_1_1SharedMemoryManager_1a6e19e8ada4d2b02f74df92dd33814f2f" prot="public" static="no" const="no" explicit="yes" inline="no" virt="non-virtual">
+        <type></type>
+        <definition>SnakeGame::SharedMemoryManager::SharedMemoryManager</definition>
+        <argsstring>(std::string shmName=std::string{DEFAULT_SHM_NAME})</argsstring>
+        <name>SharedMemoryManager</name>
+        <qualifiedname>SnakeGame::SharedMemoryManager::SharedMemoryManager</qualifiedname>
+        <param>
+          <type>std::string</type>
+          <declname>shmName</declname>
+          <defval>std::string{<ref refid="Definitions_8hpp_1aeef324886f34d7b74d437f9371fdf8da" kindref="member">DEFAULT_SHM_NAME</ref>}</defval>
+        </param>
+        <briefdescription>
+<para>Constructs a <ref refid="classSnakeGame_1_1SharedMemoryManager" kindref="compound">SharedMemoryManager</ref> with the specified shared memory name. </para>
+        </briefdescription>
+        <detaileddescription>
+<para><parameterlist kind="param"><parameteritem>
+<parameternamelist>
+<parametername>shmName</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>Name of the POSIX shared memory object (default: /snake_game_shm). </para>
+</parameterdescription>
+</parameteritem>
+</parameterlist>
+</para>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="src/network/SharedMemoryManager.hpp" line="30" column="12" bodyfile="src/network/SharedMemoryManager.cpp" bodystart="23" bodyend="27"/>
+      </memberdef>
+      <memberdef kind="function" id="classSnakeGame_1_1SharedMemoryManager_1aa88c1ec476c24ca228078e9ab0871531" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type></type>
+        <definition>SnakeGame::SharedMemoryManager::~SharedMemoryManager</definition>
+        <argsstring>()</argsstring>
+        <name>~SharedMemoryManager</name>
+        <qualifiedname>SnakeGame::SharedMemoryManager::~SharedMemoryManager</qualifiedname>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="src/network/SharedMemoryManager.hpp" line="31" column="3" bodyfile="src/network/SharedMemoryManager.cpp" bodystart="29" bodyend="33"/>
+      </memberdef>
+      <memberdef kind="function" id="classSnakeGame_1_1SharedMemoryManager_1a3fed1647b77fc0fa24147191fdbac85a" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type></type>
+        <definition>SnakeGame::SharedMemoryManager::SharedMemoryManager</definition>
+        <argsstring>(const SharedMemoryManager &amp;other)=delete</argsstring>
+        <name>SharedMemoryManager</name>
+        <qualifiedname>SnakeGame::SharedMemoryManager::SharedMemoryManager</qualifiedname>
+        <param>
+          <type>const <ref refid="classSnakeGame_1_1SharedMemoryManager" kindref="compound">SharedMemoryManager</ref> &amp;</type>
+          <declname>other</declname>
+        </param>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="src/network/SharedMemoryManager.hpp" line="33" column="3"/>
+      </memberdef>
+      <memberdef kind="function" id="classSnakeGame_1_1SharedMemoryManager_1a526593e3cc947451e8a85d2fd8557ecf" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type></type>
+        <definition>SnakeGame::SharedMemoryManager::SharedMemoryManager</definition>
+        <argsstring>(SharedMemoryManager &amp;&amp;other)=delete</argsstring>
+        <name>SharedMemoryManager</name>
+        <qualifiedname>SnakeGame::SharedMemoryManager::SharedMemoryManager</qualifiedname>
+        <param>
+          <type><ref refid="classSnakeGame_1_1SharedMemoryManager" kindref="compound">SharedMemoryManager</ref> &amp;&amp;</type>
+          <declname>other</declname>
+        </param>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="src/network/SharedMemoryManager.hpp" line="34" column="3"/>
+      </memberdef>
+      <memberdef kind="function" id="classSnakeGame_1_1SharedMemoryManager_1aff3cf08104ea0ca9a706edc50fc3e1c4" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type>auto</type>
+        <definition>auto SnakeGame::SharedMemoryManager::operator=</definition>
+        <argsstring>(const SharedMemoryManager &amp;other) -&gt; SharedMemoryManager=delete</argsstring>
+        <name>operator=</name>
+        <qualifiedname>SnakeGame::SharedMemoryManager::operator=</qualifiedname>
+        <param>
+          <type>const <ref refid="classSnakeGame_1_1SharedMemoryManager" kindref="compound">SharedMemoryManager</ref> &amp;</type>
+          <declname>other</declname>
+        </param>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="src/network/SharedMemoryManager.hpp" line="35" column="8"/>
+      </memberdef>
+      <memberdef kind="function" id="classSnakeGame_1_1SharedMemoryManager_1af0e47133b80ae5f4dad0785a01e56e70" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type>auto</type>
+        <definition>auto SnakeGame::SharedMemoryManager::operator=</definition>
+        <argsstring>(SharedMemoryManager &amp;&amp;other) -&gt; SharedMemoryManager=delete</argsstring>
+        <name>operator=</name>
+        <qualifiedname>SnakeGame::SharedMemoryManager::operator=</qualifiedname>
+        <param>
+          <type><ref refid="classSnakeGame_1_1SharedMemoryManager" kindref="compound">SharedMemoryManager</ref> &amp;&amp;</type>
+          <declname>other</declname>
+        </param>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="src/network/SharedMemoryManager.hpp" line="36" column="8"/>
+      </memberdef>
+      <memberdef kind="function" id="classSnakeGame_1_1SharedMemoryManager_1a2c448e7a68fae0be4dcf4d751b5e4803" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type>void</type>
+        <definition>void SnakeGame::SharedMemoryManager::startAsyncWriter</definition>
+        <argsstring>()</argsstring>
+        <name>startAsyncWriter</name>
+        <qualifiedname>SnakeGame::SharedMemoryManager::startAsyncWriter</qualifiedname>
+        <briefdescription>
+<para>Starts the background writer thread. </para>
+        </briefdescription>
+        <detaileddescription>
+<para>The writer thread periodically flushes buffered game state to shared memory. </para>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="src/network/SharedMemoryManager.hpp" line="43" column="8" bodyfile="src/network/SharedMemoryManager.cpp" bodystart="35" bodyend="44"/>
+      </memberdef>
+      <memberdef kind="function" id="classSnakeGame_1_1SharedMemoryManager_1aacc4c4869e2145e34e7bbc776c7f483e" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type>void</type>
+        <definition>void SnakeGame::SharedMemoryManager::stopAsyncWriter</definition>
+        <argsstring>()</argsstring>
+        <name>stopAsyncWriter</name>
+        <qualifiedname>SnakeGame::SharedMemoryManager::stopAsyncWriter</qualifiedname>
+        <briefdescription>
+<para>Stops the background writer thread and waits for it to finish. </para>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="src/network/SharedMemoryManager.hpp" line="48" column="8" bodyfile="src/network/SharedMemoryManager.cpp" bodystart="46" bodyend="61"/>
+      </memberdef>
+      <memberdef kind="function" id="classSnakeGame_1_1SharedMemoryManager_1ac802d215f4840ee8eab86cf74d21c54b" prot="public" static="no" const="no" explicit="no" inline="no" noexcept="yes" virt="non-virtual">
+        <type>void</type>
+        <definition>void SnakeGame::SharedMemoryManager::updateGameState</definition>
+        <argsstring>(const GameSharedData &amp;data) noexcept</argsstring>
+        <name>updateGameState</name>
+        <qualifiedname>SnakeGame::SharedMemoryManager::updateGameState</qualifiedname>
+        <param>
+          <type>const <ref refid="structSnakeGame_1_1GameSharedData" kindref="compound">GameSharedData</ref> &amp;</type>
+          <declname>data</declname>
+        </param>
+        <briefdescription>
+<para>Updates the internal buffer with new game state data. </para>
+        </briefdescription>
+        <detaileddescription>
+<para>This method is thread-safe and does not block. The data will be written to shared memory asynchronously by the writer thread.</para>
+<para><parameterlist kind="param"><parameteritem>
+<parameternamelist>
+<parametername>data</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>The new game state to buffer. </para>
+</parameterdescription>
+</parameteritem>
+</parameterlist>
+</para>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="src/network/SharedMemoryManager.hpp" line="58" column="8" bodyfile="src/network/SharedMemoryManager.cpp" bodystart="63" bodyend="76"/>
+      </memberdef>
+      <memberdef kind="function" id="classSnakeGame_1_1SharedMemoryManager_1a52f21df7c905b3158aa0d1ec7d1eab0b" prot="public" static="no" const="yes" explicit="no" inline="no" noexcept="yes" virt="non-virtual">
+        <type>auto</type>
+        <definition>auto SnakeGame::SharedMemoryManager::isInitialized</definition>
+        <argsstring>() const noexcept -&gt; bool</argsstring>
+        <name>isInitialized</name>
+        <qualifiedname>SnakeGame::SharedMemoryManager::isInitialized</qualifiedname>
+        <briefdescription>
+<para>Checks if shared memory was successfully initialized. </para>
+        </briefdescription>
+        <detaileddescription>
+<para><simplesect kind="return"><para>true If shared memory is ready for use. </para>
+</simplesect>
+<simplesect kind="return"><para>false If initialization failed. </para>
+</simplesect>
+</para>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="src/network/SharedMemoryManager.hpp" line="66" column="8" bodyfile="src/network/SharedMemoryManager.cpp" bodystart="78" bodyend="81"/>
+      </memberdef>
+    </sectiondef>
+    <sectiondef kind="private-func">
+      <memberdef kind="function" id="classSnakeGame_1_1SharedMemoryManager_1af2d136695d5d56f1cca27200549b0ec2" prot="private" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type>auto</type>
+        <definition>auto SnakeGame::SharedMemoryManager::initializeSharedMemory</definition>
+        <argsstring>() -&gt; bool</argsstring>
+        <name>initializeSharedMemory</name>
+        <qualifiedname>SnakeGame::SharedMemoryManager::initializeSharedMemory</qualifiedname>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="src/network/SharedMemoryManager.hpp" line="80" column="8" bodyfile="src/network/SharedMemoryManager.cpp" bodystart="83" bodyend="112"/>
+      </memberdef>
+      <memberdef kind="function" id="classSnakeGame_1_1SharedMemoryManager_1ac31eea6c750a453252efd105ef5e173d" prot="private" static="no" const="no" explicit="no" inline="no" noexcept="yes" virt="non-virtual">
+        <type>void</type>
+        <definition>void SnakeGame::SharedMemoryManager::cleanupSharedMemory</definition>
+        <argsstring>() noexcept</argsstring>
+        <name>cleanupSharedMemory</name>
+        <qualifiedname>SnakeGame::SharedMemoryManager::cleanupSharedMemory</qualifiedname>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="src/network/SharedMemoryManager.hpp" line="81" column="8" bodyfile="src/network/SharedMemoryManager.cpp" bodystart="114" bodyend="129"/>
+      </memberdef>
+      <memberdef kind="function" id="classSnakeGame_1_1SharedMemoryManager_1aa0626c9c45e7a351206f3ac803b284fc" prot="private" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type>void</type>
+        <definition>void SnakeGame::SharedMemoryManager::writerThreadFunction</definition>
+        <argsstring>()</argsstring>
+        <name>writerThreadFunction</name>
+        <qualifiedname>SnakeGame::SharedMemoryManager::writerThreadFunction</qualifiedname>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="src/network/SharedMemoryManager.hpp" line="82" column="8" bodyfile="src/network/SharedMemoryManager.cpp" bodystart="131" bodyend="148"/>
+      </memberdef>
+      <memberdef kind="function" id="classSnakeGame_1_1SharedMemoryManager_1a757ff5f2e2e4fc79fd9cea6fa689ca7a" prot="private" static="no" const="no" explicit="no" inline="no" noexcept="yes" virt="non-virtual">
+        <type>void</type>
+        <definition>void SnakeGame::SharedMemoryManager::writeToSharedMemory</definition>
+        <argsstring>(const GameSharedData &amp;data) noexcept</argsstring>
+        <name>writeToSharedMemory</name>
+        <qualifiedname>SnakeGame::SharedMemoryManager::writeToSharedMemory</qualifiedname>
+        <param>
+          <type>const <ref refid="structSnakeGame_1_1GameSharedData" kindref="compound">GameSharedData</ref> &amp;</type>
+          <declname>data</declname>
+        </param>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="src/network/SharedMemoryManager.hpp" line="83" column="8" bodyfile="src/network/SharedMemoryManager.cpp" bodystart="150" bodyend="182"/>
+      </memberdef>
+    </sectiondef>
+    <briefdescription>
+<para>Manages POSIX shared memory for game state communication. </para>
+    </briefdescription>
+    <detaileddescription>
+<para>This class creates and manages a shared memory region, providing thread-safe asynchronous writes to prevent blocking the main game loop. Uses double-buffering and atomic synchronization to ensure data consistency. </para>
+    </detaileddescription>
+    <location file="src/network/SharedMemoryManager.hpp" line="22" column="1" bodyfile="src/network/SharedMemoryManager.hpp" bodystart="23" bodyend="84"/>
+    <listofallmembers>
+      <member refid="classSnakeGame_1_1SharedMemoryManager_1a40b53a3a654eb3b8cedad6f67c39acbc" prot="private" virt="non-virtual"><scope>SnakeGame::SharedMemoryManager</scope><name>bufferMutex_</name></member>
+      <member refid="classSnakeGame_1_1SharedMemoryManager_1ac31eea6c750a453252efd105ef5e173d" prot="private" virt="non-virtual"><scope>SnakeGame::SharedMemoryManager</scope><name>cleanupSharedMemory</name></member>
+      <member refid="classSnakeGame_1_1SharedMemoryManager_1ae460ccff41572f463d72735ab1c388bd" prot="private" virt="non-virtual"><scope>SnakeGame::SharedMemoryManager</scope><name>hasNewData_</name></member>
+      <member refid="classSnakeGame_1_1SharedMemoryManager_1a954db84415a02c0249f27097102d9cb1" prot="private" virt="non-virtual"><scope>SnakeGame::SharedMemoryManager</scope><name>initialized_</name></member>
+      <member refid="classSnakeGame_1_1SharedMemoryManager_1af2d136695d5d56f1cca27200549b0ec2" prot="private" virt="non-virtual"><scope>SnakeGame::SharedMemoryManager</scope><name>initializeSharedMemory</name></member>
+      <member refid="classSnakeGame_1_1SharedMemoryManager_1a52f21df7c905b3158aa0d1ec7d1eab0b" prot="public" virt="non-virtual"><scope>SnakeGame::SharedMemoryManager</scope><name>isInitialized</name></member>
+      <member refid="classSnakeGame_1_1SharedMemoryManager_1aff3cf08104ea0ca9a706edc50fc3e1c4" prot="public" virt="non-virtual"><scope>SnakeGame::SharedMemoryManager</scope><name>operator=</name></member>
+      <member refid="classSnakeGame_1_1SharedMemoryManager_1af0e47133b80ae5f4dad0785a01e56e70" prot="public" virt="non-virtual"><scope>SnakeGame::SharedMemoryManager</scope><name>operator=</name></member>
+      <member refid="classSnakeGame_1_1SharedMemoryManager_1a6e19e8ada4d2b02f74df92dd33814f2f" prot="public" virt="non-virtual"><scope>SnakeGame::SharedMemoryManager</scope><name>SharedMemoryManager</name></member>
+      <member refid="classSnakeGame_1_1SharedMemoryManager_1a3fed1647b77fc0fa24147191fdbac85a" prot="public" virt="non-virtual"><scope>SnakeGame::SharedMemoryManager</scope><name>SharedMemoryManager</name></member>
+      <member refid="classSnakeGame_1_1SharedMemoryManager_1a526593e3cc947451e8a85d2fd8557ecf" prot="public" virt="non-virtual"><scope>SnakeGame::SharedMemoryManager</scope><name>SharedMemoryManager</name></member>
+      <member refid="classSnakeGame_1_1SharedMemoryManager_1adb8f4f9ade1ea6615e72be0cc8921fa7" prot="private" virt="non-virtual"><scope>SnakeGame::SharedMemoryManager</scope><name>shmFd_</name></member>
+      <member refid="classSnakeGame_1_1SharedMemoryManager_1ad803fb98499afcad48e0ea836d76cef6" prot="private" virt="non-virtual"><scope>SnakeGame::SharedMemoryManager</scope><name>shmName_</name></member>
+      <member refid="classSnakeGame_1_1SharedMemoryManager_1a948c02ca932f5a7ee7c5266c3b4d3ba7" prot="private" virt="non-virtual"><scope>SnakeGame::SharedMemoryManager</scope><name>shmPtr_</name></member>
+      <member refid="classSnakeGame_1_1SharedMemoryManager_1a1950c28ae05ec1a18583263167061a81" prot="private" virt="non-virtual"><scope>SnakeGame::SharedMemoryManager</scope><name>shouldStopWriter_</name></member>
+      <member refid="classSnakeGame_1_1SharedMemoryManager_1a2c448e7a68fae0be4dcf4d751b5e4803" prot="public" virt="non-virtual"><scope>SnakeGame::SharedMemoryManager</scope><name>startAsyncWriter</name></member>
+      <member refid="classSnakeGame_1_1SharedMemoryManager_1aacc4c4869e2145e34e7bbc776c7f483e" prot="public" virt="non-virtual"><scope>SnakeGame::SharedMemoryManager</scope><name>stopAsyncWriter</name></member>
+      <member refid="classSnakeGame_1_1SharedMemoryManager_1ac802d215f4840ee8eab86cf74d21c54b" prot="public" virt="non-virtual"><scope>SnakeGame::SharedMemoryManager</scope><name>updateGameState</name></member>
+      <member refid="classSnakeGame_1_1SharedMemoryManager_1a17ec9ce5ab8cf5e5ecf303b1ebc40b4b" prot="private" virt="non-virtual"><scope>SnakeGame::SharedMemoryManager</scope><name>writeBuffer_</name></member>
+      <member refid="classSnakeGame_1_1SharedMemoryManager_1a992f2c9c25581cce52d238706476867e" prot="private" virt="non-virtual"><scope>SnakeGame::SharedMemoryManager</scope><name>writerThread_</name></member>
+      <member refid="classSnakeGame_1_1SharedMemoryManager_1aa0626c9c45e7a351206f3ac803b284fc" prot="private" virt="non-virtual"><scope>SnakeGame::SharedMemoryManager</scope><name>writerThreadFunction</name></member>
+      <member refid="classSnakeGame_1_1SharedMemoryManager_1a757ff5f2e2e4fc79fd9cea6fa689ca7a" prot="private" virt="non-virtual"><scope>SnakeGame::SharedMemoryManager</scope><name>writeToSharedMemory</name></member>
+      <member refid="classSnakeGame_1_1SharedMemoryManager_1aa88c1ec476c24ca228078e9ab0871531" prot="public" virt="non-virtual"><scope>SnakeGame::SharedMemoryManager</scope><name>~SharedMemoryManager</name></member>
+    </listofallmembers>
+  </compounddef>
+</doxygen>

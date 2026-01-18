@@ -1,3 +1,5 @@
+"""Snake Game Viewer - Main interface for the Snake game with AI support."""
+
 import os
 import subprocess
 import sys

@@ -1,3 +1,5 @@
+"""Heuristic controller for Snake game."""
+
 from collections import deque
 from typing import Optional
 

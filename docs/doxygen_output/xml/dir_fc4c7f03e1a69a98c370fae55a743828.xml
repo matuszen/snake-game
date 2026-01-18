@@ -1,0 +1,15 @@
+<?xml version='1.0' encoding='UTF-8' standalone='no'?>
+<doxygen xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="compound.xsd" version="1.9.8" xml:lang="en-US">
+  <compounddef id="dir_fc4c7f03e1a69a98c370fae55a743828" kind="dir">
+    <compoundname>src/network</compoundname>
+    <innerfile refid="CommandSocket_8cpp">CommandSocket.cpp</innerfile>
+    <innerfile refid="CommandSocket_8hpp">CommandSocket.hpp</innerfile>
+    <innerfile refid="SharedMemoryManager_8cpp">SharedMemoryManager.cpp</innerfile>
+    <innerfile refid="SharedMemoryManager_8hpp">SharedMemoryManager.hpp</innerfile>
+    <briefdescription>
+    </briefdescription>
+    <detaileddescription>
+    </detaileddescription>
+    <location file="src/network/"/>
+  </compounddef>
+</doxygen>

@@ -7,3 +7,6 @@ setuptools==80.9.0
 ruff==0.14.1
 isort==7.0.0
 mypy==1.19.1
+sphinx>=7.0.0
+breathe>=4.35.0
+sphinx-rtd-theme>=2.0.0

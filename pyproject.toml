@@ -22,10 +22,6 @@ select = ["E", "F", "W", "C90"]
 extend-select = ["B", "D", "I", "S"]
 extend-ignore = [
     "E203",
-    "D100",
-    "D101",
-    "D102",
-    "D103",
     "D107",
     "C901",
     "S108",

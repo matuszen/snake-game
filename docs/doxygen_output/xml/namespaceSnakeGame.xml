@@ -1,0 +1,504 @@
+<?xml version='1.0' encoding='UTF-8' standalone='no'?>
+<doxygen xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="compound.xsd" version="1.9.8" xml:lang="en-US">
+  <compounddef id="namespaceSnakeGame" kind="namespace" language="C++">
+    <compoundname>SnakeGame</compoundname>
+    <innerclass refid="classSnakeGame_1_1Board" prot="public">SnakeGame::Board</innerclass>
+    <innerclass refid="classSnakeGame_1_1CommandSocket" prot="public">SnakeGame::CommandSocket</innerclass>
+    <innerclass refid="classSnakeGame_1_1Game" prot="public">SnakeGame::Game</innerclass>
+    <innerclass refid="structSnakeGame_1_1GameSharedData" prot="public">SnakeGame::GameSharedData</innerclass>
+    <innerclass refid="structSnakeGame_1_1SharedMemoryData" prot="public">SnakeGame::SharedMemoryData</innerclass>
+    <innerclass refid="classSnakeGame_1_1SharedMemoryManager" prot="public">SnakeGame::SharedMemoryManager</innerclass>
+    <innerclass refid="classSnakeGame_1_1Snake" prot="public">SnakeGame::Snake</innerclass>
+    <innerclass refid="structSnakeGame_1_1StepResult" prot="public">SnakeGame::StepResult</innerclass>
+    <sectiondef kind="enum">
+      <memberdef kind="enum" id="Definitions_8hpp_1a1241edc7a177c9eaec6c48e19f1db416" prot="public" static="no" strong="yes">
+        <type>uint8_t</type>
+        <name>Direction</name>
+        <qualifiedname>SnakeGame::Direction</qualifiedname>
+        <enumvalue id="Definitions_8hpp_1a1241edc7a177c9eaec6c48e19f1db416afbaedde498cdead4f2780217646e9ba1" prot="public">
+          <name>UP</name>
+          <briefdescription>
+<para>Move upward (decrease y). </para>
+          </briefdescription>
+          <detaileddescription>
+          </detaileddescription>
+        </enumvalue>
+        <enumvalue id="Definitions_8hpp_1a1241edc7a177c9eaec6c48e19f1db416ac4e0e4e3118472beeb2ae75827450f1f" prot="public">
+          <name>DOWN</name>
+          <briefdescription>
+<para>Move downward (increase y). </para>
+          </briefdescription>
+          <detaileddescription>
+          </detaileddescription>
+        </enumvalue>
+        <enumvalue id="Definitions_8hpp_1a1241edc7a177c9eaec6c48e19f1db416a684d325a7303f52e64011467ff5c5758" prot="public">
+          <name>LEFT</name>
+          <briefdescription>
+<para>Move left (decrease x). </para>
+          </briefdescription>
+          <detaileddescription>
+          </detaileddescription>
+        </enumvalue>
+        <enumvalue id="Definitions_8hpp_1a1241edc7a177c9eaec6c48e19f1db416a21507b40c80068eda19865706fdc2403" prot="public">
+          <name>RIGHT</name>
+          <briefdescription>
+<para>Move right (increase x). </para>
+          </briefdescription>
+          <detaileddescription>
+          </detaileddescription>
+        </enumvalue>
+        <briefdescription>
+<para>Enumeration of possible movement directions. </para>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="src/core/Definitions.hpp" line="53" column="1" bodyfile="src/core/Definitions.hpp" bodystart="54" bodyend="59"/>
+      </memberdef>
+      <memberdef kind="enum" id="Definitions_8hpp_1a4033b62bd7d1a2feeba9579dc97abfaa" prot="public" static="no" strong="yes">
+        <type>uint8_t</type>
+        <name>GameState</name>
+        <qualifiedname>SnakeGame::GameState</qualifiedname>
+        <enumvalue id="Definitions_8hpp_1a4033b62bd7d1a2feeba9579dc97abfaaa3ed53fbeb1eab0443561b68ca0c0b5cf" prot="public">
+          <name>MENU</name>
+          <briefdescription>
+<para>In main menu. </para>
+          </briefdescription>
+          <detaileddescription>
+          </detaileddescription>
+        </enumvalue>
+        <enumvalue id="Definitions_8hpp_1a4033b62bd7d1a2feeba9579dc97abfaaa50366a49630a416ab3ccaa004196027e" prot="public">
+          <name>PLAYING</name>
+          <briefdescription>
+<para>Actively playing. </para>
+          </briefdescription>
+          <detaileddescription>
+          </detaileddescription>
+        </enumvalue>
+        <enumvalue id="Definitions_8hpp_1a4033b62bd7d1a2feeba9579dc97abfaaa99b2439e63f73ad515f7ab2447a80673" prot="public">
+          <name>PAUSED</name>
+          <briefdescription>
+<para><ref refid="classSnakeGame_1_1Game" kindref="compound">Game</ref> paused. </para>
+          </briefdescription>
+          <detaileddescription>
+          </detaileddescription>
+        </enumvalue>
+        <enumvalue id="Definitions_8hpp_1a4033b62bd7d1a2feeba9579dc97abfaaaf8454a27e1df41397bf42444fe5aa45b" prot="public">
+          <name>GAME_OVER</name>
+          <briefdescription>
+<para><ref refid="classSnakeGame_1_1Game" kindref="compound">Game</ref> has ended. </para>
+          </briefdescription>
+          <detaileddescription>
+          </detaileddescription>
+        </enumvalue>
+        <enumvalue id="Definitions_8hpp_1a4033b62bd7d1a2feeba9579dc97abfaaa5dfd352dd6b7a5d118237fcf1e19fcc1" prot="public">
+          <name>QUIT</name>
+          <briefdescription>
+<para>Quit signal received. </para>
+          </briefdescription>
+          <detaileddescription>
+          </detaileddescription>
+        </enumvalue>
+        <briefdescription>
+<para>Enumeration of game states. </para>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="src/core/Definitions.hpp" line="64" column="1" bodyfile="src/core/Definitions.hpp" bodystart="65" bodyend="71"/>
+      </memberdef>
+      <memberdef kind="enum" id="Definitions_8hpp_1a0b5249e273705ca59543765d960233ad" prot="public" static="no" strong="yes">
+        <type>uint8_t</type>
+        <name>FoodType</name>
+        <qualifiedname>SnakeGame::FoodType</qualifiedname>
+        <enumvalue id="Definitions_8hpp_1a0b5249e273705ca59543765d960233ada4c462d6dd59d782386bb1cdad0060c70" prot="public">
+          <name>APPLE</name>
+          <briefdescription>
+<para>Apple food type. </para>
+          </briefdescription>
+          <detaileddescription>
+          </detaileddescription>
+        </enumvalue>
+        <enumvalue id="Definitions_8hpp_1a0b5249e273705ca59543765d960233adaa3dfdcec65c824a3d784228dd8796f49" prot="public">
+          <name>CHERRY</name>
+          <briefdescription>
+<para>Cherry food type. </para>
+          </briefdescription>
+          <detaileddescription>
+          </detaileddescription>
+        </enumvalue>
+        <enumvalue id="Definitions_8hpp_1a0b5249e273705ca59543765d960233adab252d1fe1c0c16d001027c2fce9b6529" prot="public">
+          <name>BANANA</name>
+          <briefdescription>
+<para>Banana food type. </para>
+          </briefdescription>
+          <detaileddescription>
+          </detaileddescription>
+        </enumvalue>
+        <enumvalue id="Definitions_8hpp_1a0b5249e273705ca59543765d960233adaec90ea0091d7876704e8b9f5bcab47a0" prot="public">
+          <name>GRAPE</name>
+          <briefdescription>
+<para>Grape food type. </para>
+          </briefdescription>
+          <detaileddescription>
+          </detaileddescription>
+        </enumvalue>
+        <enumvalue id="Definitions_8hpp_1a0b5249e273705ca59543765d960233ada5b6490317b6f7270bc3ab5ffd07c1f52" prot="public">
+          <name>ORANGE</name>
+          <briefdescription>
+<para>Orange food type. </para>
+          </briefdescription>
+          <detaileddescription>
+          </detaileddescription>
+        </enumvalue>
+        <enumvalue id="Definitions_8hpp_1a0b5249e273705ca59543765d960233ada4905ac9d6a22bdfc1ae096094ce6248d" prot="public">
+          <name>COUNT</name>
+          <briefdescription>
+<para>Total number of food types. </para>
+          </briefdescription>
+          <detaileddescription>
+          </detaileddescription>
+        </enumvalue>
+        <briefdescription>
+<para>Enumeration of food types available in the game. </para>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="src/core/Definitions.hpp" line="76" column="1" bodyfile="src/core/Definitions.hpp" bodystart="77" bodyend="84"/>
+      </memberdef>
+      <memberdef kind="enum" id="Definitions_8hpp_1a2969908cc132900702a633c926450135" prot="public" static="no" strong="yes">
+        <type>uint8_t</type>
+        <name>IpcCommands</name>
+        <qualifiedname>SnakeGame::IpcCommands</qualifiedname>
+        <enumvalue id="Definitions_8hpp_1a2969908cc132900702a633c926450135ab50339a10e1de285ac99d4c3990b8693" prot="public">
+          <name>NONE</name>
+          <briefdescription>
+<para>No command. </para>
+          </briefdescription>
+          <detaileddescription>
+          </detaileddescription>
+        </enumvalue>
+        <enumvalue id="Definitions_8hpp_1a2969908cc132900702a633c926450135ac2062c3b54b5826abf3e88338853b5ec" prot="public">
+          <name>START_GAME</name>
+          <briefdescription>
+<para>Start a new game. </para>
+          </briefdescription>
+          <detaileddescription>
+          </detaileddescription>
+        </enumvalue>
+        <enumvalue id="Definitions_8hpp_1a2969908cc132900702a633c926450135ae397b4fa67c25cc1c9eae980cfdd43eb" prot="public">
+          <name>MOVE_UP</name>
+          <briefdescription>
+<para>Command to move snake up. </para>
+          </briefdescription>
+          <detaileddescription>
+          </detaileddescription>
+        </enumvalue>
+        <enumvalue id="Definitions_8hpp_1a2969908cc132900702a633c926450135a8b32429247158c80deab773f4e04e1c2" prot="public">
+          <name>MOVE_DOWN</name>
+          <briefdescription>
+<para>Command to move snake down. </para>
+          </briefdescription>
+          <detaileddescription>
+          </detaileddescription>
+        </enumvalue>
+        <enumvalue id="Definitions_8hpp_1a2969908cc132900702a633c926450135ad7aa835d76fc894935ade13f4d0624f8" prot="public">
+          <name>MOVE_LEFT</name>
+          <briefdescription>
+<para>Command to move snake left. </para>
+          </briefdescription>
+          <detaileddescription>
+          </detaileddescription>
+        </enumvalue>
+        <enumvalue id="Definitions_8hpp_1a2969908cc132900702a633c926450135a3dc5ed1f827e8c9a6392edb90af992d5" prot="public">
+          <name>MOVE_RIGHT</name>
+          <briefdescription>
+<para>Command to move snake right. </para>
+          </briefdescription>
+          <detaileddescription>
+          </detaileddescription>
+        </enumvalue>
+        <enumvalue id="Definitions_8hpp_1a2969908cc132900702a633c926450135a926c029e01a9337ea37e350ac649f917" prot="public">
+          <name>RESTART_GAME</name>
+          <briefdescription>
+<para>Restart the current game. </para>
+          </briefdescription>
+          <detaileddescription>
+          </detaileddescription>
+        </enumvalue>
+        <enumvalue id="Definitions_8hpp_1a2969908cc132900702a633c926450135ad670e5511ca46cf781e4242eef0c8eba" prot="public">
+          <name>QUIT_GAME</name>
+          <briefdescription>
+<para>Quit the game. </para>
+          </briefdescription>
+          <detaileddescription>
+          </detaileddescription>
+        </enumvalue>
+        <enumvalue id="Definitions_8hpp_1a2969908cc132900702a633c926450135a521e1f27b4b8a734800c7015b6e694bf" prot="public">
+          <name>CHANGE_BOARD_SIZE</name>
+          <briefdescription>
+<para>Change board dimensions. </para>
+          </briefdescription>
+          <detaileddescription>
+          </detaileddescription>
+        </enumvalue>
+        <briefdescription>
+<para>Enumeration of inter-process communication commands. </para>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="src/core/Definitions.hpp" line="89" column="1" bodyfile="src/core/Definitions.hpp" bodystart="90" bodyend="100"/>
+      </memberdef>
+    </sectiondef>
+    <sectiondef kind="typedef">
+      <memberdef kind="typedef" id="Definitions_8hpp_1a9de414d17ba4549d37f38debb57e2625" prot="public" static="no">
+        <type>std::pair&lt; uint8_t, uint8_t &gt;</type>
+        <definition>using SnakeGame::Coordinate = typedef std::pair&lt;uint8_t, uint8_t&gt;</definition>
+        <argsstring></argsstring>
+        <name>Coordinate</name>
+        <qualifiedname>SnakeGame::Coordinate</qualifiedname>
+        <briefdescription>
+<para>Represents a 2D coordinate (x, y) on the board. </para>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="src/core/Definitions.hpp" line="44" column="1" bodyfile="src/core/Definitions.hpp" bodystart="44" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="typedef" id="Definitions_8hpp_1ab62ac345e97184ff1b52fd754948605e" prot="public" static="no">
+        <type><ref refid="Definitions_8hpp_1a9de414d17ba4549d37f38debb57e2625" kindref="member">Coordinate</ref></type>
+        <definition>using SnakeGame::BoardDimensions = typedef Coordinate</definition>
+        <argsstring></argsstring>
+        <name>BoardDimensions</name>
+        <qualifiedname>SnakeGame::BoardDimensions</qualifiedname>
+        <briefdescription>
+<para>Alias for board dimensions (width, height). </para>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="src/core/Definitions.hpp" line="46" column="1" bodyfile="src/core/Definitions.hpp" bodystart="46" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="typedef" id="Definitions_8hpp_1a5caf71587ea73a69d4a36903cff574d2" prot="public" static="no">
+        <type>std::array&lt; float, 12 &gt;</type>
+        <definition>using SnakeGame::NeuralInputs = typedef std::array&lt;float, 12&gt;</definition>
+        <argsstring></argsstring>
+        <name>NeuralInputs</name>
+        <qualifiedname>SnakeGame::NeuralInputs</qualifiedname>
+        <briefdescription>
+<para>Neural network input vector with 12 float values. </para>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="src/core/Definitions.hpp" line="48" column="1" bodyfile="src/core/Definitions.hpp" bodystart="48" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="typedef" id="Definitions_8hpp_1aaf0b781b9925da2241d26be1210f6824" prot="public" static="no">
+        <type>std::array&lt; <ref refid="Definitions_8hpp_1a9de414d17ba4549d37f38debb57e2625" kindref="member">Coordinate</ref>, <ref refid="Definitions_8hpp_1ae367788e9ca771b77a1480d3c03b11a0" kindref="member">SNAKE_MAX_LENGTH</ref> &gt;</type>
+        <definition>using SnakeGame::SnakeBody = typedef std::array&lt;Coordinate, SNAKE_MAX_LENGTH&gt;</definition>
+        <argsstring></argsstring>
+        <name>SnakeBody</name>
+        <qualifiedname>SnakeGame::SnakeBody</qualifiedname>
+        <briefdescription>
+<para>Array holding all coordinates of the snake&apos;s body. </para>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="src/core/Definitions.hpp" line="113" column="1" bodyfile="src/core/Definitions.hpp" bodystart="113" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="typedef" id="Definitions_8hpp_1ab385adae626bc9c7138560666b08bcea" prot="public" static="no">
+        <type>std::function&lt; void(<ref refid="Definitions_8hpp_1a2969908cc132900702a633c926450135" kindref="member">IpcCommands</ref>, const std::vector&lt; uint8_t &gt; &amp;)&gt;</type>
+        <definition>using SnakeGame::CommandCallback = typedef std::function&lt;void(IpcCommands, const std::vector&lt;uint8_t&gt;&amp;)&gt;</definition>
+        <argsstring></argsstring>
+        <name>CommandCallback</name>
+        <qualifiedname>SnakeGame::CommandCallback</qualifiedname>
+        <briefdescription>
+<para>Callback function type for handling IPC commands. </para>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="src/core/Definitions.hpp" line="154" column="1" bodyfile="src/core/Definitions.hpp" bodystart="154" bodyend="-1"/>
+      </memberdef>
+    </sectiondef>
+    <sectiondef kind="var">
+      <memberdef kind="variable" id="Definitions_8hpp_1aeef324886f34d7b74d437f9371fdf8da" prot="public" static="no" constexpr="yes" mutable="no">
+        <type>constexpr std::string_view</type>
+        <definition>constexpr std::string_view SnakeGame::DEFAULT_SHM_NAME</definition>
+        <argsstring></argsstring>
+        <name>DEFAULT_SHM_NAME</name>
+        <qualifiedname>SnakeGame::DEFAULT_SHM_NAME</qualifiedname>
+        <initializer>= &quot;/snake_game_shm&quot;</initializer>
+        <briefdescription>
+<para>Default name for POSIX shared memory object. </para>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="src/core/Definitions.hpp" line="24" column="35" bodyfile="src/core/Definitions.hpp" bodystart="24" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="Definitions_8hpp_1a60bd9a90a2bed13b155271aad7f41bb9" prot="public" static="no" constexpr="yes" mutable="no">
+        <type>constexpr std::string_view</type>
+        <definition>constexpr std::string_view SnakeGame::DEFAULT_SOCKET_PATH</definition>
+        <argsstring></argsstring>
+        <name>DEFAULT_SOCKET_PATH</name>
+        <qualifiedname>SnakeGame::DEFAULT_SOCKET_PATH</qualifiedname>
+        <initializer>= &quot;/tmp/snake_game.sock&quot;</initializer>
+        <briefdescription>
+<para>Default path for UNIX domain socket. </para>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="src/core/Definitions.hpp" line="26" column="35" bodyfile="src/core/Definitions.hpp" bodystart="26" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="Definitions_8hpp_1aa9f23904372aceac17a3002588db8529" prot="public" static="no" constexpr="yes" mutable="no">
+        <type>constexpr uint8_t</type>
+        <definition>constexpr uint8_t SnakeGame::DEFAULT_BOARD_WIDTH</definition>
+        <argsstring></argsstring>
+        <name>DEFAULT_BOARD_WIDTH</name>
+        <qualifiedname>SnakeGame::DEFAULT_BOARD_WIDTH</qualifiedname>
+        <initializer>= 20</initializer>
+        <briefdescription>
+<para>Default width of the game board in tiles. </para>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="src/core/Definitions.hpp" line="29" column="26" bodyfile="src/core/Definitions.hpp" bodystart="29" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="Definitions_8hpp_1a242f31aea4a505038b424bb38bc6d308" prot="public" static="no" constexpr="yes" mutable="no">
+        <type>constexpr uint8_t</type>
+        <definition>constexpr uint8_t SnakeGame::DEFAULT_BOARD_HEIGHT</definition>
+        <argsstring></argsstring>
+        <name>DEFAULT_BOARD_HEIGHT</name>
+        <qualifiedname>SnakeGame::DEFAULT_BOARD_HEIGHT</qualifiedname>
+        <initializer>= 20</initializer>
+        <briefdescription>
+<para>Default height of the game board in tiles. </para>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="src/core/Definitions.hpp" line="31" column="26" bodyfile="src/core/Definitions.hpp" bodystart="31" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="Definitions_8hpp_1ab344fbcdbedcb9ec1d7a94b8151fa36c" prot="public" static="no" constexpr="yes" mutable="no">
+        <type>constexpr uint16_t</type>
+        <definition>constexpr uint16_t SnakeGame::INITIAL_SNAKE_LENGTH</definition>
+        <argsstring></argsstring>
+        <name>INITIAL_SNAKE_LENGTH</name>
+        <qualifiedname>SnakeGame::INITIAL_SNAKE_LENGTH</qualifiedname>
+        <initializer>= 3</initializer>
+        <briefdescription>
+<para>Initial length of the snake at game start. </para>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="src/core/Definitions.hpp" line="34" column="27" bodyfile="src/core/Definitions.hpp" bodystart="34" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="Definitions_8hpp_1ae367788e9ca771b77a1480d3c03b11a0" prot="public" static="no" constexpr="yes" mutable="no">
+        <type>constexpr uint16_t</type>
+        <definition>constexpr uint16_t SnakeGame::SNAKE_MAX_LENGTH</definition>
+        <argsstring></argsstring>
+        <name>SNAKE_MAX_LENGTH</name>
+        <qualifiedname>SnakeGame::SNAKE_MAX_LENGTH</qualifiedname>
+        <initializer>= 2048</initializer>
+        <briefdescription>
+<para>Maximum allowable length of the snake. </para>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="src/core/Definitions.hpp" line="36" column="27" bodyfile="src/core/Definitions.hpp" bodystart="36" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="Definitions_8hpp_1aba2dfbd3f226ac66d6d8cdb79e93f7e3" prot="public" static="no" constexpr="yes" mutable="no">
+        <type>constexpr uint16_t</type>
+        <definition>constexpr uint16_t SnakeGame::INITIAL_SPEED_DELAY_MS</definition>
+        <argsstring></argsstring>
+        <name>INITIAL_SPEED_DELAY_MS</name>
+        <qualifiedname>SnakeGame::INITIAL_SPEED_DELAY_MS</qualifiedname>
+        <initializer>= 200</initializer>
+        <briefdescription>
+<para>Initial delay in milliseconds between game updates. </para>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="src/core/Definitions.hpp" line="39" column="27" bodyfile="src/core/Definitions.hpp" bodystart="39" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="Definitions_8hpp_1af5d458b85d3198ffc820f854ea11fa72" prot="public" static="no" constexpr="yes" mutable="no">
+        <type>constexpr uint8_t</type>
+        <definition>constexpr uint8_t SnakeGame::SPEED_DECREASE_PER_LEVEL</definition>
+        <argsstring></argsstring>
+        <name>SPEED_DECREASE_PER_LEVEL</name>
+        <qualifiedname>SnakeGame::SPEED_DECREASE_PER_LEVEL</qualifiedname>
+        <initializer>= 15</initializer>
+        <briefdescription>
+<para>Amount to decrease delay per speed level increase. </para>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="src/core/Definitions.hpp" line="41" column="27" bodyfile="src/core/Definitions.hpp" bodystart="41" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="Definitions_8hpp_1a5a748a77677da4c514104d0a7d9f1b18" prot="public" static="no" constexpr="yes" mutable="no">
+        <type>constexpr size_t</type>
+        <definition>constexpr size_t SnakeGame::SHARED_MEMORY_SIZE</definition>
+        <argsstring></argsstring>
+        <name>SHARED_MEMORY_SIZE</name>
+        <qualifiedname>SnakeGame::SHARED_MEMORY_SIZE</qualifiedname>
+        <initializer>= sizeof(<ref refid="structSnakeGame_1_1SharedMemoryData" kindref="compound">SharedMemoryData</ref>)</initializer>
+        <briefdescription>
+<para>Size of the shared memory region in bytes. </para>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="src/core/Definitions.hpp" line="149" column="26" bodyfile="src/core/Definitions.hpp" bodystart="149" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="Definitions_8hpp_1a9dff4d3ff5b45265079f605d8fec91e7" prot="public" static="no" constexpr="yes" mutable="no">
+        <type>constexpr int64_t</type>
+        <definition>constexpr int64_t SnakeGame::SHARED_MEMORY_WRITE_DELAY</definition>
+        <argsstring></argsstring>
+        <name>SHARED_MEMORY_WRITE_DELAY</name>
+        <qualifiedname>SnakeGame::SHARED_MEMORY_WRITE_DELAY</qualifiedname>
+        <initializer>= 200</initializer>
+        <briefdescription>
+<para>Delay in milliseconds between shared memory write operations. </para>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="src/core/Definitions.hpp" line="151" column="26" bodyfile="src/core/Definitions.hpp" bodystart="151" bodyend="-1"/>
+      </memberdef>
+    </sectiondef>
+    <briefdescription>
+    </briefdescription>
+    <detaileddescription>
+    </detaileddescription>
+    <location file="src/core/Board.cpp" line="9" column="1"/>
+  </compounddef>
+</doxygen>
