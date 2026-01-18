@@ -1,3 +1,5 @@
+"""Main training script for Snake AI using distributed genetic algorithms."""
+
 import logging
 import os
 import sys
@@ -24,6 +26,12 @@ ray.init(log_to_driver=False, ignore_reinit_error=True)
 
 
 def print_config(config):
+    """Print the current training configuration to the console.
+
+    Args:
+        config (Config): Configuration object containing training parameters.
+
+    """
     print("=" * 60)
     print("SNAKE AI TRAINING - CONFIGURATION".center(60))
     print("=" * 60)
@@ -43,6 +51,20 @@ def print_config(config):
 
 
 def handle_migration(gen, config, workers, results, best_network, best_fit):
+    """Manage the migration of the best performing network across workers.
+
+    Synchronizes the global best network to all workers at specified intervals
+    to prevent local optima stagnation.
+
+    Args:
+        gen (int): Current generation number.
+        config (Config): Training configuration.
+        workers (list): List of Ray worker handles.
+        results (list): List of results from workers for the current generation.
+        best_network (dict): The best network weights found so far globally.
+        best_fit (float): The best fitness score found so far globally.
+
+    """
     if gen > 0 and gen % config.MIGRATION_INTERVAL == 0:
         try:
             mig_best_net = [result["best_network"] for result in results]
@@ -60,6 +82,23 @@ def handle_migration(gen, config, workers, results, best_network, best_fit):
 
 
 def process_generation(gen, config, workers, results, best_history, worker_history):
+    """Process the results of a single generation from all workers.
+
+    Aggregates statistics, updates history, prints progress, and tracks the global
+    best network.
+
+    Args:
+        gen (int): Current generation number.
+        config (Config): Training configuration.
+        workers (list): List of Ray worker handles.
+        results (list): List of training results from workers.
+        best_history (list): Global history of best fitness scores.
+        worker_history (list): List of fitness histories for each worker.
+
+    Returns:
+        tuple: (best_network, best_fit) updated global bests.
+
+    """
     global_best = 0
     best_fit = -1
     best_network = None
@@ -95,6 +134,16 @@ def process_generation(gen, config, workers, results, best_history, worker_histo
 
 
 def plot_training_progress(config, best_history, worker_history):
+    """Generate and save training progress plots.
+
+    Creates subplots showing fitness progression for each worker and the global best.
+
+    Args:
+        config (Config): Training configuration.
+        best_history (list): Global best fitness per generation.
+        worker_history (list): Per-worker fitness history.
+
+    """
     num_workers = config.WORKERS
     fig, axes = plt.subplots(num_workers + 1, 1, figsize=(12, 4 * (num_workers + 1)))
 

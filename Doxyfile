@@ -1,0 +1,10 @@
+PROJECT_NAME           = "Snake Game"
+PROJECT_NUMBER         = 1.0
+OUTPUT_DIRECTORY       = docs/doxygen_output
+INPUT                  = src
+RECURSIVE              = YES
+FILE_PATTERNS          = *.hpp *.cpp
+GENERATE_LATEX         = NO
+GENERATE_XML           = YES
+XML_OUTPUT             = xml
+GENERATE_HTML          = NO

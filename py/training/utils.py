@@ -1,3 +1,5 @@
+"""Utility functions for saving and loading neural network models."""
+
 import json
 from pathlib import Path
 
@@ -5,6 +7,13 @@ from py.training.neural import Neural
 
 
 def save_network(network: Neural, filepath: str) -> None:
+    """Save a neural network to a JSON file.
+
+    Args:
+        network (Neural): The neural network to save.
+        filepath (str): Path where the network should be saved.
+
+    """
     Path(filepath).parent.mkdir(parents=True, exist_ok=True)
 
     data = {
@@ -21,6 +30,15 @@ def save_network(network: Neural, filepath: str) -> None:
 
 
 def load_network(filepath: str) -> Neural:
+    """Load a neural network from a JSON file.
+
+    Args:
+        filepath (str): Path to the saved network JSON file.
+
+    Returns:
+        Neural: The loaded neural network, or None if loading fails.
+
+    """
     try:
         with open(filepath, "r") as f:
             data = json.load(f)

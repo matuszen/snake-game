@@ -1,3 +1,5 @@
+"""Controller for interfacing with the C++ Snake Game engine via IPC."""
+
 import mmap
 import socket
 import struct
@@ -9,6 +11,8 @@ import posix_ipc
 
 
 class Direction(IntEnum):
+    """Enumeration of snake movement directions."""
+
     UP = 0
     DOWN = 1
     LEFT = 2
@@ -16,6 +20,8 @@ class Direction(IntEnum):
 
 
 class GameState(IntEnum):
+    """Enumeration of possible game states."""
+
     MENU = 0
     PLAYING = 1
     PAUSED = 2
@@ -24,6 +30,8 @@ class GameState(IntEnum):
 
 
 class FoodType(IntEnum):
+    """Enumeration of food types in the game."""
+
     APPLE = 0
     CHERRY = 1
     BANANA = 2
@@ -32,6 +40,8 @@ class FoodType(IntEnum):
 
 
 class IpcCommands(IntEnum):
+    """Enumeration of inter-process communication commands."""
+
     NONE = 0
     START_GAME = 1
     MOVE_UP = 2
@@ -45,6 +55,25 @@ class IpcCommands(IntEnum):
 
 @dataclass
 class SnakeGameData:
+    """Data structure representing the snapshot of the game state.
+
+    Attributes:
+        version (int): Protocol version / frame counter.
+        board_width (int): Width of the game board.
+        board_height (int): Height of the game board.
+        score (int): Current player score.
+        speed (int): Current game speed level.
+        game_state (GameState): Current enum state of the game.
+        food_position (Tuple[int, int]): (x, y) coordinates of the food.
+        food_type (FoodType): Type of the food item.
+        snake_head (Tuple[int, int]): (x, y) coordinates of the snake's head.
+        snake_length (int): Current length of the snake.
+        snake_body (List[Tuple[int, int]]): List of (x, y) coordinates for body segments.
+        neural_vector (List[int]): Sensor inputs for neural network.
+        snake_direction (Direction): Current movement direction.
+
+    """
+
     version: int
     board_width: int
     board_height: int
@@ -61,10 +90,23 @@ class SnakeGameData:
 
 
 class SnakeGameController:
+    """Interface for communicating with the C++ Snake Game engine via Shared Memory and IPC Sockets.
+
+    This controller allows reading game state (via shared memory) and sending commands
+    (via a UNIX domain socket).
+    """
+
     SHM_NAME = "/snake_game_shm"
     SOCKET_PATH = "/tmp/snake_game.sock"
 
     def __init__(self, shm_name: str = SHM_NAME, socket_path: str = SOCKET_PATH):
+        """Initialize the controller with paths to shared memory and socket.
+
+        Args:
+            shm_name (str): Name of the POSIX shared memory object.
+            socket_path (str): Path to the UNIX domain socket.
+
+        """
         self.shm_name = shm_name
         self.socket_path = socket_path
         self.shm: Optional[posix_ipc.SharedMemory] = None
@@ -72,6 +114,12 @@ class SnakeGameController:
         self.last_version = 0
 
     def connect(self) -> bool:
+        """Establish connection to the shared memory segment.
+
+        Returns:
+            bool: True if connection successful, False otherwise.
+
+        """
         try:
             self.shm = posix_ipc.SharedMemory(self.shm_name, flags=0)
             self.memory = mmap.mmap(self.shm.fd, self.shm.size)
@@ -84,6 +132,7 @@ class SnakeGameController:
             return False
 
     def disconnect(self):
+        """Close the shared memory connection and release resources."""
         if self.memory:
             self.memory.close()
             self.memory = None
@@ -92,6 +141,12 @@ class SnakeGameController:
             self.shm = None
 
     def read_data(self) -> Optional[SnakeGameData]:
+        """Read the current game state from shared memory.
+
+        Returns:
+            Optional[SnakeGameData]: Parsed game data object, or None if reading fails.
+
+        """
         if not self.memory:
             return None
 
@@ -163,6 +218,16 @@ class SnakeGameController:
             return None
 
     def send_command(self, command: IpcCommands, *args) -> bool:
+        """Send a command to the game engine via socket.
+
+        Args:
+            command (IpcCommands): The command to send.
+            *args: Additional arguments (e.g., board size for CHANGE_BOARD_SIZE).
+
+        Returns:
+            bool: True if command was sent and acknowledged, False otherwise.
+
+        """
         try:
             sock = socket.socket(socket.AF_UNIX, socket.SOCK_STREAM)
             sock.settimeout(1.0)
