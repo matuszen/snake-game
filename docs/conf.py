@@ -17,11 +17,47 @@ extensions = [
     "breathe",
 ]
 
+breathe_projects = {"Snake Game": "./doxygen_output/xml"}
+breathe_default_project = "Snake Game"
+
+autodoc_mock_imports = [
+    "numpy",
+    "ray",
+    "posix_ipc",
+    "matplotlib",
+    "pygame",
+    "py.snake_lib",
+]
+
 templates_path = ["_templates"]
 exclude_patterns = ["_build", "Thumbs.db", ".DS_Store"]
 
 html_theme = "sphinx_rtd_theme"
-html_static_path = ["_static"]
+html_static_path = []
 
-breathe_projects = {"Snake Game": "./doxygen_output/xml"}
-breathe_default_project = "Snake Game"
+latex_engine = "pdflatex"
+latex_elements = {
+    "papersize": "letterpaper",
+    "pointsize": "11pt",
+    "preamble": r"""
+\usepackage[utf8]{inputenc}
+\usepackage{hyperref}
+""",
+    "fncychap": "\\usepackage[Bjornstrup]{fncychap}",
+    "printindex": "\\footnotesize\\raggedright\\printindex",
+    "makeindex": "",
+}
+
+latex_documents = [
+    (
+        "index",
+        "SnakeGame.tex",
+        "Snake Game Documentation",
+        "Mateusz",
+        "manual",
+    ),
+]
+
+latex_show_urls = "False"
+latex_show_pagerefs = True
+latex_use_modindex = False
