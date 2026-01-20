@@ -55,5 +55,5 @@ latex_documents = [
     ),
 ]
 
-latex_show_urls = False
+latex_show_urls = "False"
 latex_show_pagerefs = True
