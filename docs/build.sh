@@ -23,6 +23,8 @@ rm "$BUILD_DIR/latex/SnakeGame.tex.bak"
 
 cd "$BUILD_DIR/latex"
 
+PDFLATEX_LOG="$BUILD_DIR/latex/pdflatex.log"
+
 if command -v pdflatex &> /dev/null; then
     if ! pdflatex -interaction=nonstopmode SnakeGame.tex >"$PDFLATEX_LOG" 2>&1; then
         echo "pdflatex failed on first pass; see $PDFLATEX_LOG for details." >&2
