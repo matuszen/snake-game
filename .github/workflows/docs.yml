@@ -18,7 +18,7 @@ concurrency:
 
 jobs:
   build-docs:
-    name: Build Documentation
+    name: Build documentation
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
@@ -36,14 +36,15 @@ jobs:
 
       - name: Install Python documentation dependencies
         run: |
+          cd docs
           pip install sphinx breathe sphinx-rtd-theme
 
-      - name: Generate Doxygen XML
-        run: doxygen docs/Doxyfile
+      - name: Generate doxygen XML
+        run: |
+          doxygen Doxyfile
 
       - name: Build Sphinx documentation
         run: |
-          cd docs
           make html
 
       - name: Add .nojekyll file
