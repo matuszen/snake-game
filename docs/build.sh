@@ -10,7 +10,7 @@ if [ -f "$ROOT_DIR/.venv/bin/activate" ]; then
     source "$ROOT_DIR/.venv/bin/activate"
 fi
 
-pip install -r "$ROOT_DIR/requirements.txt" > /dev/null 2>&1
+pip install -q --upgrade -r "$ROOT_DIR/requirements.txt"
 
 cd "$SCRIPT_DIR"
 doxygen "$SCRIPT_DIR/Doxyfile"
@@ -18,13 +18,18 @@ doxygen "$SCRIPT_DIR/Doxyfile"
 sphinx-build -b html -d "$BUILD_DIR/doctrees" "$SCRIPT_DIR" "$BUILD_DIR/html"
 sphinx-build -b latex -d "$BUILD_DIR/doctrees" "$SCRIPT_DIR" "$BUILD_DIR/latex"
 
-sed -i '/^\\renewcommand{\\indexname}{Python Module Index}/,/^\\end{sphinxtheindex}/d' "$BUILD_DIR/latex/SnakeGame.tex"
+sed -i.bak '/^\\renewcommand{\\indexname}{Python Module Index}/,/^\\end{sphinxtheindex}/d' "$BUILD_DIR/latex/SnakeGame.tex"
+rm "$BUILD_DIR/latex/SnakeGame.tex.bak"
 
 cd "$BUILD_DIR/latex"
 
 if command -v pdflatex &> /dev/null; then
-    pdflatex -interaction=nonstopmode SnakeGame.tex > /dev/null 2>&1 || true
-    pdflatex -interaction=nonstopmode SnakeGame.tex > /dev/null 2>&1 || true
+    if ! pdflatex -interaction=nonstopmode SnakeGame.tex >"$PDFLATEX_LOG" 2>&1; then
+        echo "pdflatex failed on first pass; see $PDFLATEX_LOG for details." >&2
+    fi
+    if ! pdflatex -interaction=nonstopmode SnakeGame.tex >>"$PDFLATEX_LOG" 2>&1; then
+        echo "pdflatex failed on second pass; see $PDFLATEX_LOG for details." >&2
+    fi
 fi
 
 cd "$SCRIPT_DIR"

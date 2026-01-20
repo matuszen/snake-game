@@ -39,13 +39,10 @@ latex_engine = "pdflatex"
 latex_elements = {
     "papersize": "letterpaper",
     "pointsize": "11pt",
-    "preamble": r"""
-\usepackage[utf8]{inputenc}
-\usepackage{hyperref}
-""",
+    "preamble": r"",
     "fncychap": "\\usepackage[Bjornstrup]{fncychap}",
     "printindex": "\\footnotesize\\raggedright\\printindex",
-    "makeindex": "",
+    "makeindex": r"\makeindex",
 }
 
 latex_documents = [
@@ -58,6 +55,5 @@ latex_documents = [
     ),
 ]
 
-latex_show_urls = "False"
+latex_show_urls = False
 latex_show_pagerefs = True
-latex_use_modindex = False
