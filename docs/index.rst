@@ -5,12 +5,5 @@ Welcome to Snake Game's documentation!
    :maxdepth: 2
    :caption: Contents:
 
-   api/cpp_interface
+   api/cpp_engine
    api/python_interface
-
-Indices and tables
-==================
-
-* :ref:`genindex`
-* :ref:`modindex`
-* :ref:`search`
