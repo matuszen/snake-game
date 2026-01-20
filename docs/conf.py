@@ -6,8 +6,9 @@ import sys
 sys.path.insert(0, os.path.abspath(".."))
 
 project = "Snake Game"
-copyright = "2026, Mateusz"
-author = "Mateusz"
+title = "Technical Documentation"
+author = "Mateusz Nowak"
+copyright = "2026"
 release = "1.0"
 
 extensions = [
@@ -37,20 +38,60 @@ html_static_path = []
 
 latex_engine = "pdflatex"
 latex_elements = {
-    "papersize": "letterpaper",
+    "papersize": "a4paper",
     "pointsize": "11pt",
-    "preamble": r"",
-    "fncychap": "\\usepackage[Bjornstrup]{fncychap}",
+    "preamble": r"""
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage{mathptmx}
+\usepackage[scaled=.92]{helvet}
+\usepackage{courier}
+
+\makeatletter
+\renewcommand{\maketitle}{
+  \begin{titlepage}
+    \centering
+    \vspace*{2cm}
+
+    \rule{\linewidth}{1.5pt}
+    \vspace{0.5cm}
+    {\textsc{\Large Technical Documentation} \par}
+    \vspace{0.5cm}
+    \rule{\linewidth}{0.5pt}
+
+    \vspace{2.5cm}
+
+    {\Huge \bfseries \sffamily \@title \par}
+
+    \vspace{1cm}
+
+    {\large \itshape Version \@release \par}
+
+    \vfill
+
+    \rule{\linewidth}{0.5pt}
+    \vspace{0.5cm}
+    \begin{flushright}
+        {\footnotesize \textbf{Project Team:}} \\
+        \vspace{0.2cm}
+        {\scriptsize \@author \par}
+        \vspace{0.5cm}
+        {\scriptsize \itshape \@date \par}
+    \end{flushright}
+  \end{titlepage}
+}
+\makeatother
+""",
+    "fncychap": "\\usepackage[Sonny]{fncychap}",
     "printindex": "\\footnotesize\\raggedright\\printindex",
-    "makeindex": r"\makeindex",
 }
 
 latex_documents = [
     (
         "index",
         "SnakeGame.tex",
-        "Snake Game Documentation",
-        "Mateusz",
+        title,
+        author,
         "manual",
     ),
 ]

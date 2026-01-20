@@ -30,7 +30,6 @@ if not os.environ.get("DISPLAY") and not os.environ.get("WAYLAND_DISPLAY"):
 cpp_game_path = project_root / "build" / "src" / "app" / "snake_game"
 assets_path = current_file_path.parent / "assets"
 
-# --- ZMIENNE GLOBALNE KONFIGURACJI ---
 DEFAULT_WINDOW_WIDTH = 1024
 DEFAULT_WINDOW_HEIGHT = 768
 
@@ -296,7 +295,7 @@ def main():  # noqa: C901
             break
         time.sleep(0.1)
     else:
-        print("Nie udało się połączyć z grą C++")
+        print("Failed to connect to the C++ game")
         return 1
 
     aiMode = False
@@ -328,7 +327,7 @@ def main():  # noqa: C901
         available_models = [f.name for f in models_dir.glob("*.json")]
         available_models.sort(reverse=True)
 
-    current_model_name = available_models[0] if available_models else "Brak modeli"
+    current_model_name = available_models[0] if available_models else "No models"
 
     menu_selection = 0
     menu_sub_state = 0
@@ -390,7 +389,6 @@ def main():  # noqa: C901
                     if cmd:
                         controller.send_command(cmd)
 
-                # --- MENU ---
                 if data and data.game_state == GameState.MENU:
                     MENU_ITEMS_COUNT = 7
 
@@ -470,7 +468,6 @@ def main():  # noqa: C901
                                     update_layout(target_w, target_h)
                             menu_sub_state = 0
 
-        # --- DANE ---
         packets_read = 0
         data_updated = False
         while True:
@@ -491,7 +488,6 @@ def main():  # noqa: C901
         if data_updated:
             should_render = True
 
-        # --- AI ---
         if data.game_state == GameState.PLAYING and data_updated:
             if aiMode or algoMode:
                 if data.version != last_ai_decision_version:
@@ -530,7 +526,6 @@ def main():  # noqa: C901
 
                     last_ai_decision_version = data.version
 
-        # --- RENDER ---
         if should_render:
             if GRAPHICS.get("background"):
                 screen.blit(GRAPHICS["background"], (0, 0))
@@ -539,15 +534,15 @@ def main():  # noqa: C901
 
             if data.game_state == GameState.MENU:
                 if menu_sub_state == 0:
-                    current_screen_text = "Tryb Okienkowy" if is_fullscreen else "Pełny Ekran"
+                    current_screen_text = "Windowed Mode" if is_fullscreen else "Fullscreen"
                     menu_options = [
-                        "Włącz grę (Manual)",
-                        "Tryb AI",
-                        "Tryb Algorytmu",
-                        "Ustawienia AI",
-                        "Rozmiar Mapy",
+                        "Start Game (Manual)",
+                        "AI Mode",
+                        "Algorithm Mode",
+                        "AI Settings",
+                        "Map Size",
                         current_screen_text,
-                        "Zamknij grę",
+                        "Quit Game",
                     ]
 
                     t = FONTS["large"].render("Snake Game Launcher", True, (0, 255, 0))
@@ -557,7 +552,7 @@ def main():  # noqa: C901
                     screen.blit(m_info, (SCREEN_WIDTH // 2 - m_info.get_width() // 2, SCREEN_HEIGHT * 0.18))
 
                     cur_w, cur_h = current_process_size
-                    size_info = FONTS["small"].render(f"Mapa: {cur_w}x{cur_h}", True, (200, 200, 200))
+                    size_info = FONTS["small"].render(f"Map: {cur_w}x{cur_h}", True, (200, 200, 200))
                     screen.blit(size_info, (SCREEN_WIDTH // 2 - size_info.get_width() // 2, SCREEN_HEIGHT * 0.22))
 
                     menu_start_y = SCREEN_HEIGHT * 0.35
@@ -568,10 +563,10 @@ def main():  # noqa: C901
                         text_x = SCREEN_WIDTH // 2 - 200
                         screen.blit(surf, (text_x, menu_start_y + i * (SCREEN_HEIGHT * 0.06)))
 
-                    draw_legend(screen, FONTS["small"], ["[ENTER] Wybierz", "[W / S] Nawigacja", "[Q] Zamknij"])
+                    draw_legend(screen, FONTS["small"], ["[ENTER] Select", "[W / S] Navigate", "[Q] Quit"])
 
                 elif menu_sub_state == 1:
-                    t = FONTS["large"].render("Wybierz model", True, (0, 200, 255))
+                    t = FONTS["large"].render("Select Model", True, (0, 200, 255))
                     screen.blit(t, (SCREEN_WIDTH // 2 - t.get_width() // 2, SCREEN_HEIGHT * 0.1))
                     list_start_y = SCREEN_HEIGHT * 0.25
                     for i, m_file in enumerate(available_models):
@@ -583,14 +578,14 @@ def main():  # noqa: C901
                         if is_active:
                             color = (0, 255, 0)
                         prefix = "> " if is_selected else "  "
-                        suffix = " [AKTYWNY]" if is_active else ""
+                        suffix = " [ACTIVE]" if is_active else ""
                         text_str = f"{prefix}{m_file}{suffix}"
                         surf = FONTS["medium"].render(text_str, True, color)
                         screen.blit(surf, (SCREEN_WIDTH // 2 - 350, list_start_y + i * (SCREEN_HEIGHT * 0.045)))
-                    draw_legend(screen, FONTS["small"], ["[ENTER] Wybierz model", "[W / S] Nawigacja", "[ESC] Powrót"])
+                    draw_legend(screen, FONTS["small"], ["[ENTER] Select Model", "[W / S] Navigate", "[ESC] Back"])
 
                 elif menu_sub_state == 2:
-                    t = FONTS["large"].render("Wybierz Rozmiar Mapy", True, (255, 100, 255))
+                    t = FONTS["large"].render("Select Map Size", True, (255, 100, 255))
                     screen.blit(t, (SCREEN_WIDTH // 2 - t.get_width() // 2, SCREEN_HEIGHT * 0.1))
                     list_start_y = SCREEN_HEIGHT * 0.25
                     for i, (w, h) in enumerate(AVAILABLE_MAP_SIZES):
@@ -600,11 +595,11 @@ def main():  # noqa: C901
                         if is_active:
                             color = (0, 255, 0)
                         prefix = "> " if is_selected else "  "
-                        suffix = " [AKTYWNY]" if is_active else ""
+                        suffix = " [ACTIVE]" if is_active else ""
                         text_str = f"{prefix}{w} x {h}{suffix}"
                         surf = FONTS["medium"].render(text_str, True, color)
                         screen.blit(surf, (SCREEN_WIDTH // 2 - 150, list_start_y + i * (SCREEN_HEIGHT * 0.06)))
-                    draw_legend(screen, FONTS["small"], ["[ENTER] Zatwierdź", "[W / S] Nawigacja", "[ESC] Anuluj"])
+                    draw_legend(screen, FONTS["small"], ["[ENTER] Confirm", "[W / S] Navigate", "[ESC] Cancel"])
 
             elif data.game_state in [GameState.PLAYING, GameState.GAME_OVER]:
                 draw_board(screen, data.board_width, data.board_height)
@@ -623,7 +618,7 @@ def main():  # noqa: C901
                     )
 
                 m_str = "AI" if aiMode else ("ALGO" if algoMode else "MANUAL")
-                score_txt = FONTS["medium"].render(f"Wynik: {data.score} | Tryb: {m_str}", True, (255, 255, 255))
+                score_txt = FONTS["medium"].render(f"Score: {data.score} | Mode: {m_str}", True, (255, 255, 255))
                 draw_text_with_bg(screen, score_txt, 10, 10)
 
                 if data.game_state == GameState.GAME_OVER:
@@ -631,22 +626,22 @@ def main():  # noqa: C901
                     overlay.fill((0, 0, 0, 180))
                     screen.blit(overlay, (0, 0))
 
-                    t = FONTS["large"].render("KONIEC GRY", True, (255, 0, 0))
+                    t = FONTS["large"].render("GAME OVER", True, (255, 0, 0))
                     screen.blit(t, (SCREEN_WIDTH // 2 - t.get_width() // 2, SCREEN_HEIGHT // 2 - 50))
 
-                    s_msg = FONTS["medium"].render(f"Wynik: {data.score}", True, (255, 255, 255))
+                    s_msg = FONTS["medium"].render(f"Score: {data.score}", True, (255, 255, 255))
                     screen.blit(s_msg, (SCREEN_WIDTH // 2 - s_msg.get_width() // 2, SCREEN_HEIGHT // 2 + 10))
 
-                    restart_msg = FONTS["medium"].render("[T] ZAGRAJ PONOWNIE", True, (0, 255, 0))
+                    restart_msg = FONTS["medium"].render("[T] PLAY AGAIN", True, (0, 255, 0))
                     screen.blit(
                         restart_msg, (SCREEN_WIDTH // 2 - restart_msg.get_width() // 2, SCREEN_HEIGHT // 2 + 60)
                     )
 
                 legend_lines = []
                 if aiMode or algoMode:
-                    legend_lines = ["[R] Menu Główne", "[Q] Zamknij"]
+                    legend_lines = ["[R] Main Menu", "[Q] Quit"]
                 else:
-                    legend_lines = ["[WASD] Ruch", "[R] Menu Główne", "[Q] Zamknij"]
+                    legend_lines = ["[WASD] Move", "[R] Main Menu", "[Q] Quit"]
                 draw_legend(screen, FONTS["small"], legend_lines)
 
             pygame.display.flip()
