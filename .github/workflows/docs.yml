@@ -1,4 +1,4 @@
-name: Docs
+name: docs
 
 on:
   push:
@@ -36,15 +36,16 @@ jobs:
 
       - name: Install Python documentation dependencies
         run: |
-          cd docs
           pip install sphinx breathe sphinx-rtd-theme
 
       - name: Generate doxygen XML
         run: |
+          cd docs
           doxygen Doxyfile
 
       - name: Build Sphinx documentation
         run: |
+          cd docs
           make html
 
       - name: Add .nojekyll file
