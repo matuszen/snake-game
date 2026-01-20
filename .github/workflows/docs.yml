@@ -39,7 +39,7 @@ jobs:
           pip install sphinx breathe sphinx-rtd-theme
 
       - name: Generate Doxygen XML
-        run: doxygen Doxyfile
+        run: doxygen docs/Doxyfile
 
       - name: Build Sphinx documentation
         run: |
